@@ -49,6 +49,18 @@ logs/
 .DS_Store
 Thumbs.db
 
+# Private — training dashboard & secret sauce (local only)
+internal_dashboard*.html
+src/api_server.py
+src/core/local_filter.py
+src/core/trending_fetcher.py
+src/core/preference_engine.py
+src/feedback_api.py
+src/feedback_server.py
+src/feedback_dashboard.py
+src/articles_api.py
+tier1_builder_signal_sources.py
+
 # Node (for web/)
 web/node_modules/
 web/.astro/
