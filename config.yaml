@@ -1,0 +1,23 @@
+schedule:
+  daily_hour: 7
+  weekly_day: sunday
+
+outputs:
+  email:
+    enabled: true
+    to: null  # Set to your email address
+  website:
+    enabled: true
+    content_dir: "web/src/content/digests"
+    auto_commit: false  # Set to true when git repo is ready
+  substack:
+    enabled: false
+    publication_url: ""
+
+digest:
+  daily_top_stories: 15
+  weekly_top_stories: 25
+  lookback_hours_daily: 24
+  lookback_hours_weekly: 168
+
+model: claude-haiku-4-5-20251001

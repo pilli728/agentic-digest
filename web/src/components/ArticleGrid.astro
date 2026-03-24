@@ -1,0 +1,316 @@
+---
+/**
+ * Article Grid Component
+ *
+ * Displays articles in a filterable grid view with:
+ * - Relevance score indicators (visual bars)
+ * - Tier filtering
+ * - Source filtering
+ * - Compact 3-sentence summary display
+ */
+
+interface Article {
+  rank: number;
+  title: string;
+  source: string;
+  tier: number;
+  relevanceScore: number;
+  whyItMatters: string;
+  link: string;
+  articleId: string;
+}
+
+interface Props {
+  articles?: Article[];
+}
+
+const { articles = [] } = Astro.props;
+
+const tierNames = {
+  1: "Builder Signal",
+  2: "Curated Daily",
+  3: "Weekly Depth",
+  4: "Community Signal",
+};
+
+const tierEmojis = {
+  1: "🚀",
+  2: "📰",
+  3: "📚",
+  4: "💬",
+};
+---
+
+{articles.length > 0 ? (
+  <div class="article-grid-wrapper">
+    <div class="filter-controls">
+      <div class="filter-group">
+        <label for="tier-filter">Filter by tier:</label>
+        <select id="tier-filter" class="filter-select">
+          <option value="">All tiers</option>
+          <option value="1">Builder Signal (🚀)</option>
+          <option value="2">Curated Daily (📰)</option>
+          <option value="3">Weekly Depth (📚)</option>
+          <option value="4">Community Signal (💬)</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="score-filter">Min relevance:</label>
+        <input
+          id="score-filter"
+          type="range"
+          min="0"
+          max="10"
+          value="0"
+          class="filter-range"
+        />
+        <span id="score-value" class="score-display">All</span>
+      </div>
+    </div>
+
+    <div class="articles-grid">
+      {articles.map((article) => (
+        <article
+          class="article-compact"
+          data-tier={article.tier}
+          data-score={article.relevanceScore}
+        >
+          <div class="article-header">
+            <span class="article-rank">#{article.rank}</span>
+            <span class="tier-indicator">{tierEmojis[article.tier]}</span>
+            <span class="relevance-score">{article.relevanceScore}/10</span>
+          </div>
+
+          <h3 class="article-title">
+            <a href={article.link} target="_blank">{article.title}</a>
+          </h3>
+
+          <p class="article-source">{article.source}</p>
+
+          <div class="relevance-bar">
+            <div
+              class="relevance-fill"
+              style={`width: ${article.relevanceScore * 10}%`}
+            ></div>
+          </div>
+
+          <p class="article-summary">{article.whyItMatters}</p>
+
+          <div class="article-footer">
+            <a href={article.link} target="_blank" class="read-link">
+              Read →
+            </a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+) : (
+  <p class="no-articles">No articles to display</p>
+)}
+
+<style>
+  .article-grid-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .filter-controls {
+    display: flex;
+    gap: 2rem;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    flex-wrap: wrap;
+  }
+
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .filter-group label {
+    font-weight: 500;
+    font-size: 0.95em;
+  }
+
+  .filter-select,
+  .filter-range {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-size: 0.95em;
+    background: white;
+  }
+
+  .filter-select:focus,
+  .filter-range:focus {
+    outline: none;
+    border-color: var(--color-accent);
+  }
+
+  .score-display {
+    min-width: 40px;
+    font-weight: 500;
+    color: var(--color-accent);
+  }
+
+  .articles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .article-compact {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s;
+  }
+
+  .article-compact:hover {
+    border-color: var(--color-accent);
+    box-shadow: 0 2px 8px rgba(0, 102, 204, 0.1);
+  }
+
+  .article-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.9em;
+  }
+
+  .article-rank {
+    font-weight: 600;
+    color: var(--color-accent);
+    min-width: 30px;
+  }
+
+  .tier-indicator {
+    font-size: 1.1em;
+  }
+
+  .relevance-score {
+    margin-left: auto;
+    font-weight: 500;
+    color: var(--color-accent);
+  }
+
+  .article-title {
+    margin: 0 0 0.5rem 0;
+    line-height: 1.4;
+  }
+
+  .article-title a {
+    color: inherit;
+  }
+
+  .article-title a:hover {
+    color: var(--color-accent);
+  }
+
+  .article-source {
+    font-size: 0.85em;
+    color: #888;
+    margin: 0 0 0.75rem 0;
+  }
+
+  .relevance-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+  }
+
+  .relevance-fill {
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      var(--color-accent) 0%,
+      rgba(0, 102, 204, 0.6) 100%
+    );
+    transition: width 0.3s ease;
+  }
+
+  .article-summary {
+    font-size: 0.9em;
+    line-height: 1.5;
+    color: #555;
+    margin: 0 0 1rem 0;
+    flex-grow: 1;
+  }
+
+  .article-footer {
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .read-link {
+    font-size: 0.9em;
+    font-weight: 500;
+    color: var(--color-accent);
+  }
+
+  .read-link:hover {
+    text-decoration: underline;
+  }
+
+  .no-articles {
+    text-align: center;
+    color: #888;
+    padding: 3rem 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .filter-controls {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .filter-group {
+      width: 100%;
+    }
+
+    .articles-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // Filter functionality
+  const tierFilter = document.getElementById("tier-filter");
+  const scoreFilter = document.getElementById("score-filter");
+  const scoreDisplay = document.getElementById("score-value");
+  const articles = document.querySelectorAll(".article-compact");
+
+  function updateFilters() {
+    const tierValue = tierFilter?.value || "";
+    const scoreValue = parseInt(scoreFilter?.value || "0");
+
+    scoreDisplay.textContent =
+      scoreValue === 0 ? "All" : scoreValue + "+";
+
+    articles.forEach((article) => {
+      const articleTier = article.dataset.tier;
+      const articleScore = parseInt(article.dataset.score);
+
+      const tierMatch = !tierValue || articleTier === tierValue;
+      const scoreMatch = articleScore >= scoreValue;
+
+      article.style.display = tierMatch && scoreMatch ? "" : "none";
+    });
+  }
+
+  tierFilter?.addEventListener("change", updateFilters);
+  scoreFilter?.addEventListener("input", updateFilters);
+</script>

@@ -1,0 +1,100 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>" />
+    <title>{title} | Agentic Edge</title>
+    <meta name="description" content={description} />
+    <style is:global>
+      @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Inter:wght@400;500;600&display=swap');
+
+      :root {
+        --color-bg: #ffffff;
+        --color-fg: #1a1a1a;
+        --color-border: #e5e5e5;
+        --color-accent: #0066cc;
+        --color-tier-1: #dc2626;
+        --color-tier-2: #f59e0b;
+        --color-tier-3: #2563eb;
+        --color-tier-4: #6b7280;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --color-bg: #0f0f0f;
+          --color-fg: #ffffff;
+          --color-border: #2a2a2a;
+          --color-accent: #60a5fa;
+        }
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Inter', sans-serif;
+        background: var(--color-bg);
+        color: var(--color-fg);
+        line-height: 1.6;
+      }
+
+      h1, h2, h3 {
+        font-family: 'Merriweather', serif;
+        font-weight: 700;
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+      }
+
+      h1 { font-size: 2.5em; }
+      h2 { font-size: 1.8em; }
+      h3 { font-size: 1.3em; }
+
+      a {
+        color: var(--color-accent);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      code {
+        background: rgba(0, 102, 204, 0.1);
+        padding: 0.2em 0.4em;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <slot />
+    </div>
+
+    <style>
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 1rem;
+        }
+      }
+    </style>
+  </body>
+</html>

@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internal Training Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
+
+        .controls {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        select, input {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95em;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        .articles-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .article-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .article-card:hover {
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+
+        .article-card.rated {
+            background: #f0f4ff;
+        }
+
+        .article-rank {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85em;
+            margin-bottom: 0.75rem;
+            width: fit-content;
+        }
+
+        .article-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .article-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+            flex: 1;
+        }
+
+        .article-title a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .article-title a:hover {
+            text-decoration: underline;
+        }
+
+        .article-meta {
+            font-size: 0.85em;
+            color: #666;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.75rem;
+        }
+
+        .article-score {
+            background: #fff3cd;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #856404;
+            font-size: 0.9em;
+        }
+
+        .article-summary {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 6px;
+            font-size: 0.9em;
+            line-height: 1.5;
+            color: #555;
+            margin-bottom: 1rem;
+            border-left: 3px solid #667eea;
+        }
+
+        .feedback-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feedback-btn {
+            padding: 0.75rem 1rem;
+            border: 2px solid #ddd;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s;
+            flex: 1;
+            font-size: 0.9em;
+        }
+
+        .feedback-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .feedback-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .feedback-btn.thumbs-up.active {
+            background: #28a745;
+            border-color: #28a745;
+        }
+
+        .feedback-btn.thumbs-down.active {
+            background: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .comment-section {
+            border-top: 1px solid #eee;
+            padding-top: 1rem;
+        }
+
+        .comment-toggle {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            color: #333;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .comment-toggle:hover {
+            background: #e9ecef;
+        }
+
+        .comment-form {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .comment-form.active {
+            display: block;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.9em;
+            resize: vertical;
+            min-height: 60px;
+            margin-bottom: 0.5rem;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .no-articles {
+            text-align: center;
+            color: #999;
+            padding: 3rem;
+            background: white;
+            border-radius: 12px;
+            font-size: 1.1em;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            padding: 2rem;
+            font-size: 1.1em;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .tier-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 500;
+        }
+
+        .tier-1 {
+            background: rgba(220, 53, 69, 0.1);
+            color: #721c24;
+        }
+
+        .tier-2 {
+            background: rgba(255, 193, 7, 0.1);
+            color: #856404;
+        }
+
+        .tier-3 {
+            background: rgba(23, 162, 184, 0.1);
+            color: #0c5460;
+        }
+
+        .tier-4 {
+            background: rgba(108, 117, 125, 0.1);
+            color: #383d41;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎓 Internal Training Dashboard</h1>
+            <p class="subtitle">Train the ranking system by rating articles</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-number" id="total-articles">0</span>
+                    <span class="stat-label">Articles Fetched</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="total-rated">0</span>
+                    <span class="stat-label">Articles Rated</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="thumbs-up">0</span>
+                    <span class="stat-label">👍 Relevant</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="thumbs-down">0</span>
+                    <span class="stat-label">👎 Not for me</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="controls">
+            <div class="filter-group">
+                <label for="sort">Sort by:</label>
+                <select id="sort">
+                    <option value="rank">Claude's Rank (best first)</option>
+                    <option value="unrated">Unrated (first)</option>
+                    <option value="your-rating">Your Rating</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="tier">Tier:</label>
+                <select id="tier">
+                    <option value="">All tiers</option>
+                    <option value="1">Builder Signal (🚀)</option>
+                    <option value="2">Curated Daily (📰)</option>
+                    <option value="3">Weekly Depth (📚)</option>
+                    <option value="4">Community Signal (💬)</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="min-score">Min score:</label>
+                <input type="range" id="min-score" min="0" max="10" value="0">
+                <span id="score-display">All</span>
+            </div>
+
+            <button onclick="loadArticles()">🔄 Refresh</button>
+            <button onclick="resetFilters()">Reset Filters</button>
+        </div>
+
+        <div id="message-container"></div>
+
+        <div class="articles-container" id="articles-container">
+            <div class="loading">Loading articles...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/feedback';
+        const DB_PATH = './data/digest.db'; // Note: This won't work directly, we'll need to use an API
+
+        let allArticles = [];
+        let feedbackData = {};
+
+        // Mock articles for demo (replace with real API call)
+        const mockArticles = [
+            {
+                id: "hash1",
+                rank: 1,
+                title: "Claude 3.5 Sonnet Achieves New Agentic Reasoning Benchmark",
+                source: "Anthropic Blog",
+                tier: 1,
+                relevance_score: 10,
+                why_it_matters: "New reasoning capabilities unlock complex multi-step agent tasks. Foundation models are now competing on agent quality, not just accuracy. This is the infrastructure shift your company needs to track."
+            },
+            {
+                id: "hash2",
+                rank: 2,
+                title: "LangChain Releases Agent Memory Framework",
+                source: "LangChain Blog",
+                tier: 1,
+                relevance_score: 9,
+                why_it_matters: "Production agents need persistent memory across sessions. This solves a critical infrastructure gap for stateful agent systems. Enables more sophisticated agent architectures."
+            },
+            {
+                id: "hash3",
+                rank: 3,
+                title: "Modal Raises $35M for Serverless AI Infrastructure",
+                source: "TechCrunch AI",
+                tier: 2,
+                relevance_score: 8,
+                why_it_matters: "More capital flowing to agent infrastructure. Market signal that serverless AI is where builders are focusing. Your infra costs just became more competitive."
+            }
+        ];
+
+        async function loadArticles() {
+            try {
+                // Load feedback summary
+                const response = await fetch(`${API_URL}/summary`);
+                const feedback = await response.json();
+                feedbackData = feedback;
+
+                // For now, use mock articles
+                allArticles = mockArticles;
+
+                displayArticles();
+                updateStats();
+            } catch (error) {
+                showMessage('Error loading articles: ' + error.message, 'error');
+                // Still show mock data for demo
+                allArticles = mockArticles;
+                displayArticles();
+            }
+        }
+
+        function displayArticles() {
+            const container = document.getElementById('articles-container');
+            const sort = document.getElementById('sort').value;
+            const tier = document.getElementById('tier').value;
+            const minScore = parseInt(document.getElementById('min-score').value);
+
+            let filtered = allArticles.filter(a => {
+                if (tier && a.tier != tier) return false;
+                if (a.relevance_score < minScore) return false;
+                return true;
+            });
+
+            if (sort === 'rank') {
+                filtered.sort((a, b) => a.rank - b.rank);
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="no-articles">No articles match your filters</div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(article => `
+                <div class="article-card" data-id="${article.id}">
+                    <div class="article-rank">#${article.rank}</div>
+
+                    <div class="article-header">
+                        <h3 class="article-title">
+                            <a href="${article.link}" target="_blank">${article.title}</a>
+                        </h3>
+                    </div>
+
+                    <div class="article-meta">
+                        <span>${article.source}</span>
+                        <span class="tier-badge tier-${article.tier}">
+                            ${getTierName(article.tier)}
+                        </span>
+                        <span class="article-score">Claude: ${article.relevance_score}/10</span>
+                    </div>
+
+                    <div class="article-summary">${article.why_it_matters}</div>
+
+                    <div class="feedback-buttons">
+                        <button class="feedback-btn thumbs-up" onclick="ratArticle('${article.id}', 'thumbs_up', this)">👍 Relevant</button>
+                        <button class="feedback-btn thumbs-down" onclick="ratArticle('${article.id}', 'thumbs_down', this)">👎 Not for me</button>
+                    </div>
+
+                    <div class="comment-section">
+                        <button class="comment-toggle" onclick="toggleCommentForm(this)">💭 Tell me why...</button>
+                        <div class="comment-form">
+                            <textarea placeholder="One sentence: why did you rate it this way?" data-id="${article.id}"></textarea>
+                            <button onclick="submitComment('${article.id}', this)">Save Comment</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function ratArticle(articleId, reaction, btn) {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ articleId, reaction })
+                });
+
+                if (response.ok) {
+                    // Update button state
+                    const card = btn.closest('.article-card');
+                    card.classList.add('rated');
+
+                    // Toggle button state
+                    const buttons = card.querySelectorAll('.feedback-btn');
+                    buttons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    loadArticles(); // Refresh stats
+                    showMessage('✓ Feedback saved!', 'success');
+                } else {
+                    showMessage('Error saving feedback', 'error');
+                }
+            } catch (error) {
+                showMessage('Feedback server not running. Start with: python3 src/feedback_server.py', 'error');
+            }
+        }
+
+        async function submitComment(articleId, btn) {
+            const textarea = btn.previousElementSibling;
+            const comment = textarea.value;
+
+            if (!comment.trim()) {
+                showMessage('Please write a comment', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ articleId, comment })
+                });
+
+                if (response.ok) {
+                    textarea.value = '';
+                    btn.closest('.comment-form').classList.remove('active');
+                    showMessage('✓ Comment saved!', 'success');
+                }
+            } catch (error) {
+                showMessage('Error saving comment', 'error');
+            }
+        }
+
+        function toggleCommentForm(btn) {
+            const form = btn.nextElementSibling;
+            form.classList.toggle('active');
+        }
+
+        function updateStats() {
+            document.getElementById('total-articles').textContent = allArticles.length;
+            document.getElementById('thumbs-up').textContent = feedbackData.thumbs_up || 0;
+            document.getElementById('thumbs-down').textContent = feedbackData.thumbs_down || 0;
+            document.getElementById('total-rated').textContent =
+                (feedbackData.thumbs_up || 0) + (feedbackData.thumbs_down || 0);
+        }
+
+        function getTierName(tier) {
+            const names = {
+                1: '🚀 Builder Signal',
+                2: '📰 Curated Daily',
+                3: '📚 Weekly Depth',
+                4: '💬 Community'
+            };
+            return names[tier] || 'Unknown';
+        }
+
+        function showMessage(msg, type) {
+            const container = document.getElementById('message-container');
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = msg;
+            container.appendChild(div);
+
+            setTimeout(() => div.remove(), 3000);
+        }
+
+        document.getElementById('sort').addEventListener('change', displayArticles);
+        document.getElementById('tier').addEventListener('change', displayArticles);
+        document.getElementById('min-score').addEventListener('input', function() {
+            document.getElementById('score-display').textContent =
+                this.value === '0' ? 'All' : this.value + '+';
+            displayArticles();
+        });
+
+        function resetFilters() {
+            document.getElementById('sort').value = 'rank';
+            document.getElementById('tier').value = '';
+            document.getElementById('min-score').value = '0';
+            document.getElementById('score-display').textContent = 'All';
+            displayArticles();
+        }
+
+        // Load on startup
+        loadArticles();
+    </script>
+</body>
+</html>

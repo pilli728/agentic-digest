@@ -1,0 +1,317 @@
+---
+interface Props {
+  rank: number;
+  title: string;
+  source: string;
+  tier: number;
+  relevanceScore: number;
+  whyItMatters: string;
+  link: string;
+  articleId: string;
+}
+
+const { rank, title, source, tier, relevanceScore, whyItMatters, link, articleId } = Astro.props;
+
+const tierNames = {
+  1: "Builder Signal",
+  2: "Curated Daily",
+  3: "Weekly Depth",
+  4: "Community Signal",
+};
+
+const tierColors = {
+  1: "bg-red-100 text-red-900 dark:bg-red-900 dark:text-red-100",
+  2: "bg-amber-100 text-amber-900 dark:bg-amber-900 dark:text-amber-100",
+  3: "bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100",
+  4: "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100",
+};
+---
+
+<article class="story-card">
+  <div class="story-header">
+    <span class="story-rank">#{rank}</span>
+    <span class={`tier-badge ${tierColors[tier]}`}>
+      {tierNames[tier]}
+    </span>
+  </div>
+
+  <h3 class="story-title">
+    <a href={link} target="_blank">{title}</a>
+  </h3>
+
+  <div class="story-meta">
+    <span class="source">{source}</span>
+    <span class="signal-strength">Signal: {relevanceScore}/10</span>
+  </div>
+
+  <p class="why-it-matters">
+    <strong>Why it matters:</strong> {whyItMatters}
+  </p>
+
+  <div class="story-footer">
+    <a href={link} target="_blank" class="read-more">Read full article →</a>
+
+    <div class="feedback-buttons">
+      <button
+        class="feedback-btn thumbs-up"
+        data-article-id={articleId}
+        data-reaction="thumbs_up"
+        title="This is relevant"
+      >
+        👍 Relevant
+      </button>
+      <button
+        class="feedback-btn thumbs-down"
+        data-article-id={articleId}
+        data-reaction="thumbs_down"
+        title="Not what I'm looking for"
+      >
+        👎 Not for me
+      </button>
+    </div>
+  </div>
+
+  <details class="feedback-comment">
+    <summary>💭 Tell me more</summary>
+    <form class="comment-form" data-article-id={articleId}>
+      <textarea
+        placeholder="Why? (one sentence)"
+        maxlength="200"
+        required
+      ></textarea>
+      <button type="submit">Submit feedback</button>
+    </form>
+  </details>
+</article>
+
+<style>
+  .story-card {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    background: rgba(0, 0, 0, 0.02);
+    transition: border-color 0.2s;
+  }
+
+  .story-card:hover {
+    border-color: var(--color-accent);
+  }
+
+  .story-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .story-rank {
+    font-weight: 600;
+    color: var(--color-accent);
+    font-size: 0.9em;
+  }
+
+  .tier-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 500;
+  }
+
+  .story-title {
+    margin: 0.5rem 0;
+  }
+
+  .story-title a {
+    color: inherit;
+  }
+
+  .story-title a:hover {
+    color: var(--color-accent);
+  }
+
+  .story-meta {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.9em;
+    color: #888;
+    margin-bottom: 0.75rem;
+  }
+
+  .why-it-matters {
+    margin: 1rem 0;
+    padding: 0.75rem;
+    background: rgba(0, 102, 204, 0.05);
+    border-left: 3px solid var(--color-accent);
+    border-radius: 4px;
+    font-style: italic;
+  }
+
+  .story-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .read-more {
+    font-weight: 500;
+  }
+
+  .feedback-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .feedback-btn {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--color-fg);
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: all 0.2s;
+  }
+
+  .feedback-btn:hover {
+    border-color: var(--color-accent);
+    background: rgba(0, 102, 204, 0.1);
+  }
+
+  .feedback-btn.active {
+    background: var(--color-accent);
+    color: white;
+    border-color: var(--color-accent);
+  }
+
+  .feedback-comment {
+    margin-top: 0.75rem;
+  }
+
+  .feedback-comment summary {
+    cursor: pointer;
+    font-size: 0.9em;
+    padding: 0.5rem;
+    margin: -0.5rem;
+    border-radius: 4px;
+    transition: background 0.2s;
+  }
+
+  .feedback-comment summary:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .comment-form {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 4px;
+  }
+
+  textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.9em;
+    resize: vertical;
+    margin-bottom: 0.5rem;
+  }
+
+  textarea:focus {
+    outline: none;
+    border-color: var(--color-accent);
+  }
+
+  button[type="submit"] {
+    padding: 0.4rem 0.8rem;
+    background: var(--color-accent);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85em;
+    font-weight: 500;
+    transition: opacity 0.2s;
+  }
+
+  button[type="submit"]:hover {
+    opacity: 0.9;
+  }
+</style>
+
+<script>
+  // Feedback API endpoint
+  const FEEDBACK_API = 'http://localhost:8000/api/feedback';
+
+  // Client-side feedback handling
+  const buttons = document.querySelectorAll('.feedback-btn');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const articleId = btn.dataset.articleId;
+      const reaction = btn.dataset.reaction;
+
+      // Optimistic update
+      btn.classList.toggle('active');
+
+      // Send to server
+      try {
+        const response = await fetch(FEEDBACK_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ articleId, reaction })
+        });
+
+        if (!response.ok) {
+          btn.classList.toggle('active'); // Revert on error
+          console.warn('Feedback server not running. Start it with: python3 src/feedback_server.py');
+        } else {
+          // Show success feedback
+          btn.title = '✓ Saved!';
+          setTimeout(() => {
+            btn.title = reaction === 'thumbs_up' ? 'This is relevant' : 'Not what I\'m looking for';
+          }, 2000);
+        }
+      } catch (err) {
+        console.error('Feedback error:', err);
+        btn.classList.toggle('active'); // Revert on error
+        console.warn('Feedback server not running. Start it with: python3 src/feedback_server.py');
+      }
+    });
+  });
+
+  // Comment form handling
+  const forms = document.querySelectorAll('.comment-form');
+
+  forms.forEach(form => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const articleId = form.dataset.articleId;
+      const comment = form.querySelector('textarea').value;
+
+      try {
+        const response = await fetch(FEEDBACK_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ articleId, comment })
+        });
+
+        if (response.ok) {
+          form.querySelector('textarea').value = '';
+          form.closest('details').removeAttribute('open');
+          alert('✓ Feedback saved!');
+        }
+      } catch (err) {
+        console.error('Comment error:', err);
+        alert('Feedback server not running. Start it with: python3 src/feedback_server.py');
+      }
+    });
+  });
+</script>

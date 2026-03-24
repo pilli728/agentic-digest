@@ -1,0 +1,281 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Upgrade to Pro" description="Get the full Agentic Edge experience">
+  <div class="upgrade-page">
+    <header class="upgrade-header">
+      <a href="/" class="back-link">← Back to Agentic Edge</a>
+      <h1>Upgrade to Pro</h1>
+      <p>Get every story, every analysis, every week. Before everyone else.</p>
+    </header>
+
+    <div class="pricing-section">
+      <div class="plan-card" id="pro-plan">
+        <h2>Pro</h2>
+        <p class="price">$9<span>/month</span></p>
+        <p class="price-annual">or $89/year (save 18%)</p>
+        <ul>
+          <li>All 20 stories weekly (free gets 5)</li>
+          <li>Full "why it matters" analysis per story</li>
+          <li>Source links + engagement data</li>
+          <li>Early access — get it Friday PM, not Monday</li>
+          <li>Reply to any issue — I read every one</li>
+          <li>Cancel anytime, keep access until period ends</li>
+        </ul>
+        <button class="checkout-btn" id="checkout-monthly" data-price="pro_monthly">
+          Start Pro — $9/month
+        </button>
+        <button class="checkout-btn secondary" id="checkout-annual" data-price="pro_annual">
+          Go Annual — $89/year
+        </button>
+      </div>
+
+      <div class="plan-card founding" id="founding-plan">
+        <div class="badge">Limited — 50 spots</div>
+        <h2>Founding Member</h2>
+        <p class="price">$29<span>/month</span></p>
+        <ul>
+          <li>Everything in Pro</li>
+          <li>Monthly 1:1 call (15 min) — ask me anything</li>
+          <li>Private Slack channel with other founders</li>
+          <li>Vote on what the newsletter covers next</li>
+          <li>Your name in credits — forever</li>
+          <li>Lock in this price — it goes up later</li>
+        </ul>
+        <button class="checkout-btn" id="checkout-founding" data-price="founding_monthly">
+          Become a Founding Member
+        </button>
+      </div>
+    </div>
+
+    <section class="faq">
+      <h2>Questions</h2>
+      <div class="faq-item">
+        <h3>Can I cancel anytime?</h3>
+        <p>Yes. One click. You keep access until the end of your billing period.</p>
+      </div>
+      <div class="faq-item">
+        <h3>What payment methods do you accept?</h3>
+        <p>All major credit cards via Stripe. Apple Pay and Google Pay too.</p>
+      </div>
+      <div class="faq-item">
+        <h3>What if I don't like it?</h3>
+        <p>Email me within 30 days for a full refund. No questions asked.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How is this different from free?</h3>
+        <p>Free gets the top 5 headlines. Pro gets all 20 stories with full analysis — the context and "so what" that makes each story actionable.</p>
+      </div>
+    </section>
+  </div>
+
+  <style>
+    .upgrade-page {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem 0;
+    }
+
+    .upgrade-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      font-size: 0.9em;
+      color: #888;
+    }
+
+    .upgrade-header h1 {
+      font-size: 2.5em;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .upgrade-header p {
+      color: #666;
+      font-size: 1.1em;
+    }
+
+    .pricing-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 4rem;
+    }
+
+    .plan-card {
+      border: 2px solid var(--color-border);
+      border-radius: 12px;
+      padding: 2.5rem 2rem;
+      position: relative;
+    }
+
+    .plan-card.founding {
+      border-color: #f59e0b;
+    }
+
+    .plan-card .badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #f59e0b;
+      color: white;
+      padding: 0.25rem 1rem;
+      border-radius: 12px;
+      font-size: 0.75em;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .plan-card h2 {
+      margin: 0 0 0.5rem 0;
+    }
+
+    .price {
+      font-size: 3em;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .price span {
+      font-size: 0.3em;
+      font-weight: 400;
+      color: #888;
+    }
+
+    .price-annual {
+      font-size: 0.85em;
+      color: #888;
+      margin: 0.25rem 0 1.5rem 0;
+    }
+
+    .plan-card ul {
+      list-style: none;
+      padding: 0;
+      margin: 1.5rem 0;
+    }
+
+    .plan-card li {
+      padding: 0.5rem 0;
+      font-size: 0.95em;
+    }
+
+    .plan-card li::before {
+      content: "✓ ";
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    .founding li::before {
+      color: #f59e0b;
+    }
+
+    .checkout-btn {
+      display: block;
+      width: 100%;
+      padding: 1rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 0.75rem;
+      background: var(--color-accent);
+      color: white;
+      transition: opacity 0.2s;
+    }
+
+    .checkout-btn:hover {
+      opacity: 0.9;
+    }
+
+    .checkout-btn.secondary {
+      background: transparent;
+      border: 1px solid var(--color-border);
+      color: var(--color-fg);
+    }
+
+    .founding .checkout-btn {
+      background: #f59e0b;
+    }
+
+    /* FAQ */
+    .faq h2 {
+      margin-bottom: 1.5rem;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--color-border);
+      padding: 1rem 0;
+    }
+
+    .faq-item h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1em;
+    }
+
+    .faq-item p {
+      margin: 0;
+      color: #666;
+      font-size: 0.95em;
+    }
+
+    @media (max-width: 768px) {
+      .pricing-section { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <script>
+    // Stripe checkout integration
+    // TODO: Replace with your Stripe publishable key and price IDs
+    const STRIPE_CONFIG = {
+      // Set these in your .env and expose via API
+      pro_monthly: 'price_XXXXX',  // Create in Stripe Dashboard
+      pro_annual: 'price_XXXXX',
+      founding_monthly: 'price_XXXXX',
+    };
+
+    document.querySelectorAll('.checkout-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const priceKey = btn.dataset.price;
+        if (!priceKey) return;
+
+        btn.textContent = 'Redirecting to checkout...';
+        btn.disabled = true;
+
+        try {
+          // Call your API to create a Stripe Checkout session
+          const res = await fetch('http://localhost:8000/api/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ price_key: priceKey })
+          });
+
+          const data = await res.json();
+
+          if (data.checkout_url) {
+            window.location.href = data.checkout_url;
+          } else {
+            alert(data.message || 'Stripe not configured yet. Add STRIPE_SECRET_KEY to .env');
+            btn.textContent = btn.dataset.price.includes('founding') ? 'Become a Founding Member' : 'Start Pro';
+            btn.disabled = false;
+          }
+        } catch (err) {
+          alert('Payment system not ready yet. Coming soon!');
+          btn.textContent = 'Coming Soon';
+          btn.disabled = false;
+        }
+      });
+    });
+
+    // Check URL params for tier preselection
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tier') === 'founding') {
+      document.getElementById('founding-plan')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+</BaseLayout>

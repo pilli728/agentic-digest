@@ -1,0 +1,143 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+// Get all digests and sort by date descending
+const digests = await getCollection('digests');
+const sorted = digests.sort((a, b) =>
+  new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+);
+
+const formatDate = (dateStr) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
+};
+
+const groupByMonth = (digests) => {
+  const groups = {};
+  digests.forEach(digest => {
+    const date = new Date(digest.data.date);
+    const key = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(digest);
+  });
+  return groups;
+};
+
+const grouped = groupByMonth(sorted);
+const months = Object.keys(grouped);
+---
+
+<BaseLayout title="Digest Archive" description="Browse all Agentic Edge digests">
+  <header class="archive-header">
+    <a href="/" class="back-link">← Home</a>
+    <h1>Digest Archive</h1>
+    <p class="subtitle">{sorted.length} digests</p>
+  </header>
+
+  {months.length === 0 ? (
+    <div class="no-content">
+      <p>No digests yet. Run the pipeline to generate your first digest.</p>
+    </div>
+  ) : (
+    <div class="archive-list">
+      {months.map(month => (
+        <section class="month-group">
+          <h2 class="month-title">{month}</h2>
+          <ul class="digest-list">
+            {grouped[month].map(digest => (
+              <li class="digest-item">
+                <a href={`/archive/${digest.slug}`} class="digest-link">
+                  <span class="digest-name">{formatDate(digest.data.date)}</span>
+                  <span class="digest-mode">{digest.data.layout === 'DigestLayout' ? '📰' : '📚'}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  )}
+
+  <style>
+    .archive-header {
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      font-size: 0.9em;
+    }
+
+    h1 {
+      margin: 0.5rem 0;
+    }
+
+    .subtitle {
+      color: #888;
+      margin: 0.5rem 0 0 0;
+      font-size: 0.9em;
+    }
+
+    .no-content {
+      text-align: center;
+      padding: 3rem;
+      color: #888;
+    }
+
+    .archive-list {
+      margin-top: 2rem;
+    }
+
+    .month-group {
+      margin-bottom: 2rem;
+    }
+
+    .month-title {
+      font-size: 1.3em;
+      margin: 1.5rem 0 1rem 0;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--color-border);
+    }
+
+    .digest-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .digest-item {
+      margin: 0.5rem 0;
+    }
+
+    .digest-link {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      border-radius: 4px;
+      transition: all 0.2s;
+      color: inherit;
+    }
+
+    .digest-link:hover {
+      background: rgba(0, 102, 204, 0.05);
+      padding-left: 1rem;
+    }
+
+    .digest-name {
+      font-weight: 500;
+    }
+
+    .digest-mode {
+      font-size: 1.1em;
+    }
+  </style>
+</BaseLayout>

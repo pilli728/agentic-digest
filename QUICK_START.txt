@@ -1,0 +1,34 @@
+╔════════════════════════════════════════════════════════════════════╗
+║         AGENTIC EDGE DIGEST - QUICK START (5 MIN)                 ║
+╚════════════════════════════════════════════════════════════════════╝
+
+1. IMPORT 42 NEW SOURCES:
+   $ cd /Users/pilli/agentic-digest
+   $ source venv/bin/activate
+   $ python scripts/import_sources.py RESEARCH_RESULTS.md
+
+2. REVIEW & APPROVE SOURCES:
+   $ python src/source_manager.py
+   (Shows 45 sources, you approve/reject)
+
+3. TEST WITH NEW SOURCES:
+   $ python src/orchestrator.py --dry-run
+   (Preview digest with expanded feed)
+
+4. SEND TEST EMAIL:
+   $ python src/orchestrator.py --mode daily --email-only
+   (Check inbox for email with 👍👎💭 buttons)
+
+5. CLICK FEEDBACK IN EMAIL:
+   - Click "👍 Relevant" or "👎 Not for me"
+   - Verify it tracks in database
+
+DONE! You now have:
+✓ Daily digest at 7 AM (automatic)
+✓ 50+ sources (up from 20)
+✓ Feedback loop (email buttons)
+✓ Website archive ready (at /web)
+
+Next: Deploy website + feedback API (see INTEGRATION_GUIDE.md)
+
+Questions? Read: GETTING_STARTED.md

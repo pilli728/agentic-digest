@@ -1,0 +1,33 @@
+---
+import DigestLayout from '../../layouts/DigestLayout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const digests = await getCollection('digests');
+  return digests.map(digest => ({
+    params: { slug: digest.slug },
+    props: { digest }
+  }));
+}
+
+interface Props {
+  digest: any;
+}
+
+const { digest } = Astro.props as Props;
+const { Content } = await digest.render();
+
+const formatDate = (dateStr) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+---
+
+<DigestLayout title={`Digest - ${digest.data.date}`} date={formatDate(digest.data.date)}>
+  <Content />
+</DigestLayout>
