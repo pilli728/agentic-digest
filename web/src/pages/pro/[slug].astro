@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const premium = await getCollection('premium');
+  return premium.map(entry => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+---
+
+<BaseLayout title={entry.data.title}>
+  <header class="article-header">
+    <a href="/pro" class="back-link">← Pro Library</a>
+    <div class="article-meta">
+      <span class={`tier-badge ${entry.data.tier}`}>{entry.data.tier === 'founding' ? 'Founding Only' : 'Pro'}</span>
+      <span class="category">{entry.data.category}</span>
+      <span class="date">{entry.data.date}</span>
+    </div>
+    <h1>{entry.data.title}</h1>
+    <p class="description">{entry.data.description}</p>
+  </header>
+
+  <main class="article-content">
+    <Content />
+  </main>
+
+  <footer class="article-footer">
+    <p>Part of the <a href="/upgrade">Agentic Edge Pro</a> library.</p>
+  </footer>
+
+  <style>
+    .article-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--color-border); }
+    .back-link { display: inline-block; margin-bottom: 1rem; font-size: 0.9em; color: #888; }
+    .article-meta { display: flex; gap: 0.75rem; margin-bottom: 1rem; align-items: center; }
+    .tier-badge { padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75em; font-weight: 600; }
+    .tier-badge.pro { background: rgba(0,102,204,0.1); color: var(--color-accent); }
+    .tier-badge.founding { background: rgba(245,158,11,0.1); color: #b45309; }
+    .category { padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75em; background: rgba(0,0,0,0.05); color: #666; }
+    .date { font-size: 0.85em; color: #888; }
+    h1 { font-size: 2em; line-height: 1.2; margin: 0 0 0.75rem; }
+    .description { font-size: 1.05em; color: #666; margin: 0; }
+    .article-content { margin-bottom: 3rem; }
+    .article-footer { padding-top: 1.5rem; border-top: 1px solid var(--color-border); text-align: center; color: #888; font-size: 0.9em; }
+  </style>
+</BaseLayout>
