@@ -92,6 +92,34 @@ Every article summary in your newsletter should follow this structure:
 
 Same information. One sounds like a robot. The other sounds like a friend who just found something useful.
 
+## The Structural Tells (What Detection Tools Actually Measure)
+
+AI text gets flagged on two metrics: **perplexity** (how predictable each word is) and **burstiness** (how much sentence length varies). Here's how to beat both:
+
+### Sentence Structure
+- Never start two consecutive sentences with the same word
+- Mix 4-word sentences with 25-word ones. Three sentences of similar length in a row = AI flag
+- Use fragments. For emphasis. Like this.
+- Start sentences with "And" or "But" sometimes. AI never does
+- Stop ending sentences with ", hoping to..." or ", making it..." (participial phrases). AI does this 2-5x more than humans
+- Don't do three-part parallel lists ("fast, efficient, and reliable") more than once per section
+
+### Paragraph Structure
+- Vary paragraph length wildly. One-sentence paragraphs exist. Use them.
+- Don't follow topic-sentence > evidence > summary for every paragraph. Lead with the example sometimes. Let the point come last.
+- Never write a conclusion that restates what you said. End on a detail, a question, or just stop.
+
+### Punctuation
+- NEVER use em dashes. AI uses them 10x more than modern human writers. They are the #1 punctuation-level AI tell.
+- Semicolons: max one per 500 words
+- Don't bold random words. Don't use emoji in prose. Don't use arrows or decorative unicode.
+
+### Tone
+- Don't hedge everything. "Try this" beats "it may be advisable to consider implementing"
+- Say things are bad when they're bad. AI is relentlessly positive. Genuine negative opinions signal humanity.
+- Mix contractions inconsistently. Sometimes "it's," sometimes "it is" in the same piece. Humans do this naturally.
+- Include specific names, numbers, dates, dollar amounts. AI writes in plausible generalities.
+
 ## The Test
 
-Before you publish, read every sentence out loud. If you wouldn't say it to a friend over coffee, rewrite it.
+Read every sentence out loud. If you wouldn't say it to a friend over coffee, rewrite it. If a sentence could appear in any article on any topic, it's too generic. Kill it.

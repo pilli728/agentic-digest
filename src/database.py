@@ -96,6 +96,28 @@ class DigestDatabase:
             )
         """)
 
+        # Digest topics: grouped article clusters for newsletter sections
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS digest_topics (
+                id TEXT PRIMARY KEY,
+                title TEXT NOT NULL,
+                synthesis TEXT DEFAULT '',
+                sort_order INTEGER DEFAULT 0,
+                created_at TEXT
+            )
+        """)
+
+        # Topic-article junction
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS topic_articles (
+                topic_id TEXT NOT NULL,
+                article_id TEXT NOT NULL,
+                PRIMARY KEY (topic_id, article_id),
+                FOREIGN KEY (topic_id) REFERENCES digest_topics(id),
+                FOREIGN KEY (article_id) REFERENCES articles(id)
+            )
+        """)
+
         # Source reviews: manual curation of new sources
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS source_reviews (

@@ -362,18 +362,318 @@
         font-size: 0.82em;
         color: var(--fg-muted);
         line-height: 1.55;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
         padding: 0.6rem 0.75rem;
         background: rgba(255, 255, 255, 0.03);
         border-radius: 8px;
         border: 1px solid rgba(255, 255, 255, 0.04);
+        max-height: 4.8em;
+        overflow-y: auto;
+        cursor: text;
       }
 
       .card-summary.expanded {
-        -webkit-line-clamp: unset;
+        max-height: none;
+      }
+
+      .card-summary::-webkit-scrollbar { width: 3px; }
+      .card-summary::-webkit-scrollbar-track { background: transparent; }
+      .card-summary::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+      /* Editor note on accepted cards */
+      .editor-note {
+        margin-top: 0.6rem;
+      }
+
+      .editor-note.collapsed .note-input {
+        background: rgba(255, 255, 255, 0.03);
+        border-color: var(--border);
+        min-height: unset;
+        height: 2em;
+        opacity: 0.5;
+        transition: all 0.15s;
+      }
+
+      .editor-note.collapsed .note-input:focus,
+      .editor-note.collapsed .note-input:not(:placeholder-shown) {
+        opacity: 1;
+        height: auto;
+        min-height: 2.5em;
+        border-color: var(--accent);
+        background: rgba(96, 165, 250, 0.06);
+      }
+
+      .note-input {
+        width: 100%;
+        padding: 0.6rem 0.75rem;
+        background: rgba(52, 211, 153, 0.06);
+        border: 1px solid var(--green-border);
+        border-radius: 8px;
+        color: var(--fg);
+        font-family: inherit;
+        font-size: 0.82em;
+        line-height: 1.5;
+        resize: vertical;
+        min-height: 2.5em;
+        transition: border-color 0.15s;
+      }
+
+      .note-input::placeholder {
+        color: var(--fg-dim);
+        font-style: italic;
+      }
+
+      .note-input:focus {
+        outline: none;
+        border-color: var(--green);
+        background: rgba(52, 211, 153, 0.1);
+      }
+
+      /* ── Topic picker dropdown ── */
+      .picker-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 199;
+      }
+
+      .picker-menu {
+        position: fixed;
+        z-index: 200;
+        background: var(--surface-raised);
+        border: 1px solid var(--border-hover);
+        border-radius: 10px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+        max-height: 280px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .picker-header {
+        padding: 0.6rem 0.85rem;
+        font-size: 0.75em;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--fg-muted);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .picker-options {
+        overflow-y: auto;
+        max-height: 220px;
+      }
+
+      .picker-option {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+        padding: 0.55rem 0.85rem;
+        background: none;
+        border: none;
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+        color: var(--fg);
+        font-size: 0.85em;
+        font-family: inherit;
+        cursor: pointer;
+        text-align: left;
+        transition: background 0.1s;
+      }
+      .picker-option:hover { background: rgba(255,255,255,0.06); }
+      .picker-option:last-child { border-bottom: none; }
+
+      .picker-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--green);
+        flex-shrink: 0;
+      }
+
+      .picker-count {
+        margin-left: auto;
+        font-size: 0.8em;
+        color: var(--fg-dim);
+      }
+
+      .picker-new {
+        color: var(--accent);
+        font-weight: 600;
+      }
+      .picker-new:hover { background: var(--accent-dim); }
+
+      .picker-divider {
+        height: 1px;
+        background: var(--border);
+      }
+
+      /* Column header button */
+      .col-header-btn {
+        margin-left: auto;
+        padding: 0.2em 0.6em;
+        border-radius: 4px;
+        font-size: 0.9em;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid var(--green-border);
+        background: var(--green-dim);
+        color: var(--green);
+        font-family: inherit;
+      }
+      .col-header-btn:hover { background: rgba(52, 211, 153, 0.25); }
+
+      /* ── Topic bubbles ── */
+      .topic-bubble {
+        border: 1px solid var(--green-border);
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, var(--green-dim) 0%, var(--surface) 100%);
+        overflow: hidden;
+      }
+
+      .topic-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 0.85rem;
+        border-bottom: 1px solid rgba(52, 211, 153, 0.15);
+      }
+
+      .topic-title-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 0.9em;
+        font-weight: 700;
+        font-family: inherit;
+        padding: 0.2em 0;
+        outline: none;
+        border-bottom: 1px solid transparent;
+      }
+      .topic-title-input:focus {
+        border-bottom-color: var(--green);
+      }
+      .topic-title-input::placeholder { color: var(--fg-dim); }
+
+      .topic-article-count {
+        font-size: 0.7em;
+        color: var(--fg-muted);
+        background: var(--border);
+        padding: 0.15em 0.45em;
+        border-radius: 8px;
+        flex-shrink: 0;
+      }
+
+      .topic-delete {
+        background: none;
+        border: none;
+        color: var(--fg-dim);
+        cursor: pointer;
+        font-size: 0.85em;
+        padding: 0.2em;
+        border-radius: 4px;
+        flex-shrink: 0;
+      }
+      .topic-delete:hover { color: var(--red); background: var(--red-dim); }
+
+      .topic-articles {
+        padding: 0.4rem 0.6rem;
+      }
+
+      /* Drag and drop states */
+      .topic-bubble.drop-target {
+        border-style: dashed;
+      }
+      .topic-bubble.drag-over {
+        border-color: var(--green);
+        background: rgba(52, 211, 153, 0.08);
+        box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.2);
+      }
+
+      .drag-handle {
+        cursor: grab;
+        color: var(--fg-dim);
+        font-size: 0.9em;
+        flex-shrink: 0;
+        user-select: none;
+        opacity: 0.4;
+        transition: opacity 0.1s;
+        line-height: 1;
+      }
+      .topic-article-item:hover .drag-handle,
+      .card:hover .drag-handle { opacity: 1; }
+
+      .topic-article-item {
+        display: flex;
+        align-items: start;
+        gap: 0.4rem;
+        padding: 0.35rem 0.3rem;
+        border-radius: 6px;
+        font-size: 0.78em;
+        transition: background 0.1s;
+        cursor: grab;
+      }
+      .topic-article-item:hover { background: rgba(255,255,255,0.04); }
+      .topic-article-item:active { cursor: grabbing; }
+
+      .topic-article-item a {
+        color: var(--fg);
+        text-decoration: none;
+        line-height: 1.35;
+        flex: 1;
+      }
+      .topic-article-item a:hover { color: var(--accent); }
+
+      .topic-article-source {
+        color: var(--fg-dim);
+        font-size: 0.85em;
+        flex-shrink: 0;
+      }
+
+      .topic-article-remove {
+        background: none;
+        border: none;
+        color: var(--fg-dim);
+        cursor: pointer;
+        font-size: 0.75em;
+        padding: 0.1em 0.3em;
+        border-radius: 3px;
+        flex-shrink: 0;
+        opacity: 0;
+        transition: opacity 0.1s;
+      }
+      .topic-article-item:hover .topic-article-remove { opacity: 1; }
+      .topic-article-remove:hover { color: var(--red); background: var(--red-dim); }
+
+      .topic-synthesis {
+        padding: 0 0.6rem 0.6rem;
+      }
+
+      .topic-synthesis textarea {
+        width: 100%;
+        padding: 0.55rem 0.7rem;
+        background: rgba(52, 211, 153, 0.06);
+        border: 1px solid rgba(52, 211, 153, 0.2);
+        border-radius: 8px;
+        color: var(--fg);
+        font-family: inherit;
+        font-size: 0.82em;
+        line-height: 1.55;
+        resize: vertical;
+        min-height: 3em;
+      }
+      .topic-synthesis textarea::placeholder { color: var(--fg-dim); font-style: italic; }
+      .topic-synthesis textarea:focus { outline: none; border-color: var(--green); background: rgba(52, 211, 153, 0.1); }
+
+      /* Ungrouped accepted articles */
+      .ungrouped-label {
+        font-size: 0.72em;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--fg-dim);
+        padding: 0.75rem 0.5rem 0.25rem;
       }
 
       .card-actions {
@@ -446,33 +746,139 @@
       .preview-overlay.visible { display: flex; }
 
       .preview-panel {
-        background: var(--bg);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        width: 90%;
-        max-width: 700px;
-        max-height: 85vh;
+        background: #ffffff;
+        color: #1a1a1a;
+        border: none;
+        border-radius: 0;
+        width: 100%;
+        max-width: 640px;
+        max-height: 90vh;
         overflow-y: auto;
-        padding: 2rem;
+        padding: 3rem 2.5rem;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+        font-family: 'Inter', system-ui, sans-serif;
       }
 
-      .preview-panel h2 {
-        font-size: 1.3em;
-        margin: 0 0 1rem 0;
+      .preview-masthead {
+        text-align: center;
+        padding-bottom: 1.5rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #111;
+      }
+
+      .preview-masthead h2 {
+        font-size: 1.8em;
+        font-weight: 800;
+        margin: 0;
+        letter-spacing: -0.02em;
+        color: #111;
+      }
+
+      .preview-masthead .preview-date {
+        font-size: 0.85em;
+        color: #888;
+        margin-top: 0.3rem;
+      }
+
+      .preview-body {
+        font-size: 0.95em;
+        line-height: 1.75;
+        color: #333;
+      }
+
+      .preview-body h2 {
+        font-size: 1.15em;
+        font-weight: 700;
+        color: #111;
+        margin: 2rem 0 0.75rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 1px solid #eee;
+      }
+
+      .preview-body h2:first-child { margin-top: 0; }
+
+      .preview-body p {
+        margin: 0 0 1rem;
+      }
+
+      .preview-body strong {
+        color: #111;
+      }
+
+      .preview-body a {
+        color: #7c3aed;
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .preview-body a:hover { text-decoration: underline; }
+
+      .preview-body hr {
+        border: none;
+        border-top: 1px solid #eee;
+        margin: 1.5rem 0;
+      }
+
+      .preview-footer {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid #111;
+        text-align: center;
+        font-size: 0.8em;
+        color: #999;
+      }
+
+      .preview-body[contenteditable="true"]:focus {
+        outline: none;
+        box-shadow: inset 0 0 0 2px rgba(124, 58, 237, 0.2);
+        border-radius: 4px;
+      }
+
+      .preview-feedback {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: #f8f8f8;
+        border-radius: 8px;
+        border: 1px solid #eee;
+      }
+
+      .preview-feedback textarea {
+        width: 100%;
+        padding: 0.6rem 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
         font-family: inherit;
+        font-size: 0.85em;
+        line-height: 1.5;
+        resize: vertical;
+        min-height: 2.5em;
+        color: #333;
+        margin-bottom: 0.5rem;
+      }
+      .preview-feedback textarea:focus { outline: none; border-color: #7c3aed; }
+      .preview-feedback textarea::placeholder { color: #aaa; }
+
+      .preview-feedback .btn {
+        background: #7c3aed;
+        color: #fff;
+        border-color: #7c3aed;
+        font-size: 0.82em;
+      }
+      .preview-feedback .btn:hover { background: #6d28d9; }
+
+      .preview-actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: center;
+        margin-top: 1.5rem;
       }
 
-      .preview-content {
-        font-size: 0.9em;
-        line-height: 1.7;
-        white-space: pre-wrap;
+      .preview-actions .btn {
+        background: #fff;
+        color: #333;
+        border: 1px solid #ddd;
       }
-
-      .preview-close {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-      }
+      .preview-actions .btn:hover { border-color: #7c3aed; color: #7c3aed; }
+      .preview-actions .btn-green { background: #7c3aed; color: #fff; border-color: #7c3aed; }
 
       /* ── Loading & empty states ── */
       .loading {
@@ -667,7 +1073,8 @@
 
       <div class="column col-accepted">
         <div class="column-header">
-          In This Digest <span class="count" id="col-count-accepted">0</span>
+          Digest Topics <span class="count" id="col-count-accepted">0</span>
+          <button class="col-header-btn" id="btn-new-topic" title="Create a topic from scratch">+ Topic</button>
         </div>
         <div class="column-body" id="col-accepted"></div>
       </div>
@@ -676,10 +1083,22 @@
     <!-- Preview overlay -->
     <div class="preview-overlay" id="preview-overlay">
       <div class="preview-panel">
-        <h2>Digest Preview</h2>
-        <div class="preview-content" id="preview-content">Loading...</div>
-        <div style="margin-top: 1.5rem; text-align: right;">
+        <div class="preview-masthead">
+          <h2>Agentic Edge</h2>
+          <div class="preview-date" id="preview-date"></div>
+        </div>
+        <div class="preview-body" id="preview-content" contenteditable="true">Loading...</div>
+        <div class="preview-feedback">
+          <textarea id="preview-feedback-input" placeholder="Feedback: 'make the tools section punchier' or 'rewrite distribution to focus more on...'"></textarea>
+          <button class="btn" id="btn-regenerate">Regenerate with feedback</button>
+        </div>
+        <div class="preview-footer">
+          You're reading Agentic Edge — the weekly brief for AI agent builders.<br>
+          Curated from 700+ sources. Zero AI slop.
+        </div>
+        <div class="preview-actions">
           <button class="btn" id="btn-close-preview">Close (Esc)</button>
+          <button class="btn btn-green" id="btn-publish-from-preview">Publish this digest</button>
         </div>
       </div>
     </div>
@@ -693,6 +1112,7 @@
 
       // ── State ──
       let articles = [];
+      let topics = [];
       let focusedId = null;
       let focusedColumn = 'candidates';
 
@@ -769,7 +1189,33 @@
               state: a.curation_state || 'candidate',
               acceptOrder: a.accept_order || 999999,
               editorNote: a.editor_note || '',
+              topicId: null,
             }));
+
+            // Load topics
+            try {
+              const topicsRes = await fetch(`${API}/api/topics`);
+              const topicsData = await topicsRes.json();
+              if (topicsData.success) {
+                topics = topicsData.topics.map(t => ({
+                  id: t.id,
+                  title: t.title,
+                  synthesis: t.synthesis || '',
+                  articleIds: t.articles.map(a => a.id),
+                }));
+                // Mark articles that belong to topics
+                for (const t of topics) {
+                  for (const aid of t.articleIds) {
+                    const a = articles.find(x => x.id === aid);
+                    if (a) {
+                      a.topicId = t.id;
+                      a.state = 'accepted';
+                    }
+                  }
+                }
+              }
+            } catch (e) { /* topics not loaded, that's ok */ }
+
             render();
             if (getCandidates().length > 0) {
               focusedId = getCandidates()[0].id;
@@ -810,7 +1256,7 @@
       function render() {
         renderColumn(colCandidates, getCandidates(), 'candidate');
         renderColumn(colMaybe, getMaybes(), 'maybe');
-        renderColumn(colAccepted, getAccepted(), 'accepted');
+        renderTopicsColumn();
         updateCounts();
         updateFocusUI();
       }
@@ -847,6 +1293,449 @@
             handleAction(id, action);
           });
         });
+
+        // Editor note auto-save (debounced)
+        el.querySelectorAll('.note-input').forEach(textarea => {
+          // Don't capture keyboard shortcuts while typing
+          textarea.addEventListener('keydown', (e) => e.stopPropagation());
+          textarea.addEventListener('click', (e) => e.stopPropagation());
+
+          let saveTimeout;
+          textarea.addEventListener('input', () => {
+            const id = textarea.dataset.id;
+            const note = textarea.value;
+            // Update in-memory
+            const article = articles.find(a => a.id === id);
+            if (article) article.editorNote = note;
+            // Debounced save
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => saveEditorNote(id, note), 800);
+          });
+        });
+      }
+
+      // ── Topics column ──
+      function renderTopicsColumn() {
+        const accepted = getAccepted();
+        const ungrouped = accepted.filter(a => !a.topicId);
+
+        if (topics.length === 0 && ungrouped.length === 0) {
+          colAccepted.innerHTML = '<div class="empty-col">Accept stories and group them into topics for your digest.</div>';
+          return;
+        }
+
+        let html = '';
+
+        // Render each topic bubble
+        for (const topic of topics) {
+          const topicArticles = topic.articleIds
+            .map(id => articles.find(a => a.id === id))
+            .filter(Boolean);
+
+          html += `
+            <div class="topic-bubble" data-topic-id="${topic.id}"
+              ondragover="event.preventDefault(); this.classList.add('drag-over')"
+              ondragleave="this.classList.remove('drag-over')"
+              ondrop="handleTopicDrop(event, '${topic.id}')">
+              <div class="topic-header">
+                <input class="topic-title-input" value="${escapeHtml(topic.title)}"
+                  placeholder="Topic name..." data-topic-id="${topic.id}" />
+                <span class="topic-article-count">${topicArticles.length} source${topicArticles.length !== 1 ? 's' : ''}</span>
+                <button class="topic-delete" data-topic-id="${topic.id}" title="Delete topic">&times;</button>
+              </div>
+              <div class="topic-articles">
+                ${topicArticles.map(a => `
+                  <div class="topic-article-item" draggable="true"
+                    data-article-id="${a.id}" data-from-topic="${topic.id}"
+                    ondragstart="handleArticleDragStart(event, '${a.id}', '${topic.id}')">
+                    <span class="drag-handle">⠿</span>
+                    <a href="${a.link}" target="_blank">${escapeHtml(a.title)}</a>
+                    <span class="topic-article-source">${escapeHtml(a.source)}</span>
+                    <button class="topic-article-remove" data-topic-id="${topic.id}" data-article-id="${a.id}">&times;</button>
+                  </div>
+                `).join('')}
+              </div>
+              <div class="topic-synthesis">
+                <textarea placeholder="Your synthesis — combine these sources into your take..."
+                  data-topic-id="${topic.id}" rows="3">${escapeHtml(topic.synthesis)}</textarea>
+              </div>
+            </div>
+          `;
+        }
+
+        // Ungrouped accepted articles — draggable into topics
+        if (ungrouped.length > 0) {
+          html += '<div class="ungrouped-label">Ungrouped — drag into a topic above</div>';
+          html += ungrouped.map((a, i) => `
+            <div class="card state-accepted" data-id="${a.id}" draggable="true"
+              ondragstart="handleArticleDragStart(event, '${a.id}', '')">
+              <div class="card-score-strip ${a.score >= 8 ? 'high' : a.score >= 5 ? 'medium' : 'low'}"></div>
+              <div class="card-body">
+                <div class="card-title">
+                  <span class="drag-handle">⠿</span>
+                  <a href="${a.link}" target="_blank" rel="noopener">${escapeHtml(a.title)}</a>
+                </div>
+                <div class="card-meta">
+                  <span class="card-source">${escapeHtml(a.source)}</span>
+                </div>
+              </div>
+              <div class="card-actions">
+                <button class="card-btn btn-undo" data-action="undo">Remove</button>
+              </div>
+            </div>
+          `).join('');
+        }
+
+        colAccepted.innerHTML = html;
+
+        // Attach topic event listeners
+        colAccepted.querySelectorAll('.topic-title-input').forEach(input => {
+          input.addEventListener('keydown', e => e.stopPropagation());
+          let saveT;
+          input.addEventListener('input', () => {
+            const tid = input.dataset.topicId;
+            const t = topics.find(x => x.id === tid);
+            if (t) t.title = input.value;
+            clearTimeout(saveT);
+            saveT = setTimeout(() => apiTopicUpdate(tid, { title: input.value }), 800);
+          });
+        });
+
+        colAccepted.querySelectorAll('.topic-synthesis textarea').forEach(ta => {
+          ta.addEventListener('keydown', e => e.stopPropagation());
+          ta.addEventListener('click', e => e.stopPropagation());
+          let saveT;
+          ta.addEventListener('input', () => {
+            const tid = ta.dataset.topicId;
+            const t = topics.find(x => x.id === tid);
+            if (t) t.synthesis = ta.value;
+            clearTimeout(saveT);
+            saveT = setTimeout(() => apiTopicUpdate(tid, { synthesis: ta.value }), 800);
+          });
+        });
+
+        colAccepted.querySelectorAll('.topic-delete').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteTopic(btn.dataset.topicId);
+          });
+        });
+
+        colAccepted.querySelectorAll('.topic-article-remove').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeArticleFromTopic(btn.dataset.topicId, btn.dataset.articleId);
+          });
+        });
+
+        // Ungrouped card listeners
+        colAccepted.querySelectorAll('.card').forEach(card => {
+          const id = card.dataset.id;
+          card.addEventListener('click', (e) => {
+            if (e.target.closest('.card-btn') || e.target.closest('.card-title a') || e.target.closest('.note-input')) return;
+            focusedId = id;
+            focusedColumn = 'accepted';
+            updateFocusUI();
+          });
+        });
+        colAccepted.querySelectorAll('.card-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            handleAction(btn.closest('.card').dataset.id, btn.dataset.action);
+          });
+        });
+        colAccepted.querySelectorAll('.card .note-input').forEach(textarea => {
+          textarea.addEventListener('keydown', e => e.stopPropagation());
+          textarea.addEventListener('click', e => e.stopPropagation());
+          let saveT;
+          textarea.addEventListener('input', () => {
+            const id = textarea.dataset.id;
+            const article = articles.find(a => a.id === id);
+            if (article) article.editorNote = textarea.value;
+            clearTimeout(saveT);
+            saveT = setTimeout(() => saveEditorNote(id, textarea.value), 800);
+          });
+        });
+      }
+
+      // ── Topic API helpers ──
+      async function apiTopicUpdate(id, fields) {
+        try {
+          await fetch(`${API}/api/topics`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'update', id, ...fields }),
+          });
+        } catch (e) { console.warn('Topic update failed:', e); }
+      }
+
+      async function createTopic(title, articleIds = []) {
+        const id = 't_' + Date.now().toString(36);
+        topics.push({ id, title, synthesis: '', articleIds });
+        for (const aid of articleIds) {
+          const a = articles.find(x => x.id === aid);
+          if (a) a.topicId = id;
+        }
+        render();
+        try {
+          await fetch(`${API}/api/topics`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'create', id, title, article_ids: articleIds }),
+          });
+        } catch (e) { console.warn('Topic create failed:', e); }
+      }
+
+      async function deleteTopic(topicId) {
+        const t = topics.find(x => x.id === topicId);
+        if (!t) return;
+        // Unassign articles
+        for (const aid of t.articleIds) {
+          const a = articles.find(x => x.id === aid);
+          if (a) { a.topicId = null; a.state = 'candidate'; }
+        }
+        topics = topics.filter(x => x.id !== topicId);
+        render();
+        try {
+          await fetch(`${API}/api/topics`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'delete', id: topicId }),
+          });
+        } catch (e) { console.warn('Topic delete failed:', e); }
+      }
+
+      async function removeArticleFromTopic(topicId, articleId) {
+        const t = topics.find(x => x.id === topicId);
+        if (t) t.articleIds = t.articleIds.filter(id => id !== articleId);
+        const a = articles.find(x => x.id === articleId);
+        if (a) { a.topicId = null; a.state = 'candidate'; }
+        render();
+        try {
+          await fetch(`${API}/api/topics`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'remove_article', id: topicId, article_id: articleId }),
+          });
+        } catch (e) { console.warn('Remove article failed:', e); }
+      }
+
+      // ── Topic picker dropdown ──
+      function showTopicPicker(article) {
+        // Remove any existing picker
+        document.getElementById('topic-picker')?.remove();
+
+        const card = document.querySelector(`.card[data-id="${article.id}"]`);
+        if (!card) return;
+
+        const rect = card.getBoundingClientRect();
+
+        let optionsHTML = topics.map(t =>
+          `<button class="picker-option" data-topic-id="${t.id}">
+            <span class="picker-dot"></span>
+            ${escapeHtml(t.title || 'Untitled')}
+            <span class="picker-count">${t.articleIds.length}</span>
+          </button>`
+        ).join('');
+
+        optionsHTML += `
+          <div class="picker-divider"></div>
+          <button class="picker-option picker-new" data-topic-id="__new__">
+            + Create new topic
+          </button>
+        `;
+
+        const picker = document.createElement('div');
+        picker.id = 'topic-picker';
+        picker.innerHTML = `
+          <div class="picker-backdrop"></div>
+          <div class="picker-menu" style="top:${Math.min(rect.bottom + 4, window.innerHeight - 300)}px; left:${rect.left}px; width:${Math.min(rect.width, 320)}px;">
+            <div class="picker-header">Add to topic:</div>
+            <div class="picker-options">${optionsHTML}</div>
+          </div>
+        `;
+        document.body.appendChild(picker);
+
+        // Handle selection
+        picker.querySelectorAll('.picker-option').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const topicId = btn.dataset.topicId;
+            picker.remove();
+            acceptArticleToTopic(article, topicId);
+          });
+        });
+
+        // Close on backdrop click or Escape
+        picker.querySelector('.picker-backdrop').addEventListener('click', () => picker.remove());
+        const escHandler = (e) => {
+          if (e.key === 'Escape') { picker.remove(); document.removeEventListener('keydown', escHandler); }
+        };
+        document.addEventListener('keydown', escHandler);
+      }
+
+      async function acceptArticleToTopic(article, topicId) {
+        const prevState = article.state;
+        article.state = 'accepted';
+        article.acceptOrder = Date.now();
+
+        if (topicId === '__new__') {
+          // Create new topic with this article
+          const title = article.editorNote && article.editorNote.trim().length > 5
+            ? article.editorNote.trim().split(/[.!?\n]/)[0].slice(0, 60)
+            : article.title;
+          await createTopic(title, [article.id]);
+        } else {
+          // Add to existing topic
+          const topic = topics.find(t => t.id === topicId);
+          if (topic) {
+            topic.articleIds.push(article.id);
+            article.topicId = topicId;
+            fetch(`${API}/api/topics`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'add_article', id: topicId, article_id: article.id }),
+            }).catch(() => {});
+            showToast(`Added to "${truncate(topic.title, 25)}"`);
+          }
+          render();
+        }
+
+        // Send feedback to API
+        try {
+          await fetch(`${API}/api/feedback`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ articleId: article.id, reaction: 'newsletter_include' }),
+          });
+        } catch (err) {
+          article.state = prevState;
+          render();
+          showToast('API error — reverted', true);
+        }
+      }
+
+      // ── Drag and drop ──
+      // These are global functions called from inline handlers (needed for dynamic HTML)
+      window.handleArticleDragStart = function(e, articleId, fromTopicId) {
+        e.dataTransfer.setData('text/plain', JSON.stringify({ articleId, fromTopicId }));
+        e.dataTransfer.effectAllowed = 'move';
+        e.target.closest('.topic-article-item, .card').style.opacity = '0.4';
+        // Highlight all topic bubbles as drop targets
+        document.querySelectorAll('.topic-bubble').forEach(b => b.classList.add('drop-target'));
+      };
+
+      window.handleTopicDrop = function(e, toTopicId) {
+        e.preventDefault();
+        document.querySelectorAll('.topic-bubble').forEach(b => {
+          b.classList.remove('drag-over', 'drop-target');
+        });
+
+        let data;
+        try { data = JSON.parse(e.dataTransfer.getData('text/plain')); } catch { return; }
+        const { articleId, fromTopicId } = data;
+
+        if (fromTopicId === toTopicId) return; // Same topic, no-op
+
+        // Remove from old topic if it was in one
+        if (fromTopicId) {
+          const oldTopic = topics.find(t => t.id === fromTopicId);
+          if (oldTopic) {
+            oldTopic.articleIds = oldTopic.articleIds.filter(id => id !== articleId);
+            fetch(`${API}/api/topics`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'remove_article', id: fromTopicId, article_id: articleId }),
+            }).catch(() => {});
+          }
+        }
+
+        // Add to new topic
+        const newTopic = topics.find(t => t.id === toTopicId);
+        if (newTopic && !newTopic.articleIds.includes(articleId)) {
+          newTopic.articleIds.push(articleId);
+          const a = articles.find(x => x.id === articleId);
+          if (a) a.topicId = toTopicId;
+          fetch(`${API}/api/topics`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'add_article', id: toTopicId, article_id: articleId }),
+          }).catch(() => {});
+        }
+
+        render();
+        showToast(`Moved to "${truncate(newTopic?.title || '', 25)}"`);
+      };
+
+      // Clean up drag styling on dragend
+      document.addEventListener('dragend', () => {
+        document.querySelectorAll('.topic-bubble').forEach(b => {
+          b.classList.remove('drag-over', 'drop-target');
+        });
+        document.querySelectorAll('[style*="opacity"]').forEach(el => {
+          el.style.opacity = '';
+        });
+      });
+
+      // ── Auto-grouping ──
+      // Stop words to ignore when matching
+      const STOP = new Set(['this','that','with','from','about','have','been','will',
+        'they','their','what','when','which','there','these','than','them','then',
+        'into','just','also','more','some','like','your','would','could','should',
+        'were','being','does','doing','each','make','made','most','much','very',
+        'after','before','only','other','over','such','here','where','every','between']);
+
+      function getKeywords(text) {
+        return new Set(
+          text.toLowerCase().split(/\W+/)
+            .filter(w => w.length > 3 && !STOP.has(w))
+        );
+      }
+
+      function autoGroupArticle(article) {
+        // Build keyword set from article title + note + summary
+        const articleText = [article.title, article.editorNote || '', article.summary || ''].join(' ');
+        const articleWords = getKeywords(articleText);
+
+        let bestMatch = null;
+        let bestScore = 0;
+
+        for (const topic of topics) {
+          // Build keyword set from topic title + synthesis + all article titles/notes/summaries
+          let topicText = [topic.title, topic.synthesis || ''].join(' ');
+          for (const aid of topic.articleIds) {
+            const ta = articles.find(a => a.id === aid);
+            if (ta) {
+              topicText += ' ' + [ta.title, ta.editorNote || '', ta.summary || ''].join(' ');
+            }
+          }
+          const topicWords = getKeywords(topicText);
+
+          const overlap = [...articleWords].filter(w => topicWords.has(w)).length;
+          // Score by overlap relative to article word count (prevents big topics from swallowing everything)
+          const score = overlap / Math.max(articleWords.size, 1);
+          if (overlap >= 2 && score > bestScore && score >= 0.15) {
+            bestScore = score;
+            bestMatch = topic;
+          }
+        }
+
+        if (bestMatch) {
+          bestMatch.articleIds.push(article.id);
+          article.topicId = bestMatch.id;
+          fetch(`${API}/api/topics`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'add_article', id: bestMatch.id, article_id: article.id }),
+          }).catch(() => {});
+          showToast(`Grouped into "${truncate(bestMatch.title, 30)}"`);
+        } else {
+          // Use editor note as topic title if available, otherwise article title
+          const topicTitle = article.editorNote && article.editorNote.trim().length > 5
+            ? article.editorNote.trim().split(/[.!?\n]/)[0].slice(0, 60)
+            : article.title;
+          createTopic(topicTitle, [article.id]);
+          showToast(`New topic: "${truncate(topicTitle, 30)}"`);
+        }
       }
 
       function cardHTML(a, type, index) {
@@ -875,12 +1764,19 @@
           `;
         }
 
-        // Editor note — only on accepted cards
+        // Editor note — on accepted cards always visible, on others show if note exists
+        const hasNote = a.editorNote && a.editorNote.trim();
         const noteHTML = type === 'accepted' ? `
           <div class="editor-note">
             <textarea class="note-input" data-id="${a.id}"
-              placeholder="Why this matters — your take for the digest..."
+              placeholder="Your take — why this matters for the digest..."
               rows="2">${escapeHtml(a.editorNote || '')}</textarea>
+          </div>
+        ` : (type === 'candidate' || type === 'maybe') ? `
+          <div class="editor-note collapsed">
+            <textarea class="note-input" data-id="${a.id}"
+              placeholder="Add a note before accepting..."
+              rows="1">${escapeHtml(a.editorNote || '')}</textarea>
           </div>
         ` : '';
 
@@ -924,7 +1820,7 @@
 
         document.getElementById('col-count-candidates').textContent = candidates.length;
         document.getElementById('col-count-maybe').textContent = maybes.length;
-        document.getElementById('col-count-accepted').textContent = accepted.length;
+        document.getElementById('col-count-accepted').textContent = topics.length;
 
         // Goal progress
         const pct = Math.min((accepted.length / DIGEST_GOAL) * 100, 100);
@@ -950,15 +1846,16 @@
         const article = articles.find(a => a.id === id);
         if (!article) return;
 
+        // On accept: show topic picker dropdown
+        if (action === 'accept') {
+          showTopicPicker(article);
+          return;
+        }
+
         const prevState = article.state;
         let newState, reaction;
 
         switch (action) {
-          case 'accept':
-            newState = 'accepted';
-            reaction = 'newsletter_include';
-            article.acceptOrder = Date.now();
-            break;
           case 'maybe':
             newState = 'maybe';
             reaction = 'newsletter_maybe';
@@ -973,9 +1870,20 @@
             break;
         }
 
+        // Remove from topic when moving away from accepted
+        if (prevState === 'accepted' && article.topicId) {
+          const t = topics.find(x => x.id === article.topicId);
+          if (t) t.articleIds = t.articleIds.filter(x => x !== id);
+          article.topicId = null;
+          fetch(`${API}/api/topics`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'remove_article', id: article.topicId, article_id: id }),
+          }).catch(() => {});
+        }
+
         article.state = newState;
 
-        // Move focus to next card in same column before re-rendering
         advanceFocusAfterAction(id, prevState);
         render();
         showToast(`${truncate(article.title, 40)} → ${newState}`);
@@ -1012,6 +1920,19 @@
           focusedId = remaining[0].id;
         } else {
           focusedId = null;
+        }
+      }
+
+      // ── Editor notes ──
+      async function saveEditorNote(id, note) {
+        try {
+          await fetch(`${API}/api/feedback`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ articleId: id, reaction: 'editor_note', comment: note }),
+          });
+        } catch (err) {
+          console.warn('Failed to save note:', err);
         }
       }
 
@@ -1098,6 +2019,17 @@
       }
 
       // ── Fetch stories ──
+      // ── New Topic button ──
+      document.getElementById('btn-new-topic').addEventListener('click', () => {
+        createTopic('', []);
+        // Focus the title input of the new topic
+        setTimeout(() => {
+          const inputs = colAccepted.querySelectorAll('.topic-title-input');
+          const last = inputs[inputs.length - 1];
+          if (last) last.focus();
+        }, 50);
+      });
+
       document.getElementById('btn-fetch').addEventListener('click', async () => {
         const btn = document.getElementById('btn-fetch');
         const status = document.getElementById('fetch-status');
@@ -1136,20 +2068,96 @@
       });
 
       // ── Preview ──
+      // Simple markdown → HTML converter (no library needed)
+      function markdownToHtml(md) {
+        return md
+          // Headers
+          .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+          .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+          // Horizontal rules
+          .replace(/^---$/gm, '<hr>')
+          // Bold
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          // Italic
+          .replace(/\*(.+?)\*/g, '<em>$1</em>')
+          // Links
+          .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+          // Paragraphs — wrap lines that aren't already tags
+          .split('\n\n')
+          .map(block => {
+            block = block.trim();
+            if (!block) return '';
+            if (block.startsWith('<h') || block.startsWith('<hr')) return block;
+            return `<p>${block.replace(/\n/g, '<br>')}</p>`;
+          })
+          .join('\n');
+      }
+
+      let cachedPreviewMarkdown = null;
+
       document.getElementById('btn-preview').addEventListener('click', async () => {
         previewOverlay.classList.add('visible');
-        document.getElementById('preview-content').textContent = 'Loading preview...';
+        document.getElementById('preview-date').textContent = new Date().toLocaleDateString('en-US', {
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        });
+
+        // Use cached version if available
+        if (cachedPreviewMarkdown) {
+          document.getElementById('preview-content').innerHTML = markdownToHtml(cachedPreviewMarkdown);
+          return;
+        }
+
+        document.getElementById('preview-content').innerHTML = '<p style="text-align:center;color:#999;">Generating digest (first run uses Opus, may take 30s)...</p>';
 
         try {
           const res = await fetch(`${API}/api/digest/preview`);
           const data = await res.json();
-          document.getElementById('preview-content').textContent = data.markdown || 'No content yet.';
+          if (data.markdown) {
+            cachedPreviewMarkdown = data.markdown;
+            document.getElementById('preview-content').innerHTML = markdownToHtml(data.markdown);
+          } else {
+            document.getElementById('preview-content').innerHTML = '<p style="color:#999;">No content yet. Accept articles into topics first.</p>';
+          }
         } catch {
-          document.getElementById('preview-content').textContent = 'Could not load preview. Is the API server running?';
+          document.getElementById('preview-content').innerHTML = '<p style="color:#c00;">Could not load preview. Is the API server running?</p>';
+        }
+      });
+
+      // Regenerate with feedback
+      document.getElementById('btn-regenerate').addEventListener('click', async () => {
+        const feedback = document.getElementById('preview-feedback-input').value.trim();
+        if (!feedback && !cachedPreviewMarkdown) return;
+
+        const currentContent = cachedPreviewMarkdown || '';
+        document.getElementById('preview-content').innerHTML = '<p style="text-align:center;color:#999;">Iterating with your feedback (using Sonnet)...</p>';
+
+        try {
+          const res = await fetch(`${API}/api/digest/iterate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              current_draft: currentContent,
+              feedback: feedback,
+            }),
+          });
+          const data = await res.json();
+          if (data.markdown) {
+            cachedPreviewMarkdown = data.markdown;
+            document.getElementById('preview-content').innerHTML = markdownToHtml(data.markdown);
+            document.getElementById('preview-feedback-input').value = '';
+            showToast('Draft updated');
+          }
+        } catch {
+          document.getElementById('preview-content').innerHTML = markdownToHtml(currentContent);
+          showToast('Iteration failed', true);
         }
       });
 
       document.getElementById('btn-close-preview').addEventListener('click', closePreview);
+      document.getElementById('btn-publish-from-preview').addEventListener('click', () => {
+        closePreview();
+        document.getElementById('btn-publish').click();
+      });
       previewOverlay.addEventListener('click', (e) => {
         if (e.target === previewOverlay) closePreview();
       });
@@ -1160,24 +2168,27 @@
 
       // ── Publish ──
       document.getElementById('btn-publish').addEventListener('click', async () => {
-        const accepted = getAccepted();
-        if (accepted.length === 0) {
-          showToast('No stories accepted yet');
+        if (!cachedPreviewMarkdown) {
+          showToast('Preview first, then publish', true);
           return;
         }
 
-        if (!confirm(`Publish digest with ${accepted.length} stories?`)) return;
+        if (!confirm('Publish this digest to the website?')) return;
 
         const btn = document.getElementById('btn-publish');
         btn.disabled = true;
         btn.textContent = 'Publishing...';
 
         try {
-          const res = await fetch(`${API}/api/digest/publish`, { method: 'POST' });
+          const res = await fetch(`${API}/api/digest/publish`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ markdown: cachedPreviewMarkdown }),
+          });
           const data = await res.json();
 
           if (data.success) {
-            showToast(`Published! ${data.article_count} stories`);
+            showToast(`Published! ${data.date}`);
           } else {
             showToast(data.message || 'Publish failed', true);
           }

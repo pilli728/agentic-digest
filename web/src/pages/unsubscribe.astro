@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Unsubscribe" description="Unsubscribe from Agentic Edge">
+  <div class="unsub-page">
+    <div class="unsub-card" id="unsub-form-card">
+      <h1>Sorry to see you go</h1>
+      <p>Enter your email to unsubscribe from all Agentic Edge emails.</p>
+      <form id="unsub-form">
+        <input type="email" placeholder="you@company.com" required id="unsub-email" />
+        <button type="submit">Unsubscribe</button>
+      </form>
+    </div>
+    <div class="unsub-card" id="unsub-done" style="display:none">
+      <h1>You've been unsubscribed</h1>
+      <p>You won't receive any more emails from us. If this was a mistake, you can always <a href="/">re-subscribe</a>.</p>
+    </div>
+  </div>
+
+  <style>
+    .unsub-page { max-width: 480px; margin: 4rem auto; text-align: center; }
+    .unsub-card { border: 1px solid var(--color-border); border-radius: 12px; padding: 3rem 2rem; }
+    h1 { font-size: 1.5em; margin: 0 0 0.75rem; }
+    p { color: #666; margin: 0 0 1.5rem; }
+    form { display: flex; gap: 0.5rem; }
+    input { flex: 1; padding: 0.75rem 1rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1em; }
+    input:focus { outline: none; border-color: var(--color-accent); }
+    button { padding: 0.75rem 1.5rem; background: #ef4444; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    button:hover { background: #dc2626; }
+  </style>
+
+  <script>
+    document.getElementById('unsub-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('unsub-email').value;
+      try {
+        await fetch('http://localhost:8000/api/unsubscribe', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ email })
+        });
+      } catch(err) {}
+      document.getElementById('unsub-form-card').style.display = 'none';
+      document.getElementById('unsub-done').style.display = 'block';
+    });
+  </script>
+</BaseLayout>

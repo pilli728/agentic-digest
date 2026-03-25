@@ -2,49 +2,78 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="Upgrade to Pro" description="Get the full Agentic Edge experience">
+<BaseLayout title="Choose Your Plan" description="Pick the level of access that fits how you build.">
   <div class="upgrade-page">
     <header class="upgrade-header">
       <a href="/" class="back-link">← Back to Agentic Edge</a>
-      <h1>Upgrade to Pro</h1>
-      <p>Get every story, every analysis, every week. Before everyone else.</p>
+      <h1>Choose your plan</h1>
+      <p>Everyone gets the analysis. Pick how deep you want to go.</p>
     </header>
 
     <div class="pricing-section">
-      <div class="plan-card" id="pro-plan">
-        <h2>Pro</h2>
-        <p class="price">$9<span>/month</span></p>
-        <p class="price-annual">or $89/year (save 18%)</p>
+      <!-- Free — shows what you're missing -->
+      <div class="plan-card free-plan">
+        <h2>Free</h2>
+        <p class="price">$0</p>
+        <p class="price-sub">Your current plan</p>
         <ul>
-          <li>All 20 stories weekly (free gets 5)</li>
-          <li>Full "why it matters" analysis per story</li>
-          <li>Source links + engagement data</li>
-          <li>Early access — get it Friday PM, not Monday</li>
-          <li>Reply to any issue — I read every one</li>
-          <li>Cancel anytime, keep access until period ends</li>
+          <li class="has">Weekly digest with 3 analysis sections</li>
+          <li class="has">Synthesized takes on what matters</li>
+          <li class="missing">15+ source links with one-liners</li>
+          <li class="missing">Builder community (Discord)</li>
+          <li class="missing">Behind-the-scenes of what I'm building</li>
+          <li class="missing">Early access (Friday PM)</li>
+          <li class="missing">CLAUDE.md templates and agent configs</li>
+          <li class="missing">Step-by-step guides on how I use agents</li>
+          <li class="missing">Access to tools I'm building</li>
+          <li class="missing">DM me directly — ask anything</li>
         </ul>
-        <button class="checkout-btn" id="checkout-monthly" data-price="pro_monthly">
-          Start Pro — $9/month
-        </button>
-        <button class="checkout-btn secondary" id="checkout-annual" data-price="pro_annual">
-          Go Annual — $89/year
+        <a href="/" class="checkout-btn secondary">Current plan</a>
+      </div>
+
+      <!-- Pro -->
+      <div class="plan-card pro-plan">
+        <div class="badge">Most Popular</div>
+        <h2>Pro</h2>
+        <p class="price">$12<span>/mo</span></p>
+        <p class="price-sub">or $99/year (save 31%)</p>
+        <ul>
+          <li class="has">Weekly digest with 3 analysis sections</li>
+          <li class="has">Synthesized takes on what matters</li>
+          <li class="has">15+ source links with one-liners</li>
+          <li class="has">Builder community (Discord)</li>
+          <li class="has">Behind-the-scenes of what I'm building</li>
+          <li class="has">Early access (Friday PM)</li>
+          <li class="missing">CLAUDE.md templates and agent configs</li>
+          <li class="missing">Step-by-step guides on how I use agents</li>
+          <li class="missing">Access to tools I'm building</li>
+          <li class="missing">DM me directly — ask anything</li>
+        </ul>
+        <button class="checkout-btn" id="checkout-pro" data-price="pro_monthly">
+          Go Pro — $12/month
         </button>
       </div>
 
-      <div class="plan-card founding" id="founding-plan">
-        <div class="badge">Limited — 50 spots</div>
-        <h2>Founding Member</h2>
-        <p class="price">$29<span>/month</span></p>
+      <!-- Inner Circle -->
+      <div class="plan-card inner-plan">
+        <div class="badge gold">Limited spots</div>
+        <h2>Inner Circle</h2>
+        <p class="price">$39<span>/mo</span></p>
+        <p class="price-sub">Price locked forever</p>
         <ul>
-          <li>Everything in Pro</li>
-          <li>Monthly tool drops — new MD files, scripts, agents I'm building</li>
-          <li>Ready-to-use templates (CLAUDE.md, AGENTS.md, hooks, skills)</li>
-          <li>Private community — share tools, get feedback</li>
-          <li>Your name in credits — forever</li>
-          <li>Lock in this price — it goes up later</li>
+          <li class="has">Weekly digest with 3 analysis sections</li>
+          <li class="has">Synthesized takes on what matters</li>
+          <li class="has">15+ source links with one-liners</li>
+          <li class="has">Builder community (Discord)</li>
+          <li class="has">Behind-the-scenes of what I'm building</li>
+          <li class="has">Early access (Friday PM)</li>
+          <li class="has">CLAUDE.md templates and agent configs</li>
+          <li class="has">Step-by-step guides on how I use agents</li>
+          <li class="has">Access to tools I'm building</li>
+          <li class="has">DM me directly — ask anything</li>
         </ul>
-        <button class="checkout-btn" id="checkout-founding" data-price="founding_monthly">
-          Become a Founding Member
+        <button class="checkout-btn gold" id="checkout-inner" data-price="inner_monthly">
+          Join Inner Circle — $39/month
         </button>
       </div>
     </div>
@@ -56,16 +85,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <p>Yes. One click. You keep access until the end of your billing period.</p>
       </div>
       <div class="faq-item">
-        <h3>What payment methods do you accept?</h3>
-        <p>All major credit cards via Stripe. Apple Pay and Google Pay too.</p>
+        <h3>What's in the Discord?</h3>
+        <p>Builders sharing what they're shipping, tools they found, problems they solved. I'm in there daily. It's small on purpose.</p>
+      </div>
+      <div class="faq-item">
+        <h3>What kind of DM access?</h3>
+        <p>Inner Circle members can message me directly about what they're building. I'll review your CLAUDE.md, suggest tools, help debug agent setups. Response within 24 hours.</p>
       </div>
       <div class="faq-item">
         <h3>What if I don't like it?</h3>
-        <p>Email me within 30 days for a full refund. No questions asked.</p>
-      </div>
-      <div class="faq-item">
-        <h3>How is this different from free?</h3>
-        <p>Free gets the top 5 headlines. Pro gets all 20 stories with full analysis — the context and "so what" that makes each story actionable.</p>
+        <p>30-day money-back guarantee. No questions. Email me and it's done.</p>
       </div>
     </section>
   </div>
@@ -101,19 +130,24 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     .pricing-section {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.5rem;
       margin-bottom: 4rem;
     }
 
     .plan-card {
       border: 2px solid var(--color-border);
       border-radius: 12px;
-      padding: 2.5rem 2rem;
+      padding: 2rem 1.5rem;
       position: relative;
     }
 
-    .plan-card.founding {
+    .plan-card.pro-plan {
+      border-color: var(--color-accent);
+      box-shadow: 0 4px 20px rgba(0, 102, 204, 0.1);
+    }
+
+    .plan-card.inner-plan {
       border-color: #f59e0b;
     }
 
@@ -164,14 +198,26 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       font-size: 0.95em;
     }
 
-    .plan-card li::before {
+    li.has::before {
       content: "✓ ";
       color: var(--color-accent);
       font-weight: 600;
     }
 
-    .founding li::before {
+    .inner-plan li.has::before {
       color: #f59e0b;
+    }
+
+    li.missing {
+      color: #bbb;
+      text-decoration: line-through;
+      text-decoration-color: #ddd;
+    }
+
+    li.missing::before {
+      content: "✗ ";
+      color: #ddd;
+      font-weight: 600;
     }
 
     .checkout-btn {
@@ -199,8 +245,22 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       color: var(--color-fg);
     }
 
-    .founding .checkout-btn {
+    .checkout-btn.gold {
       background: #f59e0b;
+    }
+
+    .badge.gold {
+      background: #f59e0b;
+    }
+
+    .price-sub {
+      font-size: 0.85em;
+      color: #888;
+      margin: 0.25rem 0 1.5rem 0;
+    }
+
+    @media (max-width: 900px) {
+      .pricing-section { grid-template-columns: 1fr; }
     }
 
     /* FAQ */

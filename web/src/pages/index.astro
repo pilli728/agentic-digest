@@ -12,190 +12,859 @@ let latestContent;
 if (latest) {
   latestContent = await latest.render();
 }
+
+const formatDate = (dateStr) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
 ---
 
-<BaseLayout title="Agentic Edge" description="Get smarter about AI agents in 5 minutes. Free weekly digest for builders.">
-
-  <!-- Hero — TLDR style -->
-  <header class="hero">
-    <div class="hero-emojis">🤖 ⚡ 🛠️ 🚀 📡</div>
-    <h1>Get smarter about AI agents in 5 minutes</h1>
-    <p class="hero-sub">Join builders, founders, and engineers who read Agentic Edge to stay ahead of the fastest-moving space in tech. Curated from 700+ sources. Zero AI slop.</p>
-
-    <form class="signup-form" id="signup-form">
-      <input type="email" placeholder="you@company.com" required id="signup-email" />
-      <button type="submit" class="btn-signup">Subscribe for free</button>
-    </form>
-
-    <p class="social-proof">Curated by a Stanford engineer building AI agents full-time.</p>
+<BaseLayout title="Agentic Edge" description="The weekly brief for AI agent builders. Zero AI slop.">
+  <header class="home-header">
+    <h1>Agentic Edge</h1>
+    <p class="tagline">Get smarter about AI agents in 5 minutes a week.</p>
+    <p class="sub-tagline">700+ sources scanned. 20 stories picked. Zero AI slop.</p>
   </header>
 
-  <!-- What you get -->
-  <section class="what-you-get">
-    <div class="get-grid">
-      <div class="get-item">
-        <span class="get-icon">📰</span>
-        <div>
-          <strong>Weekly digest</strong>
-          <p>The 20 AI agent stories that matter. Ranked by impact on what you're building.</p>
-        </div>
-      </div>
-      <div class="get-item">
-        <span class="get-icon">🛠️</span>
-        <div>
-          <strong>Tool drops</strong>
-          <p>New MCP servers, CLAUDE.md templates, agent configs, and scripts. Copy-paste ready.</p>
-        </div>
-      </div>
-      <div class="get-item">
-        <span class="get-icon">🎓</span>
-        <div>
-          <strong>Agent playbooks</strong>
-          <p>Step-by-step builds. How to go from zero to a working OpenClaw agent in one sitting.</p>
-        </div>
+  <!-- Company logos carousel -->
+  <section class="logos-section">
+    <p class="logos-label">Join builders and engineers from</p>
+    <div class="logos-track">
+      <div class="logos-slide">
+        <span class="logo-item">Google</span>
+        <span class="logo-item">Meta</span>
+        <span class="logo-item">Anthropic</span>
+        <span class="logo-item">OpenAI</span>
+        <span class="logo-item">Apple</span>
+        <span class="logo-item">Stanford</span>
+        <span class="logo-item">NVIDIA</span>
+        <span class="logo-item">Stripe</span>
+        <span class="logo-item">Vercel</span>
+        <span class="logo-item">Y Combinator</span>
+        <span class="logo-item">a16z</span>
+        <span class="logo-item">Amazon</span>
+        <span class="logo-item">Microsoft</span>
+        <span class="logo-item">Databricks</span>
+        <!-- Duplicate for seamless loop -->
+        <span class="logo-item">Google</span>
+        <span class="logo-item">Meta</span>
+        <span class="logo-item">Anthropic</span>
+        <span class="logo-item">OpenAI</span>
+        <span class="logo-item">Apple</span>
+        <span class="logo-item">Stanford</span>
+        <span class="logo-item">NVIDIA</span>
+        <span class="logo-item">Stripe</span>
+        <span class="logo-item">Vercel</span>
+        <span class="logo-item">Y Combinator</span>
+        <span class="logo-item">a16z</span>
+        <span class="logo-item">Amazon</span>
+        <span class="logo-item">Microsoft</span>
+        <span class="logo-item">Databricks</span>
       </div>
     </div>
   </section>
 
-  <!-- Sample content -->
-  {latest && (
-    <section class="sample-section">
-      <h2>Here's what a typical issue looks like</h2>
-      <div class="sample-content">
+  <!-- Email signup -->
+  <section class="signup-section">
+    <div class="signup-box">
+      <h2>Join the builders who ship with AI</h2>
+      <p>I'm an engineer building AI agents full-time. I was spending 2 hours a day reading AI news and still missing the stuff that mattered. So I built an agent that scans 700+ sources for me. Now I share what it finds every week.</p>
+      <form class="signup-form" id="signup-form">
+        <input type="email" placeholder="you@company.com" required id="signup-email" />
+        <button type="submit" class="btn btn-primary" id="signup-btn">Join for free</button>
+      </form>
+      <p class="signup-note">5-minute read. Every Monday. No spam. Unsubscribe anytime.</p>
+    </div>
+  </section>
+
+  <!-- Welcome modal overlay -->
+  <div class="modal-overlay" id="welcome-modal">
+    <div class="modal-card">
+      <div class="modal-confetti" id="confetti-container"></div>
+
+      <div class="modal-icon">🎉</div>
+      <h2>Welcome to the club.</h2>
+      <p class="modal-email" id="modal-email"></p>
+
+      <div class="modal-checklist">
+        <div class="check-item animate-in" style="animation-delay: 0.3s">
+          <span class="check-mark">✓</span>
+          <span>Your first digest drops Monday morning</span>
+        </div>
+        <div class="check-item animate-in" style="animation-delay: 0.5s">
+          <span class="check-mark">✓</span>
+          <span>3 analysis sections on what matters this week</span>
+        </div>
+        <div class="check-item animate-in" style="animation-delay: 0.7s">
+          <span class="check-mark">✓</span>
+          <span>Source links so you can go deeper</span>
+        </div>
+        <div class="check-item animate-in" style="animation-delay: 0.9s">
+          <span class="check-mark">✓</span>
+          <span>Reply anytime. I read every one.</span>
+        </div>
+      </div>
+
+      <div class="modal-divider"></div>
+
+      <p class="modal-upgrade-intro">Want to go deeper? Most builders upgrade within a week.</p>
+
+      <div class="modal-upgrade-options">
+        <a href="/upgrade" class="modal-upgrade-card">
+          <div class="upgrade-badge">Pro</div>
+          <strong>$12/mo</strong>
+          <p>Full source list, community, early access</p>
+        </a>
+        <a href="/upgrade?tier=inner" class="modal-upgrade-card gold">
+          <div class="upgrade-badge gold">Inner Circle</div>
+          <strong>$39/mo</strong>
+          <p>Templates, agents, scripts, DM access</p>
+        </a>
+      </div>
+
+      <button class="modal-close" id="modal-close">Start with free — I'll explore later</button>
+    </div>
+  </div>
+
+  <!-- Premium teasers — clear, not blocking -->
+  <section class="premium-teasers">
+    <div class="teaser-row">
+      <a href="/upgrade" class="teaser-card">
+        <span class="teaser-icon">📋</span>
+        <div>
+          <strong>15+ sources with one-liners</strong>
+          <p>Every link I scanned this week, ranked.</p>
+        </div>
+        <span class="teaser-arrow">Pro →</span>
+      </a>
+      <a href="/upgrade?tier=inner" class="teaser-card teaser-gold">
+        <span class="teaser-icon">🛠️</span>
+        <div>
+          <strong>CLAUDE.md, agent configs, scripts</strong>
+          <p>The exact setup I use. Copy-paste ready.</p>
+        </div>
+        <span class="teaser-arrow">Inner Circle →</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Latest digest — full free content, no fade blocking -->
+  {latest ? (
+    <section class="latest-digest">
+      <div class="section-header">
+        <h2>This Week's Digest</h2>
+        <p class="digest-date">{formatDate(latest.data.date)}</p>
+      </div>
+
+      <div class="digest-full">
         <latestContent.Content />
       </div>
-      <div class="sample-fade"></div>
-      <div class="sample-cta">
-        <a href="/archive" class="btn-secondary">Browse past issues</a>
-      </div>
     </section>
+  ) : (
+    <div class="no-content">
+      <p>First issue coming soon. Subscribe above to be the first to know.</p>
+    </div>
   )}
 
-  <!-- Pricing -->
-  <section class="pricing-section" id="pricing">
-    <h2>Choose your level</h2>
-    <div class="pricing-grid">
-      <div class="plan">
-        <h3>Free</h3>
-        <p class="plan-price">$0</p>
-        <ul>
-          <li>Top 5 stories weekly</li>
-          <li>Headlines + source links</li>
-          <li>Email every Monday</li>
-        </ul>
-        <a href="#signup-form" class="btn-plan">Subscribe free</a>
+  <!-- Bottom fade teaser — soft preview of premium content -->
+  <section class="bottom-teaser">
+    <div class="bottom-teaser-content">
+      <div class="blurred-sources">
+        <p class="source-line">Claude Code just shipped auto mode. Here's what it means for your workflow...</p>
+        <p class="source-line">OpenClaw 2026.3.23 update: DeepSeek plugin, Qwen pay-as-you-go, new pricing...</p>
+        <p class="source-line">Polsia hit $1M ARR. The agent that builds startups. Real numbers inside...</p>
+        <p class="source-line">LM Studio compromised? 1020 upvotes. Check your install immediately...</p>
+        <p class="source-line">Jensen Huang: if your engineer isn't burning $250K in tokens, something's wrong...</p>
+        <p class="source-line">Harvard professor co-authored a paper with Claude in 2 weeks. It would've taken...</p>
       </div>
-      <div class="plan featured">
-        <div class="plan-badge">Most Popular</div>
-        <h3>Pro</h3>
-        <p class="plan-price">$9<span>/mo</span></p>
-        <ul>
-          <li>All 20 stories + full analysis</li>
-          <li>Vibecoding playbooks and guides</li>
-          <li>Anti-AI writing style guide</li>
-          <li>Early access (Friday PM)</li>
-        </ul>
-        <a href="/upgrade" class="btn-plan primary">Go Pro</a>
-      </div>
-      <div class="plan founding">
-        <div class="plan-badge gold">50 spots</div>
-        <h3>Founding Builder</h3>
-        <p class="plan-price">$29<span>/mo</span></p>
-        <ul>
-          <li>Everything in Pro</li>
-          <li>Monthly tool drops: MD files, agents, scripts</li>
-          <li>OpenClaw agent templates and configs</li>
-          <li>Private builder community</li>
-          <li>Price locked forever</li>
-        </ul>
-        <a href="/upgrade?tier=founding" class="btn-plan gold">Become a Founder</a>
+      <div class="bottom-teaser-fade"></div>
+      <div class="bottom-teaser-cta">
+        <h3>15+ more sources this week</h3>
+        <p>Pro members get the full source list, community access, and early delivery every Friday.</p>
+        <a href="/upgrade" class="btn btn-primary">See what you're missing</a>
       </div>
     </div>
   </section>
 
   <!-- About -->
-  <section class="about-section">
-    <h2>Who's behind this?</h2>
-    <p>I'm a Stanford-trained engineer building AI agents full-time. Every week I scan 700+ sources, test new tools, and build agents with Claude Code and OpenClaw. This newsletter is what I wish existed when I started — no hype, no AI slop, just the things that actually help you ship.</p>
-    <p>The system that curates this newsletter is itself an AI agent I built. It scores articles, filters noise, learns from my feedback, and generates each issue. I just review and hit publish.</p>
+  <section class="about">
+    <h2>Why this exists</h2>
+    <div class="about-text">
+      <p>I was spending 2 hours a day reading AI news and still missing things that mattered. So I built an AI agent that does it for me — scans 700+ sources, scores every article by builder relevance, filters out the noise, and gives me the 20 that actually matter.</p>
+      <p>Now I'm sharing that feed with you. Every story earns its spot. No AI slop, no filler, no "delve into the landscape." Just the tools, launches, and shifts that affect what you're building this week.</p>
+    </div>
+    <div class="value-grid">
+      <div class="value-card">
+        <h3>Stanford-trained, builder-first</h3>
+        <p>I'm an engineer who builds AI agents full-time. This newsletter is what I wish existed when I started.</p>
+      </div>
+      <div class="value-card">
+        <h3>AI that curates AI news</h3>
+        <p>The system that makes this newsletter is itself an AI agent. It learns what matters to builders and gets smarter every week.</p>
+      </div>
+      <div class="value-card">
+        <h3>Tools you can use Monday morning</h3>
+        <p>MCP servers, CLAUDE.md templates, agent configs, scripts. Not theory — things you copy-paste into your stack.</p>
+      </div>
+      <div class="value-card">
+        <h3>Zero AI slop guarantee</h3>
+        <p>25 banned phrases. Every summary sounds like a text from a smart friend, not a corporate memo written by ChatGPT.</p>
+      </div>
+    </div>
   </section>
 
   <footer class="site-footer">
-    <p>Built by a builder, for builders. <a href="/archive">Archive</a> · <a href="/pro">Pro Library</a> · <a href="/upgrade">Upgrade</a></p>
+    <p>Built by a Stanford engineer, for builders. <a href="/archive">Archive</a> · <a href="/pro">Pro Library</a> · <a href="/upgrade">Upgrade</a></p>
   </footer>
 
   <style>
-    .hero { text-align: center; padding: 4rem 0 3rem; max-width: 640px; margin: 0 auto; }
-    .hero-emojis { font-size: 1.8em; margin-bottom: 1.5rem; letter-spacing: 0.3em; }
-    h1 { font-size: 2.8em; line-height: 1.1; margin: 0 0 1rem; letter-spacing: -0.02em; }
-    .hero-sub { font-size: 1.05em; color: #555; line-height: 1.5; margin: 0 0 2rem; }
-    .signup-form { display: flex; gap: 0.5rem; max-width: 440px; margin: 0 auto 1rem; }
-    .signup-form input { flex: 1; padding: 0.9rem 1rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; }
-    .signup-form input:focus { outline: none; border-color: #7c3aed; }
-    .btn-signup { padding: 0.9rem 1.5rem; background: #7c3aed; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.95em; cursor: pointer; white-space: nowrap; }
-    .btn-signup:hover { background: #6d28d9; }
-    .social-proof { font-size: 0.85em; color: #888; margin: 0; }
-    .what-you-get { padding: 2rem 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
-    .get-grid { display: flex; flex-direction: column; gap: 1.5rem; }
-    .get-item { display: flex; gap: 1rem; align-items: start; }
-    .get-icon { font-size: 1.5em; margin-top: 0.1em; }
-    .get-item strong { display: block; margin-bottom: 0.2rem; }
-    .get-item p { margin: 0; font-size: 0.9em; color: #666; }
-    .sample-section { padding: 3rem 0; }
-    .sample-section h2 { text-align: center; margin-bottom: 1.5rem; }
-    .sample-content { max-height: 500px; overflow: hidden; position: relative; border: 1px solid #eee; border-radius: 12px; padding: 2rem; }
-    .sample-fade { height: 100px; background: linear-gradient(transparent, var(--color-bg)); margin-top: -100px; position: relative; z-index: 1; }
-    .sample-cta { text-align: center; margin-top: 1rem; }
-    .btn-secondary { padding: 0.6rem 1.2rem; border: 1px solid #ddd; border-radius: 6px; text-decoration: none; color: #333; font-weight: 500; font-size: 0.9em; }
-    .btn-secondary:hover { border-color: #7c3aed; color: #7c3aed; }
-    .pricing-section { padding: 3rem 0; }
-    .pricing-section h2 { text-align: center; margin-bottom: 2rem; }
-    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; max-width: 900px; margin: 0 auto; }
-    .plan { border: 2px solid #eee; border-radius: 12px; padding: 2rem 1.5rem; position: relative; }
-    .plan.featured { border-color: #7c3aed; }
-    .plan.founding { border-color: #f59e0b; }
-    .plan-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #7c3aed; color: white; padding: 0.2rem 1rem; border-radius: 12px; font-size: 0.75em; font-weight: 600; white-space: nowrap; }
-    .plan-badge.gold { background: #f59e0b; }
-    .plan h3 { margin: 0 0 0.3rem; }
-    .plan-price { font-size: 2.5em; font-weight: 700; margin: 0 0 1rem; }
-    .plan-price span { font-size: 0.35em; font-weight: 400; color: #888; }
-    .plan ul { list-style: none; padding: 0; margin: 0 0 1.5rem; }
-    .plan li { padding: 0.4rem 0; font-size: 0.9em; color: #555; }
-    .plan li::before { content: "✓ "; color: #7c3aed; font-weight: 600; }
-    .founding li::before { color: #f59e0b; }
-    .btn-plan { display: block; text-align: center; padding: 0.8rem; border: 2px solid #eee; border-radius: 8px; text-decoration: none; color: #333; font-weight: 600; font-size: 0.95em; }
-    .btn-plan:hover { border-color: #7c3aed; }
-    .btn-plan.primary { background: #7c3aed; color: white; border-color: #7c3aed; }
-    .btn-plan.primary:hover { background: #6d28d9; }
-    .btn-plan.gold { background: #f59e0b; color: white; border-color: #f59e0b; }
-    .btn-plan.gold:hover { background: #d97706; }
-    .about-section { padding: 3rem 0; border-top: 1px solid #eee; max-width: 600px; margin: 0 auto; }
-    .about-section h2 { margin-bottom: 1rem; }
-    .about-section p { font-size: 0.95em; color: #555; line-height: 1.6; margin-bottom: 1rem; }
-    .site-footer { text-align: center; padding: 2rem 0; font-size: 0.85em; color: #888; }
-    .site-footer a { color: #7c3aed; }
+    .home-header {
+      text-align: center;
+      padding: 3rem 0 2rem;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-size: 3.5em;
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.02em;
+    }
+
+    .tagline {
+      font-size: 1.2em;
+      color: #666;
+      margin: 0 0 0.3rem 0;
+    }
+
+    .sub-tagline {
+      font-size: 0.9em;
+      color: #999;
+      margin: 0;
+    }
+
+    /* Logo carousel */
+    .logos-section {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      overflow: hidden;
+    }
+
+    .logos-label {
+      font-size: 0.8em;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin: 0 0 1rem 0;
+    }
+
+    .logos-track {
+      overflow: hidden;
+      mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+      -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    }
+
+    .logos-slide {
+      display: flex;
+      gap: 3rem;
+      animation: scroll 25s linear infinite;
+      width: max-content;
+    }
+
+    .logo-item {
+      font-size: 1.1em;
+      font-weight: 600;
+      color: #bbb;
+      white-space: nowrap;
+      letter-spacing: 0.02em;
+      flex-shrink: 0;
+    }
+
+    @keyframes scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .logos-track:hover .logos-slide {
+      animation-play-state: paused;
+    }
+
+    /* Signup */
+    .signup-section {
+      margin-bottom: 3rem;
+    }
+
+    .signup-box {
+      background: rgba(0, 102, 204, 0.05);
+      border: 1px solid rgba(0, 102, 204, 0.15);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .signup-box h2 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.3em;
+    }
+
+    .signup-box > p {
+      color: #666;
+      margin: 0 0 1.5rem 0;
+    }
+
+    .signup-form {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      max-width: 500px;
+      margin: 0 auto 1rem;
+    }
+
+    .signup-form input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 1em;
+    }
+
+    .signup-form input:focus {
+      outline: none;
+      border-color: var(--color-accent);
+    }
+
+    .signup-note {
+      font-size: 0.8em;
+      color: #999;
+      margin: 0;
+    }
+
+    /* Welcome/success state */
+    .signup-success {
+      background: rgba(124, 58, 237, 0.05);
+      border: 1px solid rgba(124, 58, 237, 0.2);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: left;
+    }
+
+    .signup-success h2 {
+      font-size: 1.5em;
+      margin: 0 0 0.5rem 0;
+      color: var(--color-accent, #7c3aed);
+    }
+
+    .signup-success > p {
+      color: #555;
+      margin: 0 0 1rem 0;
+      font-size: 0.95em;
+    }
+
+    .welcome-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1.5rem 0;
+    }
+
+    .welcome-list li {
+      padding: 0.4rem 0;
+      font-size: 0.9em;
+      color: #444;
+    }
+
+    .welcome-list li::before {
+      content: "-> ";
+      color: var(--color-accent, #7c3aed);
+      font-weight: 600;
+    }
+
+    .welcome-note {
+      font-size: 0.85em;
+      color: #777;
+      line-height: 1.6;
+      border-top: 1px solid rgba(124, 58, 237, 0.15);
+      padding-top: 1rem;
+    }
+
+    /* Digest preview */
+    .latest-digest {
+      margin-bottom: 3rem;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 1rem;
+    }
+
+    .section-header h2 { margin: 0; }
+    .digest-date { font-size: 0.9em; color: #888; margin: 0; }
+
+    .digest-full {
+      line-height: 1.7;
+    }
+
+    /* Premium teasers — top of page, clear not blocking */
+    .premium-teasers {
+      margin-bottom: 2.5rem;
+    }
+
+    .teaser-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .teaser-card {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.15s;
+      background: rgba(124, 58, 237, 0.02);
+    }
+
+    .teaser-card:hover {
+      border-color: #7c3aed;
+      background: rgba(124, 58, 237, 0.05);
+      text-decoration: none;
+    }
+
+    .teaser-card.teaser-gold {
+      background: rgba(245, 158, 11, 0.03);
+      border-color: #fde68a;
+    }
+    .teaser-card.teaser-gold:hover {
+      border-color: #f59e0b;
+      background: rgba(245, 158, 11, 0.06);
+    }
+
+    .teaser-icon {
+      font-size: 1.3em;
+      flex-shrink: 0;
+    }
+
+    .teaser-card strong {
+      display: block;
+      font-size: 0.85em;
+      margin-bottom: 0.15rem;
+    }
+
+    .teaser-card p {
+      margin: 0;
+      font-size: 0.78em;
+      color: #888;
+    }
+
+    .teaser-arrow {
+      margin-left: auto;
+      font-size: 0.75em;
+      font-weight: 600;
+      color: #7c3aed;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .teaser-gold .teaser-arrow { color: #d97706; }
+
+    /* Bottom fade teaser */
+    .bottom-teaser {
+      margin: 2rem 0 3rem;
+    }
+
+    .bottom-teaser-content {
+      position: relative;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .blurred-sources {
+      padding: 1.5rem 2rem 3rem;
+    }
+
+    .source-line {
+      padding: 0.6rem 0;
+      font-size: 0.9em;
+      color: #555;
+      border-bottom: 1px solid #f0f0f0;
+      margin: 0;
+    }
+
+    .source-line:last-child { border-bottom: none; }
+
+    .bottom-teaser-fade {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 200px;
+      background: linear-gradient(transparent, var(--color-bg) 80%);
+      pointer-events: none;
+    }
+
+    .bottom-teaser-cta {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 0 2rem 2rem;
+      margin-top: -3rem;
+    }
+
+    .bottom-teaser-cta h3 {
+      font-size: 1.2em;
+      margin: 0 0 0.4rem 0;
+    }
+
+    .bottom-teaser-cta p {
+      font-size: 0.9em;
+      color: #666;
+      margin: 0 0 1rem 0;
+    }
+
     @media (max-width: 768px) {
-      h1 { font-size: 2em; }
-      .pricing-grid { grid-template-columns: 1fr; }
+      .teaser-row { grid-template-columns: 1fr; }
+    }
+
+    /* === Welcome Modal === */
+    .modal-overlay {
+      display: none;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+      z-index: 9999; align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal-card {
+      background: white; border-radius: 16px; padding: 2.5rem;
+      max-width: 520px; width: 100%; text-align: center;
+      position: relative; overflow: hidden;
+      animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+    }
+
+    @keyframes modalSlideUp {
+      from { transform: translateY(60px) scale(0.95); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .modal-icon {
+      font-size: 3.5em; margin-bottom: 0.5rem;
+      animation: iconPop 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+    }
+    @keyframes iconPop {
+      from { transform: scale(0); }
+      50% { transform: scale(1.2); }
+      to { transform: scale(1); }
+    }
+
+    .modal-card h2 { font-size: 1.8em; margin: 0 0 0.3rem; color: #111; }
+    .modal-email { font-size: 0.9em; color: #7c3aed; font-weight: 500; margin: 0 0 1.5rem; }
+
+    .modal-checklist { text-align: left; margin: 0 auto 1.5rem; max-width: 340px; }
+    .check-item {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.5rem 0; font-size: 0.95em; color: #333;
+      opacity: 0; transform: translateX(-10px);
+    }
+    .check-item.animate-in {
+      animation: checkSlide 0.4s ease forwards;
+    }
+    @keyframes checkSlide {
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .check-mark {
+      color: #22c55e; font-weight: 700; font-size: 1.1em;
+      width: 20px; flex-shrink: 0;
+    }
+
+    .modal-divider {
+      height: 1px; background: #eee; margin: 1.5rem 0;
+    }
+
+    .modal-upgrade-intro {
+      font-size: 0.85em; color: #888; margin: 0 0 1rem;
+    }
+
+    .modal-upgrade-options {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem;
+    }
+
+    .modal-upgrade-card {
+      border: 2px solid #eee; border-radius: 10px; padding: 1rem;
+      text-decoration: none; color: inherit; transition: all 0.2s;
+      text-align: center;
+    }
+    .modal-upgrade-card:hover { border-color: #7c3aed; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .modal-upgrade-card.gold:hover { border-color: #f59e0b; }
+
+    .upgrade-badge {
+      display: inline-block; background: #7c3aed; color: white;
+      padding: 0.15rem 0.6rem; border-radius: 6px;
+      font-size: 0.7em; font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .upgrade-badge.gold { background: #f59e0b; }
+
+    .modal-upgrade-card strong { display: block; font-size: 1.3em; margin-bottom: 0.25rem; }
+    .modal-upgrade-card p { margin: 0; font-size: 0.78em; color: #888; }
+
+    .modal-close {
+      background: none; border: none; color: #999; font-size: 0.85em;
+      cursor: pointer; padding: 0.5rem 1rem; transition: color 0.2s;
+    }
+    .modal-close:hover { color: #333; }
+
+    /* Confetti */
+    .modal-confetti {
+      position: absolute; top: 0; left: 0; right: 0; height: 100%;
+      pointer-events: none; overflow: hidden;
+    }
+    .confetti-piece {
+      position: absolute; width: 8px; height: 8px; border-radius: 2px;
+      top: -10px; animation: confettiFall 2s ease-in forwards;
+    }
+    @keyframes confettiFall {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(500px) rotate(720deg); opacity: 0; }
+    }
+
+    .price-card {
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 2rem 1.5rem;
+      text-align: left;
+      position: relative;
+    }
+
+    .price-card.featured {
+      border-color: var(--color-accent);
+      box-shadow: 0 4px 12px rgba(0, 102, 204, 0.15);
+    }
+
+    .price-card .badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--color-accent);
+      color: white;
+      padding: 0.25rem 1rem;
+      border-radius: 12px;
+      font-size: 0.75em;
+      font-weight: 600;
+    }
+
+    .price-card h4 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.1em;
+    }
+
+    .price {
+      font-size: 2.5em;
+      font-weight: 700;
+      margin: 0 0 1rem 0;
+    }
+
+    .price span {
+      font-size: 0.35em;
+      font-weight: 400;
+      color: #888;
+    }
+
+    .price-card ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1.5rem 0;
+    }
+
+    .price-card li {
+      padding: 0.4rem 0;
+      font-size: 0.9em;
+      color: #555;
+    }
+
+    .price-card li::before {
+      content: "✓ ";
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-weight: 500;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+      width: 100%;
+      cursor: pointer;
+      border: none;
+      font-size: 1em;
+    }
+
+    .btn-primary {
+      background: var(--color-accent);
+      color: white;
+    }
+
+    .btn-primary:hover { opacity: 0.9; }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--color-border);
+      color: var(--color-fg);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--color-accent);
+    }
+
+    /* Value props */
+    .about {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .about h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .about-text {
+      max-width: 600px;
+      margin: 0 auto 2rem;
+      text-align: center;
+    }
+
+    .about-text p {
+      font-size: 0.95em;
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .value-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
+    .value-card {
+      padding: 1.5rem;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+    }
+
+    .value-card h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1em;
+    }
+
+    .value-card p {
+      margin: 0;
+      font-size: 0.9em;
+      color: #666;
+    }
+
+    .site-footer {
+      text-align: center;
+      padding: 3rem 0 2rem;
+      font-size: 0.9em;
+      color: #888;
+    }
+
+    .no-content {
+      text-align: center;
+      padding: 3rem;
+      color: #888;
+    }
+
+    @media (max-width: 768px) {
+      .pricing-cards { grid-template-columns: 1fr; }
+      .value-grid { grid-template-columns: 1fr; }
       .signup-form { flex-direction: column; }
+      h1 { font-size: 2.5em; }
     }
   </style>
 
   <script>
+    // Signup form
     document.getElementById('signup-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('signup-email');
+      const emailInput = document.getElementById('signup-email');
+      const email = emailInput.value;
+      const btn = document.getElementById('signup-btn');
+
+      btn.textContent = 'Joining...';
+      btn.disabled = true;
+
       try {
         await fetch('http://localhost:8000/api/subscribe', {
           method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ email: email.value })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
         });
-      } catch(err) {}
-      const btn = e.target.querySelector('button');
-      btn.textContent = "You're in! ✓";
-      btn.style.background = '#16a34a';
-      email.value = '';
+      } catch (err) { /* still show success */ }
+
+      // Show the welcome modal
+      document.getElementById('modal-email').textContent = email;
+      const modal = document.getElementById('welcome-modal');
+      modal.classList.add('active');
+
+      // Trigger confetti
+      spawnConfetti();
+
+      // Reset button
+      btn.textContent = "You're in!";
+      btn.style.background = '#22c55e';
+      emailInput.value = '';
     });
+
+    // Close modal
+    document.getElementById('modal-close')?.addEventListener('click', () => {
+      document.getElementById('welcome-modal').classList.remove('active');
+    });
+
+    // Close on overlay click
+    document.getElementById('welcome-modal')?.addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) {
+        document.getElementById('welcome-modal').classList.remove('active');
+      }
+    });
+
+    // Confetti generator
+    function spawnConfetti() {
+      const container = document.getElementById('confetti-container');
+      const colors = ['#7c3aed', '#22c55e', '#f59e0b', '#3b82f6', '#ef4444', '#ec4899'];
+
+      for (let i = 0; i < 50; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDelay = Math.random() * 0.8 + 's';
+        piece.style.animationDuration = (1.5 + Math.random()) + 's';
+        piece.style.width = (5 + Math.random() * 8) + 'px';
+        piece.style.height = (5 + Math.random() * 8) + 'px';
+        container.appendChild(piece);
+      }
+
+      // Clean up after animation
+      setTimeout(() => { container.innerHTML = ''; }, 3000);
+    }
   </script>
 </BaseLayout>

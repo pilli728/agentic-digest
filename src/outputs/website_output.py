@@ -29,7 +29,7 @@ def write_digest_to_website(
         # Add Astro frontmatter
         frontmatter = f"""---
 title: "Agentic Edge Digest - {date}"
-date: {date}
+date: "{date}"
 layout: ../../layouts/DigestLayout.astro
 ---
 
