@@ -79,22 +79,60 @@ const { title, description } = Astro.props;
     </style>
   </head>
   <body>
+    <nav class="site-nav">
+      <a href="/" class="nav-brand">⚡ Agentic Edge</a>
+      <div class="nav-links">
+        <a href="/archive">Archive</a>
+        <a href="/pro">Pro</a>
+        <a href="/login" class="nav-signin" id="nav-signin">Sign in</a>
+        <span class="nav-user" id="nav-user" style="display:none"></span>
+      </div>
+    </nav>
+
     <div class="container">
       <slot />
     </div>
 
     <style>
+      .site-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 1rem 2rem;
+        font-size: 0.9em;
+      }
+      .nav-brand { font-weight: 700; text-decoration: none; color: var(--color-fg); }
+      .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+      .nav-links a { text-decoration: none; color: #666; }
+      .nav-links a:hover { color: var(--color-fg); }
+      .nav-signin { background: #7c3aed; color: white !important; padding: 0.4rem 1rem; border-radius: 6px; font-weight: 500; }
+      .nav-signin:hover { background: #6d28d9; }
+      .nav-user { font-size: 0.85em; color: #7c3aed; font-weight: 500; }
+
       .container {
         max-width: 900px;
         margin: 0 auto;
-        padding: 2rem;
+        padding: 0 2rem 2rem;
       }
 
       @media (max-width: 768px) {
-        .container {
-          padding: 1rem;
-        }
+        .site-nav { padding: 1rem; }
+        .container { padding: 0 1rem 1rem; }
       }
     </style>
+
+    <script is:inline>
+      // Check login state
+      const sid = localStorage.getItem('ae_session');
+      const email = localStorage.getItem('ae_email');
+      if (sid && email) {
+        const signIn = document.getElementById('nav-signin');
+        const userEl = document.getElementById('nav-user');
+        if (signIn) signIn.style.display = 'none';
+        if (userEl) { userEl.style.display = 'inline'; userEl.textContent = email; }
+      }
+    </script>
   </body>
 </html>
