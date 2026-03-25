@@ -12,412 +12,190 @@ let latestContent;
 if (latest) {
   latestContent = await latest.render();
 }
-
-const formatDate = (dateStr) => {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-};
 ---
 
-<BaseLayout title="Agentic Edge" description="The weekly brief for AI agent builders. Zero AI slop.">
-  <header class="home-header">
-    <h1>Agentic Edge</h1>
-    <p class="tagline">The weekly brief for AI agent builders. Zero AI slop.</p>
-    <p class="sub-tagline">Curated from 700+ sources. Every story earns its spot.</p>
+<BaseLayout title="Agentic Edge" description="Get smarter about AI agents in 5 minutes. Free weekly digest for builders.">
+
+  <!-- Hero — TLDR style -->
+  <header class="hero">
+    <div class="hero-emojis">🤖 ⚡ 🛠️ 🚀 📡</div>
+    <h1>Get smarter about AI agents in 5 minutes</h1>
+    <p class="hero-sub">Join builders, founders, and engineers who read Agentic Edge to stay ahead of the fastest-moving space in tech. Curated from 700+ sources. Zero AI slop.</p>
+
+    <form class="signup-form" id="signup-form">
+      <input type="email" placeholder="you@company.com" required id="signup-email" />
+      <button type="submit" class="btn-signup">Subscribe for free</button>
+    </form>
+
+    <p class="social-proof">Curated by a Stanford engineer building AI agents full-time.</p>
   </header>
 
-  <!-- Email signup -->
-  <section class="signup-section">
-    <div class="signup-box">
-      <h2>Get the free weekly digest</h2>
-      <p>Top 5 stories every week. The ones that actually matter.</p>
-      <form class="signup-form" id="signup-form">
-        <input type="email" placeholder="you@company.com" required id="signup-email" />
-        <button type="submit" class="btn btn-primary">Subscribe — Free</button>
-      </form>
-      <p class="signup-note">No spam. Unsubscribe anytime. Read by 0 builders (be #1).</p>
+  <!-- What you get -->
+  <section class="what-you-get">
+    <div class="get-grid">
+      <div class="get-item">
+        <span class="get-icon">📰</span>
+        <div>
+          <strong>Weekly digest</strong>
+          <p>The 20 AI agent stories that matter. Ranked by impact on what you're building.</p>
+        </div>
+      </div>
+      <div class="get-item">
+        <span class="get-icon">🛠️</span>
+        <div>
+          <strong>Tool drops</strong>
+          <p>New MCP servers, CLAUDE.md templates, agent configs, and scripts. Copy-paste ready.</p>
+        </div>
+      </div>
+      <div class="get-item">
+        <span class="get-icon">🎓</span>
+        <div>
+          <strong>Agent playbooks</strong>
+          <p>Step-by-step builds. How to go from zero to a working OpenClaw agent in one sitting.</p>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- Latest digest preview (free tier: top 5 only) -->
-  {latest ? (
-    <section class="latest-digest">
-      <div class="section-header">
-        <h2>This Week's Digest</h2>
-        <p class="digest-date">{formatDate(latest.data.date)}</p>
-      </div>
-
-      <div class="digest-preview">
+  <!-- Sample content -->
+  {latest && (
+    <section class="sample-section">
+      <h2>Here's what a typical issue looks like</h2>
+      <div class="sample-content">
         <latestContent.Content />
       </div>
-
-      <div class="paywall-fade"></div>
-
-      <div class="upgrade-cta">
-        <h3>Want all 20 stories + analysis?</h3>
-        <p>Free subscribers get the top 5. Paid members get the full 20, source links, and the "why it matters" for each.</p>
-        <div class="pricing-cards">
-          <div class="price-card">
-            <h4>Free</h4>
-            <p class="price">$0</p>
-            <ul>
-              <li>Top 5 stories weekly</li>
-              <li>Headlines + sources</li>
-              <li>Email delivery</li>
-            </ul>
-            <a href="#signup-form" class="btn btn-secondary">Current plan</a>
-          </div>
-          <div class="price-card featured">
-            <div class="badge">Most Popular</div>
-            <h4>Pro</h4>
-            <p class="price">$9<span>/mo</span></p>
-            <ul>
-              <li>All 20 stories weekly</li>
-              <li>Full analysis per story</li>
-              <li>Source links + context</li>
-              <li>Early access (Friday PM)</li>
-              <li>Reply to ask me anything</li>
-            </ul>
-            <a href="/upgrade" class="btn btn-primary" id="upgrade-btn">Upgrade to Pro</a>
-          </div>
-          <div class="price-card">
-            <h4>Founding Member</h4>
-            <p class="price">$29<span>/mo</span></p>
-            <ul>
-              <li>Everything in Pro</li>
-              <li>Monthly tool drops: MD files, scripts, agents</li>
-              <li>Ready-to-use templates (CLAUDE.md, AGENTS.md)</li>
-              <li>Private community access</li>
-              <li>Name in credits forever</li>
-            </ul>
-            <a href="/upgrade?tier=founding" class="btn btn-secondary">Join as Founder</a>
-          </div>
-        </div>
+      <div class="sample-fade"></div>
+      <div class="sample-cta">
+        <a href="/archive" class="btn-secondary">Browse past issues</a>
       </div>
     </section>
-  ) : (
-    <div class="no-content">
-      <p>First issue coming soon. Subscribe above to be the first to know.</p>
-    </div>
   )}
 
-  <!-- Social proof / about -->
-  <section class="about">
-    <h2>Why Agentic Edge?</h2>
-    <div class="value-grid">
-      <div class="value-card">
-        <h3>700+ sources scanned</h3>
-        <p>RSS feeds, Reddit, Hacker News, Twitter. We read everything so you don't have to.</p>
+  <!-- Pricing -->
+  <section class="pricing-section" id="pricing">
+    <h2>Choose your level</h2>
+    <div class="pricing-grid">
+      <div class="plan">
+        <h3>Free</h3>
+        <p class="plan-price">$0</p>
+        <ul>
+          <li>Top 5 stories weekly</li>
+          <li>Headlines + source links</li>
+          <li>Email every Monday</li>
+        </ul>
+        <a href="#signup-form" class="btn-plan">Subscribe free</a>
       </div>
-      <div class="value-card">
-        <h3>Zero AI slop</h3>
-        <p>No "delve into the landscape." Every summary is written like a text from a smart friend.</p>
+      <div class="plan featured">
+        <div class="plan-badge">Most Popular</div>
+        <h3>Pro</h3>
+        <p class="plan-price">$9<span>/mo</span></p>
+        <ul>
+          <li>All 20 stories + full analysis</li>
+          <li>Vibecoding playbooks and guides</li>
+          <li>Anti-AI writing style guide</li>
+          <li>Early access (Friday PM)</li>
+        </ul>
+        <a href="/upgrade" class="btn-plan primary">Go Pro</a>
       </div>
-      <div class="value-card">
-        <h3>Builder-first filter</h3>
-        <p>We only surface what helps you ship. Research papers, hype articles, and listicles get filtered out.</p>
-      </div>
-      <div class="value-card">
-        <h3>Trained on your feedback</h3>
-        <p>Rate articles. The system learns what you care about. Your digest gets smarter every week.</p>
+      <div class="plan founding">
+        <div class="plan-badge gold">50 spots</div>
+        <h3>Founding Builder</h3>
+        <p class="plan-price">$29<span>/mo</span></p>
+        <ul>
+          <li>Everything in Pro</li>
+          <li>Monthly tool drops: MD files, agents, scripts</li>
+          <li>OpenClaw agent templates and configs</li>
+          <li>Private builder community</li>
+          <li>Price locked forever</li>
+        </ul>
+        <a href="/upgrade?tier=founding" class="btn-plan gold">Become a Founder</a>
       </div>
     </div>
+  </section>
+
+  <!-- About -->
+  <section class="about-section">
+    <h2>Who's behind this?</h2>
+    <p>I'm a Stanford-trained engineer building AI agents full-time. Every week I scan 700+ sources, test new tools, and build agents with Claude Code and OpenClaw. This newsletter is what I wish existed when I started — no hype, no AI slop, just the things that actually help you ship.</p>
+    <p>The system that curates this newsletter is itself an AI agent I built. It scores articles, filters noise, learns from my feedback, and generates each issue. I just review and hit publish.</p>
   </section>
 
   <footer class="site-footer">
-    <p>Built by builders, for builders. <a href="/archive">Browse archive</a></p>
+    <p>Built by a builder, for builders. <a href="/archive">Archive</a> · <a href="/pro">Pro Library</a> · <a href="/upgrade">Upgrade</a></p>
   </footer>
 
   <style>
-    .home-header {
-      text-align: center;
-      padding: 3rem 0 2rem;
-      margin-bottom: 2rem;
-    }
-
-    h1 {
-      font-size: 3.5em;
-      margin: 0 0 0.5rem 0;
-      letter-spacing: -0.02em;
-    }
-
-    .tagline {
-      font-size: 1.2em;
-      color: #666;
-      margin: 0 0 0.3rem 0;
-    }
-
-    .sub-tagline {
-      font-size: 0.9em;
-      color: #999;
-      margin: 0;
-    }
-
-    /* Signup */
-    .signup-section {
-      margin-bottom: 3rem;
-    }
-
-    .signup-box {
-      background: rgba(0, 102, 204, 0.05);
-      border: 1px solid rgba(0, 102, 204, 0.15);
-      border-radius: 12px;
-      padding: 2rem;
-      text-align: center;
-    }
-
-    .signup-box h2 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.3em;
-    }
-
-    .signup-box > p {
-      color: #666;
-      margin: 0 0 1.5rem 0;
-    }
-
-    .signup-form {
-      display: flex;
-      gap: 0.75rem;
-      justify-content: center;
-      max-width: 500px;
-      margin: 0 auto 1rem;
-    }
-
-    .signup-form input {
-      flex: 1;
-      padding: 0.75rem 1rem;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 1em;
-    }
-
-    .signup-form input:focus {
-      outline: none;
-      border-color: var(--color-accent);
-    }
-
-    .signup-note {
-      font-size: 0.8em;
-      color: #999;
-      margin: 0;
-    }
-
-    /* Digest preview */
-    .latest-digest {
-      margin-bottom: 3rem;
-    }
-
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 1.5rem;
-      border-bottom: 1px solid var(--color-border);
-      padding-bottom: 1rem;
-    }
-
-    .section-header h2 { margin: 0; }
-    .digest-date { font-size: 0.9em; color: #888; margin: 0; }
-
-    .digest-preview {
-      max-height: 600px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .paywall-fade {
-      height: 120px;
-      background: linear-gradient(transparent, var(--color-bg));
-      margin-top: -120px;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* Upgrade CTA */
-    .upgrade-cta {
-      text-align: center;
-      padding: 2rem 0;
-    }
-
-    .upgrade-cta h3 {
-      font-size: 1.5em;
-      margin: 0 0 0.5rem 0;
-    }
-
-    .upgrade-cta > p {
-      color: #666;
-      margin: 0 0 2rem 0;
-    }
-
-    .pricing-cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .price-card {
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      padding: 2rem 1.5rem;
-      text-align: left;
-      position: relative;
-    }
-
-    .price-card.featured {
-      border-color: var(--color-accent);
-      box-shadow: 0 4px 12px rgba(0, 102, 204, 0.15);
-    }
-
-    .price-card .badge {
-      position: absolute;
-      top: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--color-accent);
-      color: white;
-      padding: 0.25rem 1rem;
-      border-radius: 12px;
-      font-size: 0.75em;
-      font-weight: 600;
-    }
-
-    .price-card h4 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.1em;
-    }
-
-    .price {
-      font-size: 2.5em;
-      font-weight: 700;
-      margin: 0 0 1rem 0;
-    }
-
-    .price span {
-      font-size: 0.35em;
-      font-weight: 400;
-      color: #888;
-    }
-
-    .price-card ul {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 1.5rem 0;
-    }
-
-    .price-card li {
-      padding: 0.4rem 0;
-      font-size: 0.9em;
-      color: #555;
-    }
-
-    .price-card li::before {
-      content: "✓ ";
-      color: var(--color-accent);
-      font-weight: 600;
-    }
-
-    /* Buttons */
-    .btn {
-      padding: 0.75rem 1.5rem;
-      border-radius: 6px;
-      font-weight: 500;
-      text-decoration: none;
-      display: inline-block;
-      text-align: center;
-      width: 100%;
-      cursor: pointer;
-      border: none;
-      font-size: 1em;
-    }
-
-    .btn-primary {
-      background: var(--color-accent);
-      color: white;
-    }
-
-    .btn-primary:hover { opacity: 0.9; }
-
-    .btn-secondary {
-      background: transparent;
-      border: 1px solid var(--color-border);
-      color: var(--color-fg);
-    }
-
-    .btn-secondary:hover {
-      border-color: var(--color-accent);
-    }
-
-    /* Value props */
-    .about {
-      margin-top: 3rem;
-      padding-top: 2rem;
-      border-top: 1px solid var(--color-border);
-    }
-
-    .about h2 {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    .value-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
-    }
-
-    .value-card {
-      padding: 1.5rem;
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
-    }
-
-    .value-card h3 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1em;
-    }
-
-    .value-card p {
-      margin: 0;
-      font-size: 0.9em;
-      color: #666;
-    }
-
-    .site-footer {
-      text-align: center;
-      padding: 3rem 0 2rem;
-      font-size: 0.9em;
-      color: #888;
-    }
-
-    .no-content {
-      text-align: center;
-      padding: 3rem;
-      color: #888;
-    }
-
+    .hero { text-align: center; padding: 4rem 0 3rem; max-width: 640px; margin: 0 auto; }
+    .hero-emojis { font-size: 1.8em; margin-bottom: 1.5rem; letter-spacing: 0.3em; }
+    h1 { font-size: 2.8em; line-height: 1.1; margin: 0 0 1rem; letter-spacing: -0.02em; }
+    .hero-sub { font-size: 1.05em; color: #555; line-height: 1.5; margin: 0 0 2rem; }
+    .signup-form { display: flex; gap: 0.5rem; max-width: 440px; margin: 0 auto 1rem; }
+    .signup-form input { flex: 1; padding: 0.9rem 1rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; }
+    .signup-form input:focus { outline: none; border-color: #7c3aed; }
+    .btn-signup { padding: 0.9rem 1.5rem; background: #7c3aed; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.95em; cursor: pointer; white-space: nowrap; }
+    .btn-signup:hover { background: #6d28d9; }
+    .social-proof { font-size: 0.85em; color: #888; margin: 0; }
+    .what-you-get { padding: 2rem 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
+    .get-grid { display: flex; flex-direction: column; gap: 1.5rem; }
+    .get-item { display: flex; gap: 1rem; align-items: start; }
+    .get-icon { font-size: 1.5em; margin-top: 0.1em; }
+    .get-item strong { display: block; margin-bottom: 0.2rem; }
+    .get-item p { margin: 0; font-size: 0.9em; color: #666; }
+    .sample-section { padding: 3rem 0; }
+    .sample-section h2 { text-align: center; margin-bottom: 1.5rem; }
+    .sample-content { max-height: 500px; overflow: hidden; position: relative; border: 1px solid #eee; border-radius: 12px; padding: 2rem; }
+    .sample-fade { height: 100px; background: linear-gradient(transparent, var(--color-bg)); margin-top: -100px; position: relative; z-index: 1; }
+    .sample-cta { text-align: center; margin-top: 1rem; }
+    .btn-secondary { padding: 0.6rem 1.2rem; border: 1px solid #ddd; border-radius: 6px; text-decoration: none; color: #333; font-weight: 500; font-size: 0.9em; }
+    .btn-secondary:hover { border-color: #7c3aed; color: #7c3aed; }
+    .pricing-section { padding: 3rem 0; }
+    .pricing-section h2 { text-align: center; margin-bottom: 2rem; }
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; max-width: 900px; margin: 0 auto; }
+    .plan { border: 2px solid #eee; border-radius: 12px; padding: 2rem 1.5rem; position: relative; }
+    .plan.featured { border-color: #7c3aed; }
+    .plan.founding { border-color: #f59e0b; }
+    .plan-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #7c3aed; color: white; padding: 0.2rem 1rem; border-radius: 12px; font-size: 0.75em; font-weight: 600; white-space: nowrap; }
+    .plan-badge.gold { background: #f59e0b; }
+    .plan h3 { margin: 0 0 0.3rem; }
+    .plan-price { font-size: 2.5em; font-weight: 700; margin: 0 0 1rem; }
+    .plan-price span { font-size: 0.35em; font-weight: 400; color: #888; }
+    .plan ul { list-style: none; padding: 0; margin: 0 0 1.5rem; }
+    .plan li { padding: 0.4rem 0; font-size: 0.9em; color: #555; }
+    .plan li::before { content: "✓ "; color: #7c3aed; font-weight: 600; }
+    .founding li::before { color: #f59e0b; }
+    .btn-plan { display: block; text-align: center; padding: 0.8rem; border: 2px solid #eee; border-radius: 8px; text-decoration: none; color: #333; font-weight: 600; font-size: 0.95em; }
+    .btn-plan:hover { border-color: #7c3aed; }
+    .btn-plan.primary { background: #7c3aed; color: white; border-color: #7c3aed; }
+    .btn-plan.primary:hover { background: #6d28d9; }
+    .btn-plan.gold { background: #f59e0b; color: white; border-color: #f59e0b; }
+    .btn-plan.gold:hover { background: #d97706; }
+    .about-section { padding: 3rem 0; border-top: 1px solid #eee; max-width: 600px; margin: 0 auto; }
+    .about-section h2 { margin-bottom: 1rem; }
+    .about-section p { font-size: 0.95em; color: #555; line-height: 1.6; margin-bottom: 1rem; }
+    .site-footer { text-align: center; padding: 2rem 0; font-size: 0.85em; color: #888; }
+    .site-footer a { color: #7c3aed; }
     @media (max-width: 768px) {
-      .pricing-cards { grid-template-columns: 1fr; }
-      .value-grid { grid-template-columns: 1fr; }
+      h1 { font-size: 2em; }
+      .pricing-grid { grid-template-columns: 1fr; }
       .signup-form { flex-direction: column; }
-      h1 { font-size: 2.5em; }
     }
   </style>
 
   <script>
-    document.getElementById('signup-form')?.addEventListener('submit', (e) => {
+    document.getElementById('signup-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('signup-email').value;
-      // Store subscriber (for now, just show confirmation)
-      alert(`Thanks! ${email} is subscribed. You'll get the first issue soon.`);
-      // TODO: POST to /api/subscribe endpoint
+      const email = document.getElementById('signup-email');
+      try {
+        await fetch('http://localhost:8000/api/subscribe', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ email: email.value })
+        });
+      } catch(err) {}
+      const btn = e.target.querySelector('button');
+      btn.textContent = "You're in! ✓";
+      btn.style.background = '#16a34a';
+      email.value = '';
     });
   </script>
 </BaseLayout>

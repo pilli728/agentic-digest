@@ -1,0 +1,1207 @@
+---
+/**
+ * Digest Curation Dashboard
+ *
+ * Editorial workflow for deciding which stories go in the next digest.
+ * Three-column triage: Candidates → Maybe / Accepted
+ * Keyboard-driven: j/k navigate, a accept, s skip, m maybe, u undo
+ */
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>" />
+    <title>Curate Digest | Agentic Edge</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <style is:inline>
+      :root {
+        --bg: #0f0f0f;
+        --fg: #e5e5e5;
+        --fg-muted: #888;
+        --fg-dim: #555;
+        --border: #2a2a2a;
+        --border-hover: #444;
+        --accent: #60a5fa;
+        --accent-dim: rgba(96, 165, 250, 0.15);
+        --green: #34d399;
+        --green-dim: rgba(52, 211, 153, 0.12);
+        --green-border: rgba(52, 211, 153, 0.3);
+        --amber: #fbbf24;
+        --amber-dim: rgba(251, 191, 36, 0.12);
+        --amber-border: rgba(251, 191, 36, 0.3);
+        --red: #f87171;
+        --red-dim: rgba(248, 113, 113, 0.08);
+        --red-border: rgba(248, 113, 113, 0.2);
+        --surface: #161616;
+        --surface-raised: #1c1c1c;
+        --radius: 8px;
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+        font-family: 'Inter', system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+        line-height: 1.5;
+        overflow-x: hidden;
+      }
+
+      /* ── Top bar ── */
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(15, 15, 15, 0.92);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+        padding: 0.75rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .topbar-left a {
+        color: var(--fg-muted);
+        text-decoration: none;
+        font-size: 0.85em;
+      }
+
+      .topbar h1 {
+        font-size: 1.1em;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+
+      .topbar-date {
+        font-size: 0.85em;
+        color: var(--fg-muted);
+      }
+
+      .topbar-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.85em;
+        font-weight: 500;
+        cursor: pointer;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--fg);
+        transition: all 0.15s;
+        font-family: inherit;
+        white-space: nowrap;
+      }
+
+      .btn:hover { border-color: var(--border-hover); background: var(--surface-raised); }
+      .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+      .btn-accent {
+        background: var(--accent);
+        color: #000;
+        border-color: var(--accent);
+        font-weight: 600;
+      }
+      .btn-accent:hover { opacity: 0.9; }
+
+      .btn-green {
+        background: var(--green);
+        color: #000;
+        border-color: var(--green);
+        font-weight: 600;
+      }
+      .btn-green:hover { opacity: 0.9; }
+
+      /* ── Stats bar ── */
+      .stats-bar {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 0.6rem 1.5rem;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        font-size: 0.8em;
+        color: var(--fg-muted);
+        flex-wrap: wrap;
+      }
+
+      .stat {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .stat-count {
+        font-weight: 600;
+        color: var(--fg);
+        font-size: 1.1em;
+      }
+
+      .stat-accepted .stat-count { color: var(--green); }
+      .stat-maybe .stat-count { color: var(--amber); }
+      .stat-skipped .stat-count { color: var(--red); }
+
+      .stat-divider {
+        width: 1px;
+        height: 16px;
+        background: var(--border);
+      }
+
+      .keyboard-hints {
+        margin-left: auto;
+        display: flex;
+        gap: 0.75rem;
+        font-size: 0.8em;
+      }
+
+      .keyboard-hints span { color: var(--fg-dim); }
+
+      kbd {
+        display: inline-block;
+        padding: 0.1em 0.4em;
+        border: 1px solid var(--border);
+        border-radius: 3px;
+        font-family: inherit;
+        font-size: 0.9em;
+        color: var(--fg);
+        background: var(--surface-raised);
+        margin-right: 0.2em;
+      }
+
+      /* ── Main layout ── */
+      .columns {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0;
+        height: calc(100vh - 100px);
+        overflow: hidden;
+      }
+
+      .column {
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid var(--border);
+        overflow: hidden;
+      }
+
+      .column:last-child { border-right: none; }
+
+      .column-header {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.8em;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--fg-muted);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+        background: var(--surface);
+      }
+
+      .column-header .count {
+        background: var(--border);
+        color: var(--fg);
+        padding: 0.1em 0.5em;
+        border-radius: 10px;
+        font-size: 0.9em;
+        font-weight: 600;
+      }
+
+      .col-candidates .column-header { border-left: 3px solid var(--accent); }
+      .col-maybe .column-header { border-left: 3px solid var(--amber); }
+      .col-accepted .column-header { border-left: 3px solid var(--green); }
+
+      .column-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0.75rem;
+      }
+
+      /* Scrollbar styling */
+      .column-body::-webkit-scrollbar { width: 4px; }
+      .column-body::-webkit-scrollbar-track { background: transparent; }
+      .column-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+      /* ── Story cards ── */
+      .card {
+        padding: 0;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        margin-bottom: 0.75rem;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        background: var(--surface);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .card:hover {
+        border-color: var(--border-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .card.focused {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3), 0 8px 25px rgba(96, 165, 250, 0.1);
+        transform: translateY(-1px);
+      }
+
+      .card.state-accepted {
+        border-color: var(--green-border);
+        background: linear-gradient(135deg, var(--green-dim) 0%, var(--surface) 100%);
+      }
+
+      .card.state-maybe {
+        border-color: var(--amber-border);
+        background: linear-gradient(135deg, var(--amber-dim) 0%, var(--surface) 100%);
+      }
+
+      .card.state-skipped {
+        border-color: var(--red-border);
+        background: var(--red-dim);
+        opacity: 0.5;
+      }
+      .card.state-skipped:hover { opacity: 0.7; }
+
+      /* Score accent strip along the top */
+      .card-score-strip {
+        height: 3px;
+        width: 100%;
+        background: var(--border);
+      }
+      .card-score-strip.high { background: linear-gradient(90deg, var(--green), #6ee7b7); }
+      .card-score-strip.medium { background: linear-gradient(90deg, var(--amber), #fde68a); }
+      .card-score-strip.low { background: linear-gradient(90deg, var(--red), #fca5a5); }
+
+      .card-body {
+        padding: 0.85rem 1rem 0.65rem;
+      }
+
+      .card-title {
+        font-size: 0.95em;
+        font-weight: 700;
+        line-height: 1.4;
+        margin-bottom: 0.5rem;
+        color: #fff;
+        letter-spacing: -0.01em;
+      }
+
+      .card-title a {
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.12s;
+      }
+      .card-title a:hover { color: var(--accent); }
+
+      .card-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.6rem;
+        flex-wrap: wrap;
+      }
+
+      .score {
+        font-size: 0.7em;
+        font-weight: 800;
+        padding: 0.2em 0.55em;
+        border-radius: 6px;
+        letter-spacing: 0.02em;
+      }
+
+      .score.high {
+        background: var(--green);
+        color: #000;
+      }
+      .score.medium {
+        background: var(--amber);
+        color: #000;
+      }
+      .score.low {
+        background: rgba(248, 113, 113, 0.25);
+        color: var(--red);
+      }
+
+      .card-source {
+        font-size: 0.72em;
+        color: var(--fg-muted);
+        font-weight: 500;
+      }
+
+      .tier-badge {
+        font-size: 0.65em;
+        color: var(--fg-dim);
+        padding: 0.2em 0.5em;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-weight: 600;
+      }
+
+      .card-summary {
+        font-size: 0.82em;
+        color: var(--fg-muted);
+        line-height: 1.55;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        padding: 0.6rem 0.75rem;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+      }
+
+      .card-summary.expanded {
+        -webkit-line-clamp: unset;
+      }
+
+      .card-actions {
+        display: flex;
+        gap: 0;
+        border-top: 1px solid var(--border);
+      }
+
+      .card-btn {
+        flex: 1;
+        padding: 0.55rem 0.5rem;
+        font-size: 0.72em;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+        border-right: 1px solid var(--border);
+        background: transparent;
+        color: var(--fg-dim);
+        transition: all 0.12s;
+        font-family: inherit;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .card-btn:last-child { border-right: none; }
+
+      .card-btn:hover { color: var(--fg); background: rgba(255, 255, 255, 0.04); }
+
+      .card-btn.btn-accept:hover {
+        color: var(--green);
+        background: var(--green-dim);
+      }
+      .card-btn.btn-maybe:hover {
+        color: var(--amber);
+        background: var(--amber-dim);
+      }
+      .card-btn.btn-skip:hover {
+        color: var(--red);
+        background: var(--red-dim);
+      }
+      .card-btn.btn-undo:hover {
+        color: var(--accent);
+        background: var(--accent-dim);
+      }
+
+      .card-rank {
+        position: absolute;
+        top: 8px;
+        right: 10px;
+        font-size: 1.3em;
+        font-weight: 800;
+        color: var(--green);
+        opacity: 0.18;
+        z-index: 1;
+        line-height: 1;
+      }
+
+      /* ── Preview overlay ── */
+      .preview-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 200;
+        display: none;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .preview-overlay.visible { display: flex; }
+
+      .preview-panel {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        width: 90%;
+        max-width: 700px;
+        max-height: 85vh;
+        overflow-y: auto;
+        padding: 2rem;
+      }
+
+      .preview-panel h2 {
+        font-size: 1.3em;
+        margin: 0 0 1rem 0;
+        font-family: inherit;
+      }
+
+      .preview-content {
+        font-size: 0.9em;
+        line-height: 1.7;
+        white-space: pre-wrap;
+      }
+
+      .preview-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+      }
+
+      /* ── Loading & empty states ── */
+      .loading {
+        text-align: center;
+        padding: 3rem;
+        color: var(--fg-muted);
+      }
+
+      .loading-spinner {
+        width: 24px;
+        height: 24px;
+        border: 2px solid var(--border);
+        border-top: 2px solid var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 1rem;
+      }
+
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      .empty-col {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: var(--fg-dim);
+        font-size: 0.85em;
+      }
+
+      /* ── Toast notifications ── */
+      .toast {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        z-index: 300;
+        padding: 0.75rem 1.25rem;
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        font-size: 0.85em;
+        color: var(--fg);
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.2s;
+        pointer-events: none;
+      }
+
+      .toast.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* ── Responsive ── */
+      @media (max-width: 1024px) {
+        .columns {
+          grid-template-columns: 1fr;
+          height: auto;
+        }
+
+        .column {
+          border-right: none;
+          border-bottom: 1px solid var(--border);
+          max-height: 50vh;
+        }
+
+        .keyboard-hints { display: none; }
+      }
+
+      /* ── Fetch status indicator ── */
+      .fetch-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.8em;
+        color: var(--fg-muted);
+        margin-left: 0.5rem;
+      }
+
+      .fetch-status .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--green);
+        animation: pulse 1.5s ease infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+      }
+
+      /* ── Digest goal progress bar ── */
+      .digest-goal {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 1.5rem;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        font-size: 0.78em;
+        color: var(--fg-muted);
+      }
+
+      .goal-bar {
+        flex: 1;
+        max-width: 200px;
+        height: 6px;
+        background: var(--border);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+
+      .goal-fill {
+        height: 100%;
+        background: var(--green);
+        border-radius: 3px;
+        transition: width 0.3s;
+      }
+
+      .goal-fill.over { background: var(--amber); }
+    </style>
+  </head>
+
+  <body>
+    <!-- Top bar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <a href="/">&larr; Home</a>
+        <h1>Curate Digest</h1>
+        <span class="topbar-date" id="topbar-date"></span>
+        <span class="fetch-status" id="fetch-status" style="display:none">
+          <span class="dot"></span>
+          <span id="fetch-status-text">Fetching...</span>
+        </span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn" id="btn-fetch" title="Pull fresh stories from sources">Fetch Stories</button>
+        <button class="btn" id="btn-preview" title="Preview rendered digest (Esc to close)">Preview</button>
+        <button class="btn btn-green" id="btn-publish" title="Publish digest to email + website">Publish</button>
+      </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="stats-bar">
+      <div class="stat stat-candidates">
+        <span class="stat-count" id="count-candidates">0</span> candidates
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat stat-accepted">
+        <span class="stat-count" id="count-accepted">0</span> accepted
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat stat-maybe">
+        <span class="stat-count" id="count-maybe">0</span> maybe
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat stat-skipped">
+        <span class="stat-count" id="count-skipped">0</span> skipped
+      </div>
+      <div class="keyboard-hints">
+        <span><kbd>j</kbd><kbd>k</kbd> navigate</span>
+        <span><kbd>a</kbd> accept</span>
+        <span><kbd>m</kbd> maybe</span>
+        <span><kbd>s</kbd> skip</span>
+        <span><kbd>u</kbd> undo</span>
+        <span><kbd>e</kbd> expand</span>
+      </div>
+    </div>
+
+    <!-- Digest goal progress -->
+    <div class="digest-goal">
+      <span>Digest goal:</span>
+      <div class="goal-bar">
+        <div class="goal-fill" id="goal-fill" style="width: 0%"></div>
+      </div>
+      <span id="goal-text">0 / 15 stories</span>
+    </div>
+
+    <!-- Three columns -->
+    <div class="columns">
+      <div class="column col-candidates">
+        <div class="column-header">
+          Candidates <span class="count" id="col-count-candidates">0</span>
+        </div>
+        <div class="column-body" id="col-candidates"></div>
+      </div>
+
+      <div class="column col-maybe">
+        <div class="column-header">
+          Maybe <span class="count" id="col-count-maybe">0</span>
+        </div>
+        <div class="column-body" id="col-maybe"></div>
+      </div>
+
+      <div class="column col-accepted">
+        <div class="column-header">
+          In This Digest <span class="count" id="col-count-accepted">0</span>
+        </div>
+        <div class="column-body" id="col-accepted"></div>
+      </div>
+    </div>
+
+    <!-- Preview overlay -->
+    <div class="preview-overlay" id="preview-overlay">
+      <div class="preview-panel">
+        <h2>Digest Preview</h2>
+        <div class="preview-content" id="preview-content">Loading...</div>
+        <div style="margin-top: 1.5rem; text-align: right;">
+          <button class="btn" id="btn-close-preview">Close (Esc)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+      const API = 'http://localhost:8000';
+      const DIGEST_GOAL = 15;
+
+      // ── State ──
+      let articles = [];
+      let focusedId = null;
+      let focusedColumn = 'candidates';
+
+      // ── DOM refs ──
+      const colCandidates = document.getElementById('col-candidates');
+      const colMaybe = document.getElementById('col-maybe');
+      const colAccepted = document.getElementById('col-accepted');
+      const previewOverlay = document.getElementById('preview-overlay');
+      const toast = document.getElementById('toast');
+
+      // ── Init ──
+      setDate();
+      loadArticles();
+
+      function setDate() {
+        const d = new Date();
+        document.getElementById('topbar-date').textContent = d.toLocaleDateString('en-US', {
+          weekday: 'short', month: 'short', day: 'numeric'
+        });
+      }
+
+      // ── Summary cleaning ──
+      function cleanSummary(rssSummary, whyItMatters) {
+        // Strip HTML tags from RSS summary
+        const stripHtml = (s) => {
+          const div = document.createElement('div');
+          div.innerHTML = s;
+          return div.textContent || div.innerText || '';
+        };
+
+        const raw = rssSummary || '';
+        const cleaned = stripHtml(raw).trim();
+
+        // Skip useless summaries: HN/Reddit point counts, empty, too short
+        const isUseless = !cleaned
+          || cleaned.length < 30
+          || /^Points:\s*\d+/i.test(cleaned)
+          || /^Comments:\s*\d+/i.test(cleaned)
+          || /Trending on (Hacker News|Reddit)/i.test(cleaned);
+
+        if (!isUseless) return cleaned;
+
+        // Fall back to why_it_matters only if it's not the keyword-match garbage
+        const wim = (whyItMatters || '').trim();
+        if (wim && !wim.startsWith('High signal') && !wim.startsWith('Actionable')
+            && !wim.startsWith('Worth a look') && !wim.startsWith('Paradigm shift')
+            && !wim.startsWith('Low signal') && !wim.startsWith('Filtered')
+            && !wim.startsWith('Research') && !wim.startsWith('Auto-skipped')) {
+          return wim;
+        }
+
+        return '';
+      }
+
+      // ── Data loading ──
+      async function loadArticles() {
+        showLoadingIn(colCandidates);
+        showLoadingIn(colMaybe);
+        showLoadingIn(colAccepted);
+
+        try {
+          const res = await fetch(`${API}/api/curate/state`);
+          const data = await res.json();
+
+          if (data.success) {
+            articles = data.articles.map(a => ({
+              id: a.id,
+              title: a.title,
+              source: a.source,
+              tier: a.tier,
+              score: a.relevance_score || 0,
+              summary: cleanSummary(a.summary, a.why_it_matters),
+              link: a.link,
+              state: a.curation_state || 'candidate',
+              acceptOrder: a.accept_order || 999999,
+              editorNote: a.editor_note || '',
+            }));
+            render();
+            if (getCandidates().length > 0) {
+              focusedId = getCandidates()[0].id;
+              focusedColumn = 'candidates';
+              updateFocusUI();
+            }
+          }
+        } catch (err) {
+          showLoadingIn(colCandidates, 'Could not connect to API. Start it with: python3 src/api_server.py');
+          colMaybe.innerHTML = '';
+          colAccepted.innerHTML = '';
+        }
+      }
+
+      function showLoadingIn(el, msg) {
+        if (msg) {
+          el.innerHTML = `<div class="empty-col">${msg}</div>`;
+        } else {
+          el.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading...</div>';
+        }
+      }
+
+      // ── Getters ──
+      function getCandidates() {
+        return articles.filter(a => a.state === 'candidate').sort((a, b) => b.score - a.score);
+      }
+      function getMaybes() {
+        return articles.filter(a => a.state === 'maybe').sort((a, b) => b.score - a.score);
+      }
+      function getAccepted() {
+        return articles.filter(a => a.state === 'accepted').sort((a, b) => a.acceptOrder - b.acceptOrder);
+      }
+      function getSkipped() {
+        return articles.filter(a => a.state === 'skipped');
+      }
+
+      // ── Render ──
+      function render() {
+        renderColumn(colCandidates, getCandidates(), 'candidate');
+        renderColumn(colMaybe, getMaybes(), 'maybe');
+        renderColumn(colAccepted, getAccepted(), 'accepted');
+        updateCounts();
+        updateFocusUI();
+      }
+
+      function renderColumn(el, items, type) {
+        if (items.length === 0) {
+          const messages = {
+            candidate: 'No stories to review. Hit "Fetch Stories" to pull new ones.',
+            maybe: 'Stories you\'re on the fence about will appear here.',
+            accepted: 'Accept stories to build your digest.',
+          };
+          el.innerHTML = `<div class="empty-col">${messages[type]}</div>`;
+          return;
+        }
+
+        el.innerHTML = items.map((a, i) => cardHTML(a, type, i)).join('');
+
+        // Attach event listeners
+        el.querySelectorAll('.card').forEach(card => {
+          const id = card.dataset.id;
+          card.addEventListener('click', (e) => {
+            if (e.target.closest('.card-btn') || e.target.closest('.card-title a')) return;
+            focusedId = id;
+            focusedColumn = type === 'candidate' ? 'candidates' : type;
+            updateFocusUI();
+          });
+        });
+
+        el.querySelectorAll('.card-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const id = btn.closest('.card').dataset.id;
+            const action = btn.dataset.action;
+            handleAction(id, action);
+          });
+        });
+      }
+
+      function cardHTML(a, type, index) {
+        const scoreClass = a.score >= 8 ? 'high' : a.score >= 5 ? 'medium' : 'low';
+        const tierNames = { 0: 'Top', 1: 'Signal', 2: 'Curated', 3: 'Weekly', 4: 'Community' };
+        const focused = a.id === focusedId ? ' focused' : '';
+        const rankLabel = type === 'accepted' ? `<span class="card-rank">#${index + 1}</span>` : '';
+
+        let actions = '';
+        if (type === 'candidate') {
+          actions = `
+            <button class="card-btn btn-accept" data-action="accept" title="a">Accept</button>
+            <button class="card-btn btn-maybe" data-action="maybe" title="m">Maybe</button>
+            <button class="card-btn btn-skip" data-action="skip" title="s">Skip</button>
+          `;
+        } else if (type === 'maybe') {
+          actions = `
+            <button class="card-btn btn-accept" data-action="accept" title="a">Accept</button>
+            <button class="card-btn btn-undo" data-action="undo" title="u">Back</button>
+            <button class="card-btn btn-skip" data-action="skip" title="s">Skip</button>
+          `;
+        } else if (type === 'accepted') {
+          actions = `
+            <button class="card-btn btn-maybe" data-action="maybe" title="m">Maybe</button>
+            <button class="card-btn btn-undo" data-action="undo" title="u">Remove</button>
+          `;
+        }
+
+        // Editor note — only on accepted cards
+        const noteHTML = type === 'accepted' ? `
+          <div class="editor-note">
+            <textarea class="note-input" data-id="${a.id}"
+              placeholder="Why this matters — your take for the digest..."
+              rows="2">${escapeHtml(a.editorNote || '')}</textarea>
+          </div>
+        ` : '';
+
+        return `
+          <div class="card state-${a.state}${focused}" data-id="${a.id}">
+            <div class="card-score-strip ${scoreClass}"></div>
+            ${rankLabel}
+            <div class="card-body">
+              <div class="card-title">
+                <a href="${a.link}" target="_blank" rel="noopener">${escapeHtml(a.title)}</a>
+              </div>
+              <div class="card-meta">
+                <span class="score ${scoreClass}">${a.score.toFixed(1)}</span>
+                <span class="card-source">${escapeHtml(a.source)}</span>
+                <span class="tier-badge">${tierNames[a.tier] || 'Tier ' + a.tier}</span>
+              </div>
+              ${a.summary ? `<div class="card-summary" data-id="${a.id}">${escapeHtml(a.summary)}</div>` : ''}
+              ${noteHTML}
+            </div>
+            <div class="card-actions">${actions}</div>
+          </div>
+        `;
+      }
+
+      function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      function updateCounts() {
+        const candidates = getCandidates();
+        const accepted = getAccepted();
+        const maybes = getMaybes();
+        const skipped = getSkipped();
+
+        document.getElementById('count-candidates').textContent = candidates.length;
+        document.getElementById('count-accepted').textContent = accepted.length;
+        document.getElementById('count-maybe').textContent = maybes.length;
+        document.getElementById('count-skipped').textContent = skipped.length;
+
+        document.getElementById('col-count-candidates').textContent = candidates.length;
+        document.getElementById('col-count-maybe').textContent = maybes.length;
+        document.getElementById('col-count-accepted').textContent = accepted.length;
+
+        // Goal progress
+        const pct = Math.min((accepted.length / DIGEST_GOAL) * 100, 100);
+        const goalFill = document.getElementById('goal-fill');
+        goalFill.style.width = pct + '%';
+        goalFill.className = 'goal-fill' + (accepted.length > DIGEST_GOAL ? ' over' : '');
+        document.getElementById('goal-text').textContent = `${accepted.length} / ${DIGEST_GOAL} stories`;
+      }
+
+      function updateFocusUI() {
+        document.querySelectorAll('.card.focused').forEach(el => el.classList.remove('focused'));
+        if (focusedId) {
+          const card = document.querySelector(`.card[data-id="${focusedId}"]`);
+          if (card) {
+            card.classList.add('focused');
+            card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          }
+        }
+      }
+
+      // ── Actions ──
+      async function handleAction(id, action) {
+        const article = articles.find(a => a.id === id);
+        if (!article) return;
+
+        const prevState = article.state;
+        let newState, reaction;
+
+        switch (action) {
+          case 'accept':
+            newState = 'accepted';
+            reaction = 'newsletter_include';
+            article.acceptOrder = Date.now();
+            break;
+          case 'maybe':
+            newState = 'maybe';
+            reaction = 'newsletter_maybe';
+            break;
+          case 'skip':
+            newState = 'skipped';
+            reaction = 'newsletter_skip';
+            break;
+          case 'undo':
+            newState = 'candidate';
+            reaction = 'newsletter_remove';
+            break;
+        }
+
+        article.state = newState;
+
+        // Move focus to next card in same column before re-rendering
+        advanceFocusAfterAction(id, prevState);
+        render();
+        showToast(`${truncate(article.title, 40)} → ${newState}`);
+
+        // Send to API
+        try {
+          await fetch(`${API}/api/feedback`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ articleId: id, reaction }),
+          });
+        } catch (err) {
+          // Revert on failure
+          article.state = prevState;
+          render();
+          showToast('API error — reverted', true);
+        }
+      }
+
+      function advanceFocusAfterAction(removedId, fromState) {
+        const columnMap = {
+          candidate: getCandidates,
+          maybe: getMaybes,
+          accepted: getAccepted,
+        };
+        const getter = columnMap[fromState];
+        if (!getter) return;
+
+        // Get the list before the state change was applied (article already moved)
+        const remaining = getter().filter(a => a.id !== removedId);
+        if (remaining.length > 0) {
+          // Find the article that was below the removed one
+          const currentList = articles.filter(a => a.state === fromState).sort((a, b) => b.score - a.score);
+          focusedId = remaining[0].id;
+        } else {
+          focusedId = null;
+        }
+      }
+
+      // ── Keyboard navigation ──
+      document.addEventListener('keydown', (e) => {
+        // Don't capture if typing in an input
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        // Don't capture if preview is open (except Esc)
+        if (previewOverlay.classList.contains('visible') && e.key !== 'Escape') return;
+
+        switch (e.key) {
+          case 'j': navigateDown(); e.preventDefault(); break;
+          case 'k': navigateUp(); e.preventDefault(); break;
+          case 'a': doAction('accept'); e.preventDefault(); break;
+          case 's': doAction('skip'); e.preventDefault(); break;
+          case 'm': doAction('maybe'); e.preventDefault(); break;
+          case 'u': doAction('undo'); e.preventDefault(); break;
+          case 'e': toggleExpand(); e.preventDefault(); break;
+          case 'h': switchColumn('left'); e.preventDefault(); break;
+          case 'l': switchColumn('right'); e.preventDefault(); break;
+          case 'Escape': closePreview(); break;
+        }
+      });
+
+      function getCurrentColumnList() {
+        switch (focusedColumn) {
+          case 'candidates': return getCandidates();
+          case 'maybe': return getMaybes();
+          case 'accepted': return getAccepted();
+          default: return getCandidates();
+        }
+      }
+
+      function navigateDown() {
+        const list = getCurrentColumnList();
+        if (list.length === 0) return;
+        if (!focusedId) {
+          focusedId = list[0].id;
+        } else {
+          const idx = list.findIndex(a => a.id === focusedId);
+          if (idx < list.length - 1) {
+            focusedId = list[idx + 1].id;
+          }
+        }
+        updateFocusUI();
+      }
+
+      function navigateUp() {
+        const list = getCurrentColumnList();
+        if (list.length === 0) return;
+        if (!focusedId) {
+          focusedId = list[0].id;
+        } else {
+          const idx = list.findIndex(a => a.id === focusedId);
+          if (idx > 0) {
+            focusedId = list[idx - 1].id;
+          }
+        }
+        updateFocusUI();
+      }
+
+      function switchColumn(dir) {
+        const cols = ['candidates', 'maybe', 'accepted'];
+        const idx = cols.indexOf(focusedColumn);
+        let newIdx = dir === 'left' ? idx - 1 : idx + 1;
+        newIdx = Math.max(0, Math.min(cols.length - 1, newIdx));
+        focusedColumn = cols[newIdx];
+        const list = getCurrentColumnList();
+        focusedId = list.length > 0 ? list[0].id : null;
+        updateFocusUI();
+      }
+
+      function doAction(action) {
+        if (!focusedId) return;
+        handleAction(focusedId, action);
+      }
+
+      function toggleExpand() {
+        if (!focusedId) return;
+        const summaryEl = document.querySelector(`.card-summary[data-id="${focusedId}"]`);
+        if (summaryEl) {
+          summaryEl.classList.toggle('expanded');
+        }
+      }
+
+      // ── Fetch stories ──
+      document.getElementById('btn-fetch').addEventListener('click', async () => {
+        const btn = document.getElementById('btn-fetch');
+        const status = document.getElementById('fetch-status');
+        const statusText = document.getElementById('fetch-status-text');
+
+        btn.disabled = true;
+        btn.textContent = 'Fetching...';
+        status.style.display = 'inline-flex';
+
+        try {
+          await fetch(`${API}/api/pipeline/fetch`, { method: 'POST' });
+
+          // Poll for completion
+          const poll = setInterval(async () => {
+            try {
+              const res = await fetch(`${API}/api/pipeline/status`);
+              const data = await res.json();
+              statusText.textContent = data.message || 'Working...';
+
+              if (data.state !== 'fetching') {
+                clearInterval(poll);
+                btn.disabled = false;
+                btn.textContent = 'Fetch Stories';
+                status.style.display = 'none';
+                showToast(data.message || 'Fetch complete');
+                loadArticles(); // Reload
+              }
+            } catch { /* keep polling */ }
+          }, 2000);
+        } catch (err) {
+          btn.disabled = false;
+          btn.textContent = 'Fetch Stories';
+          status.style.display = 'none';
+          showToast('Failed to start fetch', true);
+        }
+      });
+
+      // ── Preview ──
+      document.getElementById('btn-preview').addEventListener('click', async () => {
+        previewOverlay.classList.add('visible');
+        document.getElementById('preview-content').textContent = 'Loading preview...';
+
+        try {
+          const res = await fetch(`${API}/api/digest/preview`);
+          const data = await res.json();
+          document.getElementById('preview-content').textContent = data.markdown || 'No content yet.';
+        } catch {
+          document.getElementById('preview-content').textContent = 'Could not load preview. Is the API server running?';
+        }
+      });
+
+      document.getElementById('btn-close-preview').addEventListener('click', closePreview);
+      previewOverlay.addEventListener('click', (e) => {
+        if (e.target === previewOverlay) closePreview();
+      });
+
+      function closePreview() {
+        previewOverlay.classList.remove('visible');
+      }
+
+      // ── Publish ──
+      document.getElementById('btn-publish').addEventListener('click', async () => {
+        const accepted = getAccepted();
+        if (accepted.length === 0) {
+          showToast('No stories accepted yet');
+          return;
+        }
+
+        if (!confirm(`Publish digest with ${accepted.length} stories?`)) return;
+
+        const btn = document.getElementById('btn-publish');
+        btn.disabled = true;
+        btn.textContent = 'Publishing...';
+
+        try {
+          const res = await fetch(`${API}/api/digest/publish`, { method: 'POST' });
+          const data = await res.json();
+
+          if (data.success) {
+            showToast(`Published! ${data.article_count} stories`);
+          } else {
+            showToast(data.message || 'Publish failed', true);
+          }
+        } catch {
+          showToast('Publish failed — API error', true);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Publish';
+        }
+      });
+
+      // ── Toast ──
+      let toastTimeout;
+      function showToast(msg, isError) {
+        toast.textContent = msg;
+        toast.style.borderColor = isError ? 'var(--red)' : 'var(--border)';
+        toast.classList.add('visible');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => toast.classList.remove('visible'), 2500);
+      }
+
+      function truncate(str, len) {
+        return str.length > len ? str.slice(0, len) + '...' : str;
+      }
+    </script>
+  </body>
+</html>
