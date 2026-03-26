@@ -11,13 +11,23 @@ const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === '
 ---
 
 <BaseLayout title="The Vault" description="Playbooks, guides, templates, and tools for AI builders.">
-  <!-- Auth gate -->
-  <div class="auth-gate" id="auth-gate">
+  <!-- Auth gate: not logged in -->
+  <div class="auth-gate" id="auth-gate-signin" style="display:none">
     <div class="gate-card">
       <h2>The Vault</h2>
-      <p>Sign in to access playbooks, guides, and tools for serious AI builders.</p>
+      <p>Playbooks, guides, and tools for serious AI builders.</p>
       <a href="/login" class="gate-btn">Sign in</a>
-      <p class="gate-sub">Not a member yet? <a href="/upgrade">See plans</a></p>
+      <p class="gate-sub">New here? <a href="/">Join free on the homepage.</a></p>
+    </div>
+  </div>
+
+  <!-- Auth gate: logged in but free tier -->
+  <div class="auth-gate" id="auth-gate-upgrade" style="display:none">
+    <div class="gate-card">
+      <h2>The Vault is a Pro benefit</h2>
+      <p>You're signed in, but The Vault requires a Pro membership. Upgrade to access playbooks, guides, templates, and tools.</p>
+      <a href="/upgrade" class="gate-btn">Upgrade to Pro — $12/mo</a>
+      <p class="gate-sub">Already upgraded? <a href="/login">Sign in again</a> to refresh your session.</p>
     </div>
   </div>
 
@@ -40,6 +50,71 @@ const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === '
           <p>{item.data.description}</p>
         </a>
       ))}
+    </div>
+
+    <!-- Downloadable Templates Section -->
+    <div class="downloads-section" id="downloads-section">
+      <h2>Copy-Paste Templates</h2>
+      <p class="downloads-sub">Drop these into your project. Ready to use.</p>
+
+      <div class="downloads-grid">
+        <a href="/downloads/CLAUDE.md" download class="download-card">
+          <span class="dl-icon">📄</span>
+          <div>
+            <strong>CLAUDE.md</strong>
+            <p>Project context for Claude Code. The template every project needs.</p>
+          </div>
+        </a>
+        <a href="/downloads/AGENTS.md" download class="download-card">
+          <span class="dl-icon">🤖</span>
+          <div>
+            <strong>AGENTS.md</strong>
+            <p>Constraints, danger zones, verification steps. Not a tech stack list.</p>
+          </div>
+        </a>
+        <a href="/downloads/react-agent-CLAUDE.md" download class="download-card">
+          <span class="dl-icon">⚛️</span>
+          <div>
+            <strong>React Agent CLAUDE.md</strong>
+            <p>Next.js + Claude API + Prisma. Pre-configured for agent projects.</p>
+          </div>
+        </a>
+        <a href="/downloads/python-agent-CLAUDE.md" download class="download-card">
+          <span class="dl-icon">🐍</span>
+          <div>
+            <strong>Python Agent CLAUDE.md</strong>
+            <p>FastAPI + SQLAlchemy + Claude. Agent rules baked in.</p>
+          </div>
+        </a>
+        <a href="/downloads/SKILLS-code-review.md" download class="download-card">
+          <span class="dl-icon">🔍</span>
+          <div>
+            <strong>Code Review Skill</strong>
+            <p>Security, performance, readability. Drop into .claude/skills/</p>
+          </div>
+        </a>
+        <a href="/downloads/SKILLS-security-audit.md" download class="download-card">
+          <span class="dl-icon">🛡️</span>
+          <div>
+            <strong>Security Audit Skill</strong>
+            <p>OWASP Top 10 checklist as a Claude skill. Catches what you miss.</p>
+          </div>
+        </a>
+        <a href="/downloads/SKILLS-test-writer.md" download class="download-card">
+          <span class="dl-icon">🧪</span>
+          <div>
+            <strong>Test Writer Skill</strong>
+            <p>Edge cases, failure modes, AAA pattern. Makes Claude write real tests.</p>
+          </div>
+        </a>
+        <a href="/downloads/pre-commit-hook.sh" download class="download-card">
+          <span class="dl-icon">🪝</span>
+          <div>
+            <strong>Pre-Commit Hook</strong>
+            <p>Tests, lint, typecheck, secret scan. Nothing broken gets committed.</p>
+          </div>
+        </a>
+      </div>
     </div>
   </div>
 
@@ -99,6 +174,22 @@ const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === '
     .content-card h3 { margin: 0 0 0.5rem; font-size: 1.1em; line-height: 1.3; }
     .content-card p { margin: 0; font-size: 0.9em; color: #666; line-height: 1.4; }
 
+    /* Downloads */
+    .downloads-section { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--color-border); }
+    .downloads-section h2 { margin: 0 0 0.3rem; font-size: 1.4em; }
+    .downloads-sub { color: var(--color-muted); font-size: 0.9em; margin: 0 0 1.5rem; }
+    .downloads-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+    .download-card {
+      display: flex; gap: 0.75rem; align-items: start;
+      border: 1px solid var(--color-border); border-radius: 8px; padding: 1rem;
+      text-decoration: none; color: inherit; transition: all 0.15s;
+    }
+    .download-card:hover { border-color: var(--color-accent); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .dl-icon { font-size: 1.3em; flex-shrink: 0; margin-top: 0.1em; }
+    .download-card strong { display: block; font-size: 0.9em; margin-bottom: 0.15rem; }
+    .download-card p { margin: 0; font-size: 0.78em; color: var(--color-muted); line-height: 1.4; }
+    @media (max-width: 768px) { .downloads-grid { grid-template-columns: 1fr; } }
+
     /* Auth gate */
     .auth-gate { max-width: 400px; margin: 4rem auto; text-align: center; }
     .gate-card { border: 1px solid var(--color-border); border-radius: 12px; padding: 2rem 2.5rem 1.5rem; }
@@ -146,7 +237,6 @@ const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === '
     if (sid) {
       checkAccess().then(ok => {
         if (ok) {
-          document.getElementById('auth-gate').style.display = 'none';
           document.getElementById('pro-content').style.display = 'block';
 
           const userTier = localStorage.getItem('ae_tier');
@@ -166,8 +256,14 @@ const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === '
               });
             });
           }
+        } else {
+          // Signed in but free tier — show upgrade gate
+          document.getElementById('auth-gate-upgrade').style.display = 'block';
         }
       });
+    } else {
+      // Not signed in — show sign in gate
+      document.getElementById('auth-gate-signin').style.display = 'block';
     }
   </script>
 </BaseLayout>
