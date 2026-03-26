@@ -309,7 +309,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
         try {
           // Call your API to create a Stripe Checkout session
-          const res = await fetch('http://localhost:8000/api/checkout', {
+          const res = await fetch(window.API_URL + '/api/checkout', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ price_key: priceKey })

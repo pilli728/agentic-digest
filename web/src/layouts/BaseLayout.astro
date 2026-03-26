@@ -15,6 +15,7 @@ const { title, description } = Astro.props;
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>" />
     <title>{title} | Agentic Edge</title>
     <meta name="description" content={description} />
+    <meta name="api-url" content={import.meta.env.PUBLIC_API_URL || 'http://localhost:8000'} />
     <style is:global>
       @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Inter:wght@400;500;600&display=swap');
 
@@ -124,6 +125,9 @@ const { title, description } = Astro.props;
     </style>
 
     <script is:inline>
+      // Global API URL from meta tag
+      window.API_URL = document.querySelector('meta[name="api-url"]')?.content || 'http://localhost:8000';
+
       // Check login state
       const sid = localStorage.getItem('ae_session');
       const email = localStorage.getItem('ae_email');

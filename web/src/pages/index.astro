@@ -813,12 +813,34 @@ const formatDate = (dateStr) => {
       btn.disabled = true;
 
       try {
-        await fetch('http://localhost:8000/api/subscribe', {
+        const res = await fetch(window.API_URL + '/api/subscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email }),
         });
-      } catch (err) { /* still show success */ }
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          btn.textContent = data.message || 'Something went wrong. Try again.';
+          btn.style.background = '#ef4444';
+          btn.disabled = false;
+          setTimeout(() => {
+            btn.textContent = 'Join for free';
+            btn.style.background = '';
+            btn.disabled = false;
+          }, 3000);
+          return;
+        }
+      } catch (err) {
+        btn.textContent = 'Connection error. Try again.';
+        btn.style.background = '#ef4444';
+        btn.disabled = false;
+        setTimeout(() => {
+          btn.textContent = 'Join for free';
+          btn.style.background = '';
+          btn.disabled = false;
+        }, 3000);
+        return;
+      }
 
       // Show the welcome modal
       document.getElementById('modal-email').textContent = email;

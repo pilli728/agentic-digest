@@ -12,7 +12,9 @@ Flow:
 import os
 import hashlib
 import secrets
+import sqlite3
 from datetime import datetime, timedelta
+from pathlib import Path
 
 try:
     import resend
@@ -20,15 +22,30 @@ except ImportError:
     resend = None
 
 
-# In-memory token store (for simplicity — works for single-server setup)
-# Key: token, Value: {email, expires, tier}
-_pending_tokens = {}
-
-# Active sessions — Key: session_id, Value: {email, tier, expires}
-_sessions = {}
-
 TOKEN_EXPIRY_MINUTES = 15
 SESSION_EXPIRY_DAYS = 30
+
+DB_PATH = str(Path(__file__).parent.parent / "data" / "digest.db")
+
+
+def _get_db():
+    """Get a SQLite connection and ensure auth tables exist."""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    conn.execute("""CREATE TABLE IF NOT EXISTS auth_sessions (
+        session_id TEXT PRIMARY KEY,
+        email TEXT NOT NULL,
+        tier TEXT NOT NULL,
+        expires_at TEXT NOT NULL
+    )""")
+    conn.execute("""CREATE TABLE IF NOT EXISTS auth_tokens (
+        token TEXT PRIMARY KEY,
+        email TEXT NOT NULL,
+        tier TEXT NOT NULL,
+        expires_at TEXT NOT NULL
+    )""")
+    conn.commit()
+    return conn
 
 
 def create_magic_link(email: str, db) -> str:
@@ -43,18 +60,23 @@ def create_magic_link(email: str, db) -> str:
 
     tier = dict(row)["tier"]
     token = secrets.token_urlsafe(32)
+    expires_at = (datetime.now() + timedelta(minutes=TOKEN_EXPIRY_MINUTES)).isoformat()
 
-    _pending_tokens[token] = {
-        "email": email,
-        "tier": tier,
-        "expires": datetime.now() + timedelta(minutes=TOKEN_EXPIRY_MINUTES),
-    }
+    conn = _get_db()
+    conn.execute(
+        "INSERT OR REPLACE INTO auth_tokens (token, email, tier, expires_at) VALUES (?, ?, ?, ?)",
+        (token, email, tier, expires_at),
+    )
+    conn.commit()
+    conn.close()
 
     return token
 
 
-def send_magic_link_email(email: str, token: str, base_url: str = "http://localhost:4321") -> bool:
+def send_magic_link_email(email: str, token: str, base_url: str = None) -> bool:
     """Send the magic link email."""
+    if base_url is None:
+        base_url = os.environ.get("SITE_URL", "http://localhost:4321")
     link = f"{base_url}/auth/verify?token={token}"
 
     html = f"""<!DOCTYPE html>
@@ -110,41 +132,63 @@ def send_magic_link_email(email: str, token: str, base_url: str = "http://localh
 
 def verify_token(token: str) -> dict:
     """Verify a magic link token. Returns session info or None."""
-    pending = _pending_tokens.get(token)
-    if not pending:
+    conn = _get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT email, tier, expires_at FROM auth_tokens WHERE token = ?", (token,))
+    row = cursor.fetchone()
+
+    if not row:
+        conn.close()
         return None
 
-    if datetime.now() > pending["expires"]:
-        del _pending_tokens[token]
+    pending = dict(row)
+    if datetime.now() > datetime.fromisoformat(pending["expires_at"]):
+        conn.execute("DELETE FROM auth_tokens WHERE token = ?", (token,))
+        conn.commit()
+        conn.close()
         return None
 
     # Create session
     session_id = secrets.token_urlsafe(32)
-    _sessions[session_id] = {
-        "email": pending["email"],
-        "tier": pending["tier"],
-        "expires": datetime.now() + timedelta(days=SESSION_EXPIRY_DAYS),
-    }
+    expires_at = (datetime.now() + timedelta(days=SESSION_EXPIRY_DAYS)).isoformat()
+    conn.execute(
+        "INSERT OR REPLACE INTO auth_sessions (session_id, email, tier, expires_at) VALUES (?, ?, ?, ?)",
+        (session_id, pending["email"], pending["tier"], expires_at),
+    )
 
     # Clean up token
-    del _pending_tokens[token]
+    conn.execute("DELETE FROM auth_tokens WHERE token = ?", (token,))
+    conn.commit()
+    conn.close()
 
     return {"session_id": session_id, "email": pending["email"], "tier": pending["tier"]}
 
 
 def get_session(session_id: str) -> dict:
     """Get session info from a session ID. Returns None if invalid/expired."""
-    session = _sessions.get(session_id)
-    if not session:
+    conn = _get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT email, tier, expires_at FROM auth_sessions WHERE session_id = ?", (session_id,))
+    row = cursor.fetchone()
+
+    if not row:
+        conn.close()
         return None
 
-    if datetime.now() > session["expires"]:
-        del _sessions[session_id]
+    session = dict(row)
+    if datetime.now() > datetime.fromisoformat(session["expires_at"]):
+        conn.execute("DELETE FROM auth_sessions WHERE session_id = ?", (session_id,))
+        conn.commit()
+        conn.close()
         return None
 
-    return session
+    conn.close()
+    return {"email": session["email"], "tier": session["tier"]}
 
 
 def logout(session_id: str):
     """Invalidate a session."""
-    _sessions.pop(session_id, None)
+    conn = _get_db()
+    conn.execute("DELETE FROM auth_sessions WHERE session_id = ?", (session_id,))
+    conn.commit()
+    conn.close()

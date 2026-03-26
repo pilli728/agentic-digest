@@ -1,0 +1,44 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Terms of Service" description="Terms of service for Agentic Edge">
+  <div class="legal-page">
+    <h1>Terms of Service</h1>
+    <p class="updated">Last updated: March 25, 2026</p>
+
+    <h2>What this is</h2>
+    <p>Agentic Edge is a weekly newsletter about AI agents and builder tools. By subscribing or purchasing a paid plan, you agree to these terms.</p>
+
+    <h2>Free subscription</h2>
+    <p>Anyone can subscribe for free. You'll receive a weekly email digest. You can unsubscribe anytime via the link in any email or at <a href="/unsubscribe">/unsubscribe</a>.</p>
+
+    <h2>Paid subscriptions</h2>
+    <p>Pro and Inner Circle plans are billed monthly or annually via Stripe. Payments are non-refundable except within the first 30 days. Email me for a full refund, no questions asked.</p>
+    <p>You can cancel anytime. Access continues until the end of your billing period.</p>
+
+    <h2>What you get</h2>
+    <p>Paid subscribers receive additional newsletter content, premium documents, templates, and community access as described on the <a href="/upgrade">pricing page</a>. Content and features may change over time.</p>
+
+    <h2>Intellectual property</h2>
+    <p>Newsletter content, templates, guides, and tools are for your personal and professional use. Do not redistribute paid content publicly or resell it.</p>
+
+    <h2>No guarantees</h2>
+    <p>This newsletter provides information and opinions, not professional advice. We do our best to be accurate but are not liable for decisions you make based on what you read here.</p>
+
+    <h2>Changes</h2>
+    <p>We may update these terms. Significant changes will be communicated via email.</p>
+
+    <h2>Contact</h2>
+    <p>Questions? Reply to any newsletter email.</p>
+  </div>
+
+  <style>
+    .legal-page { max-width: 640px; margin: 2rem auto; }
+    .legal-page h1 { font-size: 2em; margin-bottom: 0.25rem; }
+    .updated { color: #999; font-size: 0.85em; margin-bottom: 2rem; }
+    .legal-page h2 { font-size: 1.1em; margin-top: 2rem; margin-bottom: 0.5rem; }
+    .legal-page p { color: #555; line-height: 1.7; margin-bottom: 0.75rem; }
+    .legal-page a { color: #7c3aed; }
+  </style>
+</BaseLayout>

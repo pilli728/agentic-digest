@@ -8,34 +8,36 @@ except ImportError:
     resend = None
 
 
-WELCOME_HTML = """<!DOCTYPE html>
+def _build_welcome_html() -> str:
+    site_url = os.environ.get("SITE_URL", "https://agenticedge.com")
+    return f"""<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  body {
+  body {{
     font-family: Georgia, 'Times New Roman', serif;
     max-width: 560px;
     margin: 0 auto;
     padding: 32px 20px;
     color: #1a1a1a;
     line-height: 1.7;
-  }
-  h1 { font-size: 24px; margin: 0 0 16px; }
-  p { margin: 0 0 16px; }
-  .checklist { margin: 16px 0 24px; padding: 0; list-style: none; }
-  .checklist li { padding: 6px 0; }
-  .checklist li::before { content: "-> "; color: #7c3aed; font-weight: 600; }
-  .cta-box {
+  }}
+  h1 {{ font-size: 24px; margin: 0 0 16px; }}
+  p {{ margin: 0 0 16px; }}
+  .checklist {{ margin: 16px 0 24px; padding: 0; list-style: none; }}
+  .checklist li {{ padding: 6px 0; }}
+  .checklist li::before {{ content: "-> "; color: #7c3aed; font-weight: 600; }}
+  .cta-box {{
     background: #f8f5ff;
     border: 1px solid #e9e0ff;
     border-radius: 8px;
     padding: 20px;
     text-align: center;
     margin: 24px 0;
-  }
-  .cta-box a {
+  }}
+  .cta-box a {{
     display: inline-block;
     background: #7c3aed;
     color: white;
@@ -44,10 +46,10 @@ WELCOME_HTML = """<!DOCTYPE html>
     text-decoration: none;
     font-weight: 600;
     margin-top: 8px;
-  }
-  .footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #eee; font-size: 13px; color: #999; }
-  .footer a { color: #999; }
-  a { color: #7c3aed; }
+  }}
+  .footer {{ margin-top: 32px; padding-top: 16px; border-top: 1px solid #eee; font-size: 13px; color: #999; }}
+  .footer a {{ color: #999; }}
+  a {{ color: #7c3aed; }}
 </style>
 </head>
 <body>
@@ -72,14 +74,15 @@ WELCOME_HTML = """<!DOCTYPE html>
 <div class="cta-box">
   <strong>Want to go deeper?</strong><br>
   <span style="font-size: 14px; color: #666;">Pro members get 15+ source links, community access, and early delivery every Friday.</span><br>
-  <a href="https://agenticedge.com/upgrade">See Pro plans</a>
+  <a href="{site_url}/upgrade">See Pro plans</a>
 </div>
 
 <p>Talk soon,<br>
 <strong>Agentic Edge</strong></p>
 
 <div class="footer">
-  <p><a href="https://agenticedge.com/unsubscribe">Unsubscribe</a> · <a href="https://agenticedge.com">Web</a></p>
+  <p><a href="{site_url}/unsubscribe">Unsubscribe</a> · <a href="{site_url}">Web</a></p>
+  <p style="font-size: 11px; color: #bbb; margin-top: 8px;">Agentic Edge · Stanford, CA</p>
 </div>
 
 </body>
@@ -99,7 +102,7 @@ def send_welcome_email(email: str) -> bool:
                 "from": sender,
                 "to": [email],
                 "subject": "Welcome to Agentic Edge",
-                "html": WELCOME_HTML,
+                "html": _build_welcome_html(),
             })
             print(f"  Welcome email sent to {email}")
             return True
@@ -122,7 +125,7 @@ def send_welcome_email(email: str) -> bool:
             msg["Subject"] = "Welcome to Agentic Edge"
             msg["From"] = sender_email
             msg["To"] = email
-            msg.attach(MIMEText(WELCOME_HTML, "html"))
+            msg.attach(MIMEText(_build_welcome_html(), "html"))
 
             with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
                 server.login(sender_email, password)

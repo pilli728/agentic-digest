@@ -512,9 +512,10 @@ class DigestDatabase:
         try:
             cursor = self.conn.cursor()
             cursor.execute("""
-                INSERT OR IGNORE INTO subscribers (email, tier, subscribed_at)
+                INSERT INTO subscribers (email, tier, subscribed_at)
                 VALUES (?, ?, ?)
-            """, (email, tier, datetime.now().isoformat()))
+                ON CONFLICT(email) DO UPDATE SET active = 1, subscribed_at = ?
+            """, (email, tier, datetime.now().isoformat(), datetime.now().isoformat()))
             self.conn.commit()
             return True
         except Exception as e:

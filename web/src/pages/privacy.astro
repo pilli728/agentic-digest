@@ -1,0 +1,84 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Privacy Policy" description="Agentic Edge Privacy Policy">
+  <div class="legal-page">
+    <h1>Privacy Policy</h1>
+    <p class="last-updated">Last updated: March 25, 2026</p>
+
+    <p>Agentic Edge ("we", "us") respects your privacy. This policy explains what data we collect, how we use it, and your rights.</p>
+
+    <h2>What we collect</h2>
+    <ul>
+      <li><strong>Email address</strong> -- provided when you subscribe to the newsletter.</li>
+      <li><strong>Feedback ratings</strong> -- thumbs up/down and optional comments you leave on articles.</li>
+      <li><strong>Payment information</strong> -- if you upgrade to a paid plan, payment details are handled by Stripe. We never see or store your card number.</li>
+    </ul>
+
+    <h2>How we use it</h2>
+    <ul>
+      <li><strong>Send the newsletter</strong> -- your email is used to deliver the weekly Agentic Edge digest.</li>
+      <li><strong>Improve curation</strong> -- feedback ratings help us understand which topics matter most to builders, so we can improve future issues.</li>
+      <li><strong>Account management</strong> -- to manage your subscription tier and preferences.</li>
+    </ul>
+
+    <h2>Third parties</h2>
+    <p>We use a small number of trusted services:</p>
+    <ul>
+      <li><strong>Stripe</strong> -- processes payments for Pro and Inner Circle subscriptions. See <a href="https://stripe.com/privacy">Stripe's privacy policy</a>.</li>
+      <li><strong>Resend</strong> -- delivers emails on our behalf. See <a href="https://resend.com/legal/privacy-policy">Resend's privacy policy</a>.</li>
+    </ul>
+    <p>We do not sell your data to anyone. We do not share your email with advertisers.</p>
+
+    <h2>Data retention</h2>
+    <p>We keep your email address for as long as you are subscribed. Feedback data is retained to improve curation quality. If you unsubscribe, your email is marked inactive and is not used for further mailings.</p>
+
+    <h2>Deletion</h2>
+    <p>You can request deletion of all your data at any time by emailing us. We will remove your email, feedback history, and any associated records within 30 days.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about this policy? Reach out at <a href="mailto:hello@agenticedge.com">hello@agenticedge.com</a>.</p>
+
+    <p class="legal-address">Agentic Edge · Stanford, CA</p>
+  </div>
+
+  <style>
+    .legal-page {
+      max-width: 640px;
+      margin: 2rem auto 4rem;
+    }
+    .legal-page h1 {
+      font-size: 2em;
+      margin: 0 0 0.25rem;
+    }
+    .last-updated {
+      color: #999;
+      font-size: 0.85em;
+      margin: 0 0 2rem;
+    }
+    .legal-page h2 {
+      font-size: 1.2em;
+      margin: 2rem 0 0.75rem;
+    }
+    .legal-page p {
+      margin: 0 0 1rem;
+      line-height: 1.7;
+      color: #444;
+    }
+    .legal-page ul {
+      margin: 0 0 1rem;
+      padding-left: 1.25rem;
+    }
+    .legal-page li {
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
+      color: #444;
+    }
+    .legal-address {
+      margin-top: 3rem;
+      font-size: 0.85em;
+      color: #999;
+    }
+  </style>
+</BaseLayout>

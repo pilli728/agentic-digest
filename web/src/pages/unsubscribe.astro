@@ -31,11 +31,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   </style>
 
   <script>
+    // Auto-fill email from URL query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const prefillEmail = urlParams.get('email');
+    const emailInput = document.getElementById('unsub-email');
+    if (prefillEmail && emailInput) {
+      emailInput.value = prefillEmail;
+      // Auto-submit if email is present
+      document.getElementById('unsub-form')?.dispatchEvent(new Event('submit', { cancelable: true }));
+    }
+
     document.getElementById('unsub-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('unsub-email').value;
       try {
-        await fetch('http://localhost:8000/api/unsubscribe', {
+        await fetch(window.API_URL + '/api/unsubscribe', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ email })
