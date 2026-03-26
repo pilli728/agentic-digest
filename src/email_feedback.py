@@ -14,7 +14,7 @@ from database import DigestDatabase
 def generate_feedback_link(
     article_id: str,
     reaction: str,
-    base_url: str = "http://localhost:3000"
+    base_url: str = "http://localhost:8000"
 ) -> str:
     """
     Generate a feedback link for email.
@@ -37,7 +37,7 @@ def generate_feedback_link(
 def enhance_email_with_feedback(
     markdown_digest: str,
     articles: list,
-    base_url: str = "http://localhost:3000"
+    base_url: str = "http://localhost:8000"
 ) -> str:
     """
     Add feedback buttons to email digest.
@@ -109,7 +109,7 @@ class EmailFeedbackTemplate:
     @staticmethod
     def reaction_html(
         article_id: str,
-        base_url: str = "http://localhost:3000"
+        base_url: str = "http://localhost:8000"
     ) -> str:
         """
         Generate HTML for email feedback buttons.

@@ -15,6 +15,13 @@ const { title, description } = Astro.props;
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='5' y='5' width='90' height='90' rx='18' fill='%237c3aed'/><text x='50' y='68' text-anchor='middle' font-family='Georgia,serif' font-size='48' font-weight='700' fill='white'>AE</text></svg>" />
     <title>{title} | Agentic Edge</title>
     <meta name="description" content={description} />
+    <meta property="og:title" content={`${title} | Agentic Edge`} />
+    <meta property="og:description" content={description || 'Your unfair advantage as an AI builder.'} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Agentic Edge" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={`${title} | Agentic Edge`} />
+    <meta name="twitter:description" content={description || 'Your unfair advantage as an AI builder.'} />
     <meta name="api-url" content={import.meta.env.PUBLIC_API_URL || 'http://localhost:8000'} />
     <!-- Privacy-friendly analytics by Plausible -->
     <script async src="https://plausible.io/js/pa-uHDu7oFzXabKDy2C5GJFZ.js"></script>

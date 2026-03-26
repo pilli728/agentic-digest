@@ -128,7 +128,8 @@ const formatDate = (dateStr) => {
         <a href="/upgrade" class="modal-pro-btn">Upgrade to Pro →</a>
       </div>
 
-      <button class="modal-close-btn modal-animate" style="animation-delay: 0.4s" id="modal-close">Start with free</button>
+      <p class="modal-inbox-note modal-animate" style="animation-delay: 0.4s">Check your inbox — we sent a magic link to sign in.</p>
+      <button class="modal-close-btn modal-animate" style="animation-delay: 0.45s" id="modal-close">Got it</button>
     </div>
   </div>
 
@@ -659,6 +660,7 @@ const formatDate = (dateStr) => {
     .modal-pro-list li::before { content: "✓ "; color: var(--color-accent); font-weight: 600; }
     .modal-pro-btn { display: block; width: 100%; text-align: center; background: var(--color-accent); color: white; padding: 0.7rem; border-radius: 7px; font-size: 0.88em; font-weight: 600; text-decoration: none; }
     .modal-pro-btn:hover { background: var(--color-accent-hover); text-decoration: none; }
+    .modal-inbox-note { text-align: center; font-size: 0.82em; color: var(--color-muted); margin: 0 0 0.5rem; }
     .modal-close-btn { display: block; width: 100%; padding: 0.65rem; background: transparent; color: var(--color-muted); border: 1px solid var(--color-border); border-radius: 7px; font-size: 0.84em; cursor: pointer; font-family: 'Inter', sans-serif; }
     .modal-close-btn:hover { color: var(--color-fg); border-color: #ccc; }
 

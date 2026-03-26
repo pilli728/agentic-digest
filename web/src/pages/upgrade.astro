@@ -360,15 +360,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       });
     })();
 
-    // Stripe checkout integration
-    // TODO: Replace with your Stripe publishable key and price IDs
-    const STRIPE_CONFIG = {
-      // Set these in your .env and expose via API
-      pro_monthly: 'price_XXXXX',  // Create in Stripe Dashboard
-      pro_annual: 'price_XXXXX',
-      founding_monthly: 'price_XXXXX',
-    };
-
     document.querySelectorAll('.checkout-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const priceKey = btn.dataset.price;
@@ -378,11 +369,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         btn.disabled = true;
 
         try {
-          // Call your API to create a Stripe Checkout session
+          const checkoutBody = { price_key: priceKey };
+          const sid = localStorage.getItem('ae_session');
+          if (sid) checkoutBody.session_id = sid;
+
           const res = await fetch(window.API_URL + '/api/checkout', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ price_key: priceKey })
+            body: JSON.stringify(checkoutBody)
           });
 
           const data = await res.json();

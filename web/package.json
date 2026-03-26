@@ -8,6 +8,7 @@
     "preview": "astro preview"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.1.0",
     "@plausible-analytics/tracker": "^0.4.4",
     "astro": "^4.12.0"
   },
