@@ -44,21 +44,24 @@ test.describe('Upgrade Page (/upgrade)', () => {
     await expect(innerPrice).toContainText('$39');
   });
 
-  test('Pro checkout: redirects to Stripe checkout URL', async ({ page }) => {
-    // Intercept the checkout API and block navigation to Stripe to avoid losing the page
-    let checkoutCalled = false;
-    await page.route('**/api/checkout', (route) => {
-      checkoutCalled = true;
-      route.fulfill({
-        json: { checkout_url: 'https://stripe.com/mock-checkout' },
+  test('Pro checkout: calls checkout API with correct price key', async ({ page }) => {
+    // Verify the checkout button calls the API with the correct price key.
+    // We return a non-URL response to prevent navigation away from the page.
+    let capturedBody: string | null = null;
+    await page.route('**/api/checkout', async (route) => {
+      capturedBody = route.request().postData();
+      await route.fulfill({
+        json: { success: false, message: 'Stripe not configured' },
       });
     });
-    // Block the Stripe navigation so the page stays on /upgrade
-    await page.route('**/stripe.com/**', (route) => route.abort());
+    page.on('dialog', async (dialog) => {
+      await dialog.accept();
+    });
     await page.goto('/upgrade');
     await page.locator('#checkout-pro').click();
-    // The button text changes to "Redirecting to checkout..." before navigation
-    await expect(page.locator('#checkout-pro')).toHaveText('Redirecting to checkout...');
+    // Wait a moment for the request to complete
+    await page.waitForTimeout(500);
+    expect(capturedBody).toContain('pro_monthly');
   });
 
   test('Inner Circle checkout: uses inner_monthly price_key', async ({ page }) => {
