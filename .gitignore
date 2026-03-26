@@ -61,7 +61,9 @@ src/feedback_dashboard.py
 src/articles_api.py
 tier1_builder_signal_sources.py
 
-# Node (for web/)
-web/node_modules/
+# Node
+node_modules/
 web/.astro/
 web/dist/
+test-results/
+playwright-report/

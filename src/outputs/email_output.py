@@ -114,7 +114,7 @@ def _build_html(digest_content: str, unsubscribe_url: str = "#") -> str:
 
   <div class="footer">
     <p>Agentic Edge — curated by a Stanford engineer for AI builders.</p>
-    <p><a href="{unsubscribe_url}">Unsubscribe</a> · <a href="{os.environ.get('SITE_URL', 'https://agenticedge.com')}">Web</a> · <a href="{os.environ.get('SITE_URL', 'https://agenticedge.com')}/pro">Pro Library</a></p>
+    <p><a href="{unsubscribe_url}">Unsubscribe</a> · <a href="{os.environ.get('SITE_URL', 'https://agenticedge.com')}">Web</a> · <a href="{os.environ.get('SITE_URL', 'https://agenticedge.com')}/pro">The Vault</a></p>
     <p style="font-size: 11px; color: #bbb; margin-top: 8px;">Agentic Edge · Stanford, CA</p>
   </div>
 </body>

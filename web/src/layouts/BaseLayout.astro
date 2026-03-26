@@ -16,8 +16,11 @@ const { title, description } = Astro.props;
     <title>{title} | Agentic Edge</title>
     <meta name="description" content={description} />
     <meta name="api-url" content={import.meta.env.PUBLIC_API_URL || 'http://localhost:8000'} />
-    <!-- Analytics — Plausible (privacy-friendly, no cookie banner needed) -->
-    <script defer data-domain="agenticedge.com" src="https://plausible.io/js/script.tagged-events.js"></script>
+    <!-- Privacy-friendly analytics by Plausible -->
+    <script async src="https://plausible.io/js/pa-uHDu7oFzXabKDy2C5GJFZ.js"></script>
+    <script is:inline>
+      window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)};
+    </script>
     <style is:global>
       @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Inter:wght@400;500;600&display=swap');
 
