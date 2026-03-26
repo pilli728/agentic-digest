@@ -8,8 +8,17 @@ except ImportError:
     resend = None
 
 
-def _build_welcome_html() -> str:
+def _build_welcome_html(magic_link: str = None) -> str:
     site_url = os.environ.get("SITE_URL", "https://agenticedge.com")
+    signin_block = ""
+    if magic_link:
+        signin_block = f"""
+<div class="cta-box" style="margin-bottom: 24px;">
+  <strong>Sign in to your account</strong><br>
+  <span style="font-size: 14px; color: #666;">Click below to access your Agentic Edge account. This link expires in 15 minutes.</span><br>
+  <a href="{magic_link}">Sign in now</a>
+</div>
+"""
     return f"""<!DOCTYPE html>
 <html>
 <head>
@@ -54,27 +63,25 @@ def _build_welcome_html() -> str:
 </head>
 <body>
 
-<h1>Welcome to Agentic Edge.</h1>
+<h1>Welcome to the club of people who are at the agentic edge.</h1>
 
-<p>You just joined a small group of builders who want to stay ahead of the AI agent space without spending hours reading.</p>
+{signin_block}<p>You're now part of a small group of builders who refuse to fall behind in the AI agent space. That's why you're here. And that's exactly who this is for.</p>
 
-<p>Here's what to expect:</p>
+<p>Here's what happens next:</p>
 
 <ul class="checklist">
-  <li>Your first digest arrives Monday morning</li>
-  <li>3 deep analysis sections on the topics reshaping the space</li>
-  <li>Every story is ranked by how much it affects what you're building</li>
-  <li>Reply to any issue. I read every response.</li>
+  <li>Monday morning: your first digest lands in this inbox</li>
+  <li>3 deep analysis sections on what actually moved this week</li>
+  <li>700+ sources scanned. You read for 5 minutes.</li>
+  <li>Reply to any issue. I read every one.</li>
 </ul>
 
-<p>A quick note on how this works: I built an AI agent that scans 700+ sources every week, scores them by builder relevance, and filters out the noise. I review the top 20, add my analysis, and send it to you. Zero AI slop.</p>
-
-<p>I'm a Stanford-trained engineer building AI agents full-time. This newsletter is what I wish existed when I started.</p>
+<p>How it works: I built an AI agent that scans 700+ sources every week, scores them by builder relevance, and cuts the noise. I review the top stories, write the analysis, and send it Monday. No AI slop. No filler.</p>
 
 <div class="cta-box">
   <strong>Want to go deeper?</strong><br>
-  <span style="font-size: 14px; color: #666;">Pro members get 15+ source links, community access, and early delivery every Friday.</span><br>
-  <a href="{site_url}/upgrade">See Pro plans</a>
+  <span style="font-size: 14px; color: #666;">Pro members get 15+ source links, the builder Discord, and early delivery every Friday.</span><br>
+  <a href="{site_url}/upgrade">See what's behind the paywall</a>
 </div>
 
 <p>Talk soon,<br>
@@ -89,8 +96,8 @@ def _build_welcome_html() -> str:
 </html>"""
 
 
-def send_welcome_email(email: str) -> bool:
-    """Send welcome email to a new subscriber."""
+def send_welcome_email(email: str, magic_link: str = None) -> bool:
+    """Send welcome email to a new subscriber. Optionally embed a magic link."""
     resend_key = os.environ.get("RESEND_API_KEY")
 
     if resend_key and resend is not None:
@@ -101,8 +108,8 @@ def send_welcome_email(email: str) -> bool:
             resend.Emails.send({
                 "from": sender,
                 "to": [email],
-                "subject": "Welcome to Agentic Edge",
-                "html": _build_welcome_html(),
+                "subject": "Welcome to Agentic Edge — you're in.",
+                "html": _build_welcome_html(magic_link),
             })
             print(f"  Welcome email sent to {email}")
             return True
@@ -122,10 +129,10 @@ def send_welcome_email(email: str) -> bool:
                 return False
 
             msg = MIMEMultipart("alternative")
-            msg["Subject"] = "Welcome to Agentic Edge"
+            msg["Subject"] = "Welcome to Agentic Edge — you're in."
             msg["From"] = sender_email
             msg["To"] = email
-            msg.attach(MIMEText(_build_welcome_html(), "html"))
+            msg.attach(MIMEText(_build_welcome_html(magic_link), "html"))
 
             with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
                 server.login(sender_email, password)

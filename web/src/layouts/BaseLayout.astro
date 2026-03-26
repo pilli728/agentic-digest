@@ -12,18 +12,23 @@ const { title, description } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='5' y='5' width='90' height='90' rx='18' fill='%237c3aed'/><text x='50' y='68' text-anchor='middle' font-family='Georgia,serif' font-size='48' font-weight='700' fill='white'>AE</text></svg>" />
     <title>{title} | Agentic Edge</title>
     <meta name="description" content={description} />
     <meta name="api-url" content={import.meta.env.PUBLIC_API_URL || 'http://localhost:8000'} />
+    <!-- Analytics — Plausible (privacy-friendly, no cookie banner needed) -->
+    <script defer data-domain="agenticedge.com" src="https://plausible.io/js/script.tagged-events.js"></script>
     <style is:global>
       @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Inter:wght@400;500;600&display=swap');
 
       :root {
-        --color-bg: #ffffff;
+        --color-bg: #faf8f4;
         --color-fg: #1a1a1a;
-        --color-border: #e5e5e5;
-        --color-accent: #0066cc;
+        --color-border: #e8e4db;
+        --color-accent: #7c3aed;
+        --color-accent-hover: #6d28d9;
+        --color-muted: #8a8780;
+        --color-card: #ffffff;
         --color-tier-1: #dc2626;
         --color-tier-2: #f59e0b;
         --color-tier-3: #2563eb;
@@ -32,10 +37,13 @@ const { title, description } = Astro.props;
 
       @media (prefers-color-scheme: dark) {
         :root {
-          --color-bg: #0f0f0f;
-          --color-fg: #ffffff;
-          --color-border: #2a2a2a;
-          --color-accent: #60a5fa;
+          --color-bg: #111110;
+          --color-fg: #f0ede6;
+          --color-border: #2a2923;
+          --color-accent: #a78bfa;
+          --color-accent-hover: #c4b5fd;
+          --color-muted: #777570;
+          --color-card: #1a1918;
         }
       }
 
@@ -81,12 +89,19 @@ const { title, description } = Astro.props;
   </head>
   <body>
     <nav class="site-nav">
-      <a href="/" class="nav-brand">⚡ Agentic Edge</a>
+      <a href="/" class="nav-brand"><svg class="nav-logo" viewBox="0 0 100 100" width="22" height="22"><rect x="5" y="5" width="90" height="90" rx="18" fill="#7c3aed"/><text x="50" y="68" text-anchor="middle" font-family="Georgia,serif" font-size="48" font-weight="700" fill="white">AE</text></svg> Agentic Edge</a>
       <div class="nav-links">
-        <a href="/archive">Archive</a>
-        <a href="/pro">Pro</a>
+        <a href="/pro">The Vault</a>
+        <a href="/upgrade" class="nav-upgrade">Upgrade</a>
+        <a href="/archive" class="nav-archive">Archive</a>
         <a href="/login" class="nav-signin" id="nav-signin">Sign in</a>
-        <span class="nav-user" id="nav-user" style="display:none"></span>
+        <div class="nav-user-wrap" id="nav-user-wrap" style="display:none">
+          <button class="nav-user-btn" id="nav-user"></button>
+          <div class="nav-dropdown" id="nav-dropdown">
+            <span class="nav-dropdown-email" id="nav-dropdown-email"></span>
+            <a href="#" id="nav-logout">Log out</a>
+          </div>
+        </div>
       </div>
     </nav>
 
@@ -104,13 +119,38 @@ const { title, description } = Astro.props;
         padding: 1rem 2rem;
         font-size: 0.9em;
       }
-      .nav-brand { font-weight: 700; text-decoration: none; color: var(--color-fg); }
+      .nav-brand { font-weight: 700; text-decoration: none; color: var(--color-fg); display: flex; align-items: center; gap: 0.5rem; }
+      .nav-logo { flex-shrink: 0; vertical-align: middle; }
       .nav-links { display: flex; gap: 1.5rem; align-items: center; }
-      .nav-links a { text-decoration: none; color: #666; }
+      .nav-links a { text-decoration: none; color: var(--color-muted); }
       .nav-links a:hover { color: var(--color-fg); }
-      .nav-signin { background: #7c3aed; color: white !important; padding: 0.4rem 1rem; border-radius: 6px; font-weight: 500; }
+      .nav-upgrade { color: var(--color-accent) !important; font-weight: 600; }
+      .nav-archive { color: var(--color-muted) !important; }
+      .nav-archive:hover { color: var(--color-fg) !important; }
+      .nav-signin { background: var(--color-accent); color: white !important; padding: 0.4rem 1rem; border-radius: 6px; font-weight: 500; }
       .nav-signin:hover { background: #6d28d9; }
       .nav-user { font-size: 0.85em; color: #7c3aed; font-weight: 500; }
+
+      .nav-user-wrap { position: relative; }
+      .nav-user-btn {
+        background: none; border: 1px solid var(--color-border); padding: 0.35rem 0.75rem;
+        border-radius: 6px; font-size: 0.85em; color: var(--color-fg); cursor: pointer;
+        font-family: inherit;
+      }
+      .nav-user-btn:hover { border-color: #7c3aed; color: #7c3aed; }
+      .nav-dropdown {
+        display: none; position: absolute; right: 0; top: calc(100% + 4px);
+        background: var(--color-bg); border: 1px solid var(--color-border);
+        border-radius: 8px; padding: 0.75rem 1rem; min-width: 180px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 100;
+      }
+      .nav-dropdown.open { display: block; }
+      .nav-dropdown-email { display: block; font-size: 0.8em; color: #999; margin-bottom: 0.5rem; word-break: break-all; }
+      .nav-dropdown a {
+        display: block; font-size: 0.9em; color: #ef4444; text-decoration: none;
+        padding: 0.3rem 0;
+      }
+      .nav-dropdown a:hover { text-decoration: underline; }
 
       .container {
         max-width: 900px;
@@ -132,11 +172,55 @@ const { title, description } = Astro.props;
       const sid = localStorage.getItem('ae_session');
       const email = localStorage.getItem('ae_email');
       if (sid && email) {
-        const signIn = document.getElementById('nav-signin');
-        const userEl = document.getElementById('nav-user');
+        // Hide sign in, show user button
+        var signIn = document.getElementById('nav-signin');
+        var userWrap = document.getElementById('nav-user-wrap');
+        var userBtn = document.getElementById('nav-user');
+        var dropdownEmail = document.getElementById('nav-dropdown-email');
         if (signIn) signIn.style.display = 'none';
-        if (userEl) { userEl.style.display = 'inline'; userEl.textContent = email; }
+        if (userWrap) userWrap.style.display = 'block';
+        if (userBtn) userBtn.textContent = email;
+        if (dropdownEmail) dropdownEmail.textContent = email;
+
+        // Hide signup section when logged in
+        document.querySelectorAll('.signup-section').forEach(function(el) { el.style.display = 'none'; });
+
+        // Only hide upgrade nav link for inner circle (they have everything)
+        var tier = localStorage.getItem('ae_tier');
+        if (tier === 'inner') {
+          var upgradeLink = document.querySelector('.nav-upgrade');
+          if (upgradeLink) upgradeLink.style.display = 'none';
+        }
       }
+
+      // Dropdown toggle
+      document.getElementById('nav-user')?.addEventListener('click', function() {
+        document.getElementById('nav-dropdown')?.classList.toggle('open');
+      });
+
+      // Close dropdown on outside click
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.nav-user-wrap')) {
+          document.getElementById('nav-dropdown')?.classList.remove('open');
+        }
+      });
+
+      // Logout
+      document.getElementById('nav-logout')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        var sessionId = localStorage.getItem('ae_session');
+        if (sessionId) {
+          fetch(window.API_URL + '/api/auth/logout', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ session_id: sessionId })
+          }).catch(function() {});
+        }
+        localStorage.removeItem('ae_session');
+        localStorage.removeItem('ae_email');
+        localStorage.removeItem('ae_tier');
+        window.location.reload();
+      });
     </script>
   </body>
 </html>

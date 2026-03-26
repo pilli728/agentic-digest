@@ -11,43 +11,33 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     </header>
 
     <div class="pricing-section">
-      <!-- Free — shows what you're missing -->
-      <div class="plan-card free-plan">
+      <!-- Free -->
+      <div class="plan-card free-plan" id="plan-free">
         <h2>Free</h2>
         <p class="price">$0</p>
-        <p class="price-sub">Your current plan</p>
+        <p class="price-sub" id="free-sub">Your current plan</p>
         <ul>
-          <li class="has">Weekly digest with 3 analysis sections</li>
-          <li class="has">Synthesized takes on what matters</li>
-          <li class="missing">15+ source links with one-liners</li>
-          <li class="missing">Builder community (Discord)</li>
-          <li class="missing">Behind-the-scenes of what I'm building</li>
-          <li class="missing">Early access (Friday PM)</li>
-          <li class="missing">CLAUDE.md templates and agent configs</li>
-          <li class="missing">Step-by-step guides on how I use agents</li>
-          <li class="missing">Access to tools I'm building</li>
-          <li class="missing">DM me directly — ask anything</li>
+          <li class="has">Weekly digest every Monday</li>
+          <li class="missing">Behind-the-scenes + builder Discord</li>
+          <li class="missing">My exact setup files + tools</li>
+          <li class="missing">DM access</li>
         </ul>
-        <a href="/" class="checkout-btn secondary">Current plan</a>
+        <span class="checkout-btn secondary" id="free-btn" style="cursor: default;">Current plan</span>
       </div>
 
       <!-- Pro -->
-      <div class="plan-card pro-plan">
+      <div class="plan-card pro-plan" id="plan-pro">
         <div class="badge">Most Popular</div>
         <h2>Pro</h2>
         <p class="price">$12<span>/mo</span></p>
         <p class="price-sub">or $99/year (save 31%)</p>
         <ul>
-          <li class="has">Weekly digest with 3 analysis sections</li>
-          <li class="has">Synthesized takes on what matters</li>
-          <li class="has">15+ source links with one-liners</li>
-          <li class="has">Builder community (Discord)</li>
+          <li class="has">Weekly digest every Monday</li>
           <li class="has">Behind-the-scenes of what I'm building</li>
-          <li class="has">Early access (Friday PM)</li>
-          <li class="missing">CLAUDE.md templates and agent configs</li>
-          <li class="missing">Step-by-step guides on how I use agents</li>
-          <li class="missing">Access to tools I'm building</li>
-          <li class="missing">DM me directly — ask anything</li>
+          <li class="has">Builder community (Discord)</li>
+          <li class="has">Synthesized takes + early access Friday</li>
+          <li class="missing">My exact setup files + tools</li>
+          <li class="missing">DM access</li>
         </ul>
         <button class="checkout-btn" id="checkout-pro" data-price="pro_monthly">
           Go Pro — $12/month
@@ -55,22 +45,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </div>
 
       <!-- Inner Circle -->
-      <div class="plan-card inner-plan">
+      <div class="plan-card inner-plan" id="plan-inner">
         <div class="badge gold">Limited spots</div>
         <h2>Inner Circle</h2>
         <p class="price">$39<span>/mo</span></p>
         <p class="price-sub">Price locked forever</p>
         <ul>
-          <li class="has">Weekly digest with 3 analysis sections</li>
-          <li class="has">Synthesized takes on what matters</li>
-          <li class="has">15+ source links with one-liners</li>
-          <li class="has">Builder community (Discord)</li>
-          <li class="has">Behind-the-scenes of what I'm building</li>
-          <li class="has">Early access (Friday PM)</li>
-          <li class="has">CLAUDE.md templates and agent configs</li>
+          <li class="has">Everything in Pro</li>
           <li class="has">Step-by-step guides on how I use agents</li>
-          <li class="has">Access to tools I'm building</li>
-          <li class="has">DM me directly — ask anything</li>
+          <li class="has">My .md files, configs, and tools (GitHub)</li>
+          <li class="has">DM me directly, ask anything</li>
         </ul>
         <button class="checkout-btn gold" id="checkout-inner" data-price="inner_monthly">
           Join Inner Circle — $39/month
@@ -78,25 +62,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </div>
     </div>
 
-    <section class="faq">
-      <h2>Questions</h2>
-      <div class="faq-item">
-        <h3>Can I cancel anytime?</h3>
-        <p>Yes. One click. You keep access until the end of your billing period.</p>
-      </div>
-      <div class="faq-item">
-        <h3>What's in the Discord?</h3>
-        <p>Builders sharing what they're shipping, tools they found, problems they solved. I'm in there daily. It's small on purpose.</p>
-      </div>
-      <div class="faq-item">
-        <h3>What kind of DM access?</h3>
-        <p>Inner Circle members can message me directly about what they're building. I'll review your CLAUDE.md, suggest tools, help debug agent setups. Response within 24 hours.</p>
-      </div>
-      <div class="faq-item">
-        <h3>What if I don't like it?</h3>
-        <p>30-day money-back guarantee. No questions. Email me and it's done.</p>
-      </div>
-    </section>
+    <div class="plan-footer">
+      <p class="cancel-link" id="cancel-link" style="display:none"><a href="#" id="cancel-btn">Cancel subscription and downgrade to free</a></p>
+      <p class="unsubscribe-link"><a href="/unsubscribe">Unsubscribe from all emails</a></p>
+    </div>
   </div>
 
   <style>
@@ -138,7 +107,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     .plan-card {
       border: 2px solid var(--color-border);
       border-radius: 12px;
-      padding: 2rem 1.5rem;
+      padding: 1.25rem 1.25rem;
       position: relative;
     }
 
@@ -170,7 +139,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
 
     .price {
-      font-size: 3em;
+      font-size: 2.2em;
       font-weight: 700;
       margin: 0;
     }
@@ -190,12 +159,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     .plan-card ul {
       list-style: none;
       padding: 0;
-      margin: 1.5rem 0;
+      margin: 0.75rem 0;
     }
 
     .plan-card li {
-      padding: 0.5rem 0;
-      font-size: 0.95em;
+      padding: 0.3rem 0;
+      font-size: 0.88em;
     }
 
     li.has::before {
@@ -223,13 +192,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     .checkout-btn {
       display: block;
       width: 100%;
-      padding: 1rem;
+      padding: 0.7rem;
       border: none;
       border-radius: 8px;
-      font-size: 1em;
+      font-size: 0.9em;
       font-weight: 600;
       cursor: pointer;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0;
       background: var(--color-accent);
       color: white;
       transition: opacity 0.2s;
@@ -254,9 +223,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
 
     .price-sub {
-      font-size: 0.85em;
+      font-size: 0.8em;
       color: #888;
-      margin: 0.25rem 0 1.5rem 0;
+      margin: 0.15rem 0 0.5rem 0;
     }
 
     @media (max-width: 900px) {
@@ -284,12 +253,113 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       font-size: 0.95em;
     }
 
+    .plan-footer { text-align: center; margin-top: 2rem; }
+    .cancel-link { font-size: 0.8em; margin-bottom: 0.5rem; }
+    .cancel-link a { color: #ef4444; text-decoration: none; }
+    .cancel-link a:hover { text-decoration: underline; }
+    .unsubscribe-link { font-size: 0.72em; }
+    .unsubscribe-link a { color: #bbb; text-decoration: none; }
+    .unsubscribe-link a:hover { color: #888; text-decoration: underline; }
+
+    .current-plan-btn {
+      background: var(--color-accent) !important; color: white !important;
+      opacity: 1 !important; cursor: default !important;
+      border: none !important;
+    }
+
     @media (max-width: 768px) {
       .pricing-section { grid-template-columns: 1fr; }
     }
   </style>
 
   <script>
+    // Dynamic plan state based on user tier
+    (function() {
+      const sid = localStorage.getItem('ae_session');
+      const tier = localStorage.getItem('ae_tier') || 'free';
+
+      if (sid && (tier === 'pro' || tier === 'inner')) {
+        // Verify with server and update
+        fetch(window.API_URL + '/api/auth/session', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ session_id: sid })
+        }).then(r => r.json()).then(data => {
+          if (data.success) applyTier(data.tier);
+          else applyTier('free');
+        }).catch(() => applyTier(tier));
+      } else {
+        applyTier(tier);
+      }
+
+      function applyTier(t) {
+        const freeBtn = document.getElementById('free-btn');
+        const freeSub = document.getElementById('free-sub');
+        const proBtn = document.getElementById('checkout-pro');
+        const innerBtn = document.getElementById('checkout-inner');
+
+        if (t === 'pro') {
+          // Free: not current
+          if (freeBtn) { freeBtn.textContent = 'Free plan'; freeBtn.classList.remove('secondary'); freeBtn.style.opacity = '0.5'; }
+          if (freeSub) freeSub.textContent = '';
+          // Pro: current
+          if (proBtn) {
+            proBtn.textContent = 'Current plan';
+            proBtn.disabled = true;
+            proBtn.classList.add('current-plan-btn');
+          }
+        } else if (t === 'inner') {
+          // Free: not current
+          if (freeBtn) { freeBtn.textContent = 'Free plan'; freeBtn.classList.remove('secondary'); freeBtn.style.opacity = '0.5'; }
+          if (freeSub) freeSub.textContent = '';
+          // Pro: included
+          if (proBtn) {
+            proBtn.textContent = 'Included';
+            proBtn.disabled = true;
+            proBtn.style.opacity = '0.5';
+          }
+          // Inner: current
+          if (innerBtn) {
+            innerBtn.textContent = 'Current plan';
+            innerBtn.disabled = true;
+            innerBtn.classList.add('current-plan-btn');
+            innerBtn.classList.remove('gold');
+          }
+        }
+        // else free: default state already correct
+      }
+      function applyCancel(t) {
+        if (t === 'pro' || t === 'inner') {
+          document.getElementById('cancel-link').style.display = 'block';
+        }
+      }
+      applyCancel(tier);
+
+      // Cancel subscription handler
+      document.getElementById('cancel-btn')?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (!confirm('Are you sure you want to cancel? You will lose access to Pro/Inner Circle content immediately.')) return;
+        const cancelSid = localStorage.getItem('ae_session');
+        if (!cancelSid) return;
+        try {
+          const res = await fetch(window.API_URL + '/api/cancel-subscription', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ session_id: cancelSid })
+          });
+          const data = await res.json();
+          if (data.success) {
+            localStorage.setItem('ae_tier', 'free');
+            window.location.reload();
+          } else {
+            document.getElementById('cancel-btn').textContent = data.message || 'Error cancelling';
+          }
+        } catch {
+          document.getElementById('cancel-btn').textContent = 'Connection error';
+        }
+      });
+    })();
+
     // Stripe checkout integration
     // TODO: Replace with your Stripe publishable key and price IDs
     const STRIPE_CONFIG = {
@@ -318,6 +388,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           const data = await res.json();
 
           if (data.checkout_url) {
+            if (window.plausible) window.plausible('Checkout', {props: {plan: priceKey}});
             window.location.href = data.checkout_url;
           } else {
             alert(data.message || 'Stripe not configured yet. Add STRIPE_SECRET_KEY to .env');
@@ -334,8 +405,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     // Check URL params for tier preselection
     const params = new URLSearchParams(window.location.search);
-    if (params.get('tier') === 'founding') {
-      document.getElementById('founding-plan')?.scrollIntoView({ behavior: 'smooth' });
+    const tierParam = params.get('tier');
+    if (tierParam === 'inner' || tierParam === 'founding') {
+      const innerCard = document.querySelector('.inner-plan');
+      if (innerCard) {
+        innerCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        innerCard.style.boxShadow = '0 0 0 3px #f59e0b';
+        setTimeout(() => { innerCard.style.boxShadow = ''; }, 2000);
+      }
     }
   </script>
 </BaseLayout>

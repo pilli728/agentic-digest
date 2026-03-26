@@ -10,24 +10,37 @@ const sorted = premium.sort((a, b) =>
 const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === 'founding');
 ---
 
-<BaseLayout title="Pro Content" description="Premium playbooks, guides, and resources for AI builders">
-  <header class="pro-header">
-    <a href="/" class="back-link">← Back to Agentic Edge</a>
-    <h1>Pro Library</h1>
-    <p>Playbooks, guides, and resources for serious AI builders.</p>
-  </header>
+<BaseLayout title="The Vault" description="Playbooks, guides, templates, and tools for AI builders.">
+  <!-- Auth gate -->
+  <div class="auth-gate" id="auth-gate">
+    <div class="gate-card">
+      <h2>The Vault</h2>
+      <p>Sign in to access playbooks, guides, and tools for serious AI builders.</p>
+      <a href="/login" class="gate-btn">Sign in</a>
+      <p class="gate-sub">Not a member yet? <a href="/upgrade">See plans</a></p>
+    </div>
+  </div>
 
-  <div class="content-grid">
-    {proContent.map(item => (
-      <a href={`/pro/${item.slug}`} class="content-card">
-        <div class="card-meta">
-          <span class={`tier-badge ${item.data.tier}`}>{item.data.tier === 'founding' ? 'Founding Only' : 'Pro'}</span>
-          <span class="category">{item.data.category}</span>
-        </div>
-        <h3>{item.data.title}</h3>
-        <p>{item.data.description}</p>
-      </a>
-    ))}
+  <!-- Pro content (hidden until auth check) -->
+  <div class="pro-content" id="pro-content" style="display:none">
+    <header class="pro-header">
+      <a href="/" class="back-link">← Back to Agentic Edge</a>
+      <h1>The Vault</h1>
+      <p>Playbooks, templates, tools, and guides. Everything you need to build with AI agents.</p>
+    </header>
+
+    <div class="content-grid">
+      {proContent.map(item => (
+        <a href={`/pro/${item.slug}`} class={`content-card ${item.data.tier === 'founding' ? 'founding-locked' : ''}`} data-tier={item.data.tier}>
+          <div class="card-meta">
+            <span class={`tier-badge ${item.data.tier}`}>{item.data.tier === 'founding' ? 'Inner Circle' : 'Pro'}</span>
+            <span class="category">{item.data.category}</span>
+          </div>
+          <h3>{item.data.title}</h3>
+          <p>{item.data.description}</p>
+        </a>
+      ))}
+    </div>
   </div>
 
   <style>
@@ -85,5 +98,76 @@ const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === '
 
     .content-card h3 { margin: 0 0 0.5rem; font-size: 1.1em; line-height: 1.3; }
     .content-card p { margin: 0; font-size: 0.9em; color: #666; line-height: 1.4; }
+
+    /* Auth gate */
+    .auth-gate { max-width: 400px; margin: 4rem auto; text-align: center; }
+    .gate-card { border: 1px solid var(--color-border); border-radius: 12px; padding: 2rem 2.5rem 1.5rem; }
+    .gate-card h2 { margin: 0 0 0.5rem; font-size: 1.5em; }
+    .gate-card > p { color: var(--color-muted); font-size: 0.92em; margin: 0 0 1.5rem; }
+    .gate-btn {
+      display: inline-block; background: var(--color-accent); color: white;
+      padding: 0.75rem 2rem; border-radius: 8px; font-weight: 600;
+      text-decoration: none; font-size: 0.95em;
+    }
+    .gate-btn:hover { opacity: 0.9; text-decoration: none; }
+    .gate-sub { font-size: 0.82em; color: var(--color-muted); margin: 1.25rem 0 0; }
+    .gate-sub a { color: var(--color-accent); }
+
+    .tier-gated { opacity: 0.45; pointer-events: auto; position: relative; }
+    .tier-gated::after {
+      content: 'Inner Circle'; position: absolute; top: 0.75rem; right: 0.75rem;
+      background: #f59e0b; color: white; font-size: 0.65em; font-weight: 700;
+      padding: 0.15rem 0.5rem; border-radius: 4px; letter-spacing: 0.04em;
+    }
   </style>
+
+  <script>
+    const API = window.API_URL;
+    const sid = localStorage.getItem('ae_session');
+
+    async function checkAccess() {
+      if (!sid) return false;
+      try {
+        const res = await fetch(`${API}/api/auth/session`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ session_id: sid })
+        });
+        const data = await res.json();
+        if (data.success && (data.tier === 'pro' || data.tier === 'inner')) {
+          // Sync localStorage with server tier
+          localStorage.setItem('ae_tier', data.tier);
+          return true;
+        }
+        return false;
+      } catch { return false; }
+    }
+
+    if (sid) {
+      checkAccess().then(ok => {
+        if (ok) {
+          document.getElementById('auth-gate').style.display = 'none';
+          document.getElementById('pro-content').style.display = 'block';
+
+          const userTier = localStorage.getItem('ae_tier');
+
+          if (userTier === 'inner') {
+            // Inner Circle — full access, remove all locks
+            document.querySelectorAll('.founding-locked').forEach(card => {
+              card.classList.remove('tier-gated');
+            });
+          } else {
+            // Pro — lock founding content, redirect to upgrade
+            document.querySelectorAll('.founding-locked').forEach(card => {
+              card.classList.add('tier-gated');
+              card.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.location.href = '/upgrade?tier=inner';
+              });
+            });
+          }
+        }
+      });
+    }
+  </script>
 </BaseLayout>

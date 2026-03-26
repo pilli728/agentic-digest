@@ -15,24 +15,36 @@ const { Content } = await entry.render();
 ---
 
 <BaseLayout title={entry.data.title}>
-  <header class="article-header">
-    <a href="/pro" class="back-link">← Pro Library</a>
-    <div class="article-meta">
-      <span class={`tier-badge ${entry.data.tier}`}>{entry.data.tier === 'founding' ? 'Founding Only' : 'Pro'}</span>
-      <span class="category">{entry.data.category}</span>
-      <span class="date">{entry.data.date}</span>
+  <!-- Auth gate -->
+  <div class="auth-gate" id="auth-gate">
+    <div class="gate-card">
+      <h2>The Vault</h2>
+      <p>This guide is available to Pro and Inner Circle members.</p>
+      <a href="/login" class="gate-btn">Sign in</a>
+      <p class="gate-sub">Not a member? <a href="/upgrade">See plans — $12/mo</a></p>
     </div>
-    <h1>{entry.data.title}</h1>
-    <p class="description">{entry.data.description}</p>
-  </header>
+  </div>
 
-  <main class="article-content">
-    <Content />
-  </main>
+  <div id="pro-content" style="display:none" data-content-tier={entry.data.tier}>
+    <header class="article-header">
+      <a href="/pro" class="back-link">← The Vault</a>
+      <div class="article-meta">
+        <span class={`tier-badge ${entry.data.tier}`}>{entry.data.tier === 'founding' ? 'Founding Only' : 'Pro'}</span>
+        <span class="category">{entry.data.category}</span>
+        <span class="date">{entry.data.date}</span>
+      </div>
+      <h1>{entry.data.title}</h1>
+      <p class="description">{entry.data.description}</p>
+    </header>
 
-  <footer class="article-footer">
-    <p>Part of the <a href="/upgrade">Agentic Edge Pro</a> library.</p>
-  </footer>
+    <main class="article-content">
+      <Content />
+    </main>
+
+    <footer class="article-footer">
+      <p>Part of the <a href="/upgrade">Agentic Edge Pro</a> library.</p>
+    </footer>
+  </div>
 
   <style>
     .article-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--color-border); }
@@ -47,5 +59,59 @@ const { Content } = await entry.render();
     .description { font-size: 1.05em; color: #666; margin: 0; }
     .article-content { margin-bottom: 3rem; }
     .article-footer { padding-top: 1.5rem; border-top: 1px solid var(--color-border); text-align: center; color: #888; font-size: 0.9em; }
+    /* Auth gate */
+    .auth-gate { max-width: 400px; margin: 4rem auto; text-align: center; }
+    .gate-card { border: 1px solid var(--color-border); border-radius: 12px; padding: 2.5rem; }
+    .gate-card h2 { margin: 0 0 0.5rem; font-size: 1.5em; }
+    .gate-card > p { color: #666; font-size: 0.92em; margin: 0 0 1.5rem; }
+    .gate-btn {
+      display: inline-block; background: var(--color-accent); color: white;
+      padding: 0.75rem 2rem; border-radius: 8px; font-weight: 600;
+      text-decoration: none; font-size: 0.95em;
+    }
+    .gate-btn:hover { opacity: 0.9; text-decoration: none; }
+    .gate-sub { font-size: 0.82em; color: #888; margin: 1rem 0 0; }
+    .gate-sub a { color: var(--color-accent); }
   </style>
+
+  <script>
+    const API = window.API_URL;
+    const sid = localStorage.getItem('ae_session');
+
+    const contentTier = document.querySelector('[data-content-tier]')?.dataset.contentTier;
+
+    if (sid) {
+      const cachedTier = localStorage.getItem('ae_tier');
+      // Quick show for valid cached tier (avoids flash)
+      if (cachedTier === 'inner' || (cachedTier === 'pro' && contentTier !== 'founding')) {
+        document.getElementById('auth-gate').style.display = 'none';
+        document.getElementById('pro-content').style.display = 'block';
+      }
+
+      // Verify with server in background
+      fetch(`${API}/api/auth/session`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ session_id: sid })
+      }).then(r => r.json()).then(data => {
+        if (data.success && (data.tier === 'pro' || data.tier === 'inner')) {
+          localStorage.setItem('ae_tier', data.tier);
+          // Founding content requires inner tier
+          if (contentTier === 'founding' && data.tier !== 'inner') {
+            document.getElementById('auth-gate').style.display = 'block';
+            document.getElementById('pro-content').style.display = 'none';
+            return;
+          }
+          document.getElementById('auth-gate').style.display = 'none';
+          document.getElementById('pro-content').style.display = 'block';
+        } else {
+          // Session invalid — show gate
+          document.getElementById('auth-gate').style.display = 'block';
+          document.getElementById('pro-content').style.display = 'none';
+          localStorage.removeItem('ae_session');
+          localStorage.removeItem('ae_tier');
+        }
+      }).catch(() => {});
+    }
+  </script>
 </BaseLayout>

@@ -48,17 +48,21 @@ def _get_db():
     return conn
 
 
-def create_magic_link(email: str, db) -> str:
-    """Generate a magic link token for the given email. Returns the token."""
-    # Check subscriber exists and get their tier
+def create_magic_link(email: str, db) -> tuple:
+    """Generate a magic link token for the given email.
+    Creates a free subscriber if the email doesn't exist.
+    Returns (token, is_new_subscriber)."""
     cursor = db.conn.cursor()
     cursor.execute("SELECT tier FROM subscribers WHERE email = ? AND active = 1", (email,))
     row = cursor.fetchone()
 
-    if not row:
-        return None  # Not a subscriber
+    is_new = not row
+    if is_new:
+        db.add_subscriber(email, tier="free")
+        tier = "free"
+    else:
+        tier = dict(row)["tier"]
 
-    tier = dict(row)["tier"]
     token = secrets.token_urlsafe(32)
     expires_at = (datetime.now() + timedelta(minutes=TOKEN_EXPIRY_MINUTES)).isoformat()
 
@@ -70,7 +74,7 @@ def create_magic_link(email: str, db) -> str:
     conn.commit()
     conn.close()
 
-    return token
+    return token, is_new
 
 
 def send_magic_link_email(email: str, token: str, base_url: str = None) -> bool:
@@ -78,6 +82,8 @@ def send_magic_link_email(email: str, token: str, base_url: str = None) -> bool:
     if base_url is None:
         base_url = os.environ.get("SITE_URL", "http://localhost:4321")
     link = f"{base_url}/auth/verify?token={token}"
+    # Always print so local dev works without email configured
+    print(f"\n  [MAGIC LINK] {email}\n  {link}\n")
 
     html = f"""<!DOCTYPE html>
 <html>

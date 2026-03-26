@@ -7,29 +7,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     <!-- Login form -->
     <div class="login-card" id="login-card">
-      <h1>Sign in</h1>
+      <h1>Get your link</h1>
       <p>Enter your email and we'll send you a magic link. No password needed.</p>
       <form id="login-form">
         <input type="email" placeholder="you@company.com" required id="login-email" />
         <button type="submit" id="login-btn">Send magic link</button>
       </form>
-      <p class="login-note">Not a subscriber yet? <a href="/">Join for free</a></p>
+      <p class="login-note">New here? Enter your email and you're in.</p>
     </div>
 
     <!-- Check email state -->
     <div class="login-card" id="check-email" style="display:none">
-      <div class="check-icon">📧</div>
-      <h1>Check your email</h1>
-      <p>We sent a magic link to <strong id="sent-to-email"></strong></p>
-      <p class="check-note">Click the link in your email to sign in. It expires in 15 minutes.</p>
+      <h1>Check your inbox</h1>
+      <p>We sent a link to <strong id="sent-to-email"></strong>. Click it to sign in.</p>
+      <p class="check-note">Expires in 15 minutes. Check spam if you don't see it.</p>
       <button class="try-again" onclick="document.getElementById('check-email').style.display='none'; document.getElementById('login-card').style.display='block';">Try a different email</button>
-    </div>
-
-    <!-- Error state -->
-    <div class="login-card" id="login-error" style="display:none">
-      <h1>Not found</h1>
-      <p>No account found for that email. <a href="/">Subscribe first</a>, then come back to sign in.</p>
-      <button class="try-again" onclick="document.getElementById('login-error').style.display='none'; document.getElementById('login-card').style.display='block';">Try again</button>
     </div>
 
   </div>
@@ -55,6 +47,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   <script>
     const API = window.API_URL;
+
+    // Auto-fill email from URL param (when redirected from signup)
+    const urlParams = new URLSearchParams(window.location.search);
+    const prefillEmail = urlParams.get('email');
+    if (prefillEmail) {
+      const emailInput = document.getElementById('login-email');
+      if (emailInput) emailInput.value = prefillEmail;
+    }
 
     // Check if already logged in
     const sessionId = localStorage.getItem('ae_session');
@@ -86,13 +86,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       });
       const data = await res.json();
 
+      if (data.dev_link) {
+        window.location.href = data.dev_link;
+        return;
+      }
       if (data.success) {
         document.getElementById('sent-to-email').textContent = email;
         document.getElementById('login-card').style.display = 'none';
         document.getElementById('check-email').style.display = 'block';
       } else {
-        document.getElementById('login-card').style.display = 'none';
-        document.getElementById('login-error').style.display = 'block';
+        btn.textContent = 'Send magic link';
+        btn.disabled = false;
+        btn.style.background = '#ef4444';
+        setTimeout(() => { btn.style.background = ''; }, 2000);
       }
     });
   </script>

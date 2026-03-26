@@ -8,6 +8,7 @@ const sorted = digests.sort((a, b) =>
 );
 
 const latest = sorted[0];
+const previous = sorted[1];
 let latestContent;
 if (latest) {
   latestContent = await latest.render();
@@ -27,8 +28,8 @@ const formatDate = (dateStr) => {
 <BaseLayout title="Agentic Edge" description="The weekly brief for AI agent builders. Zero AI slop.">
   <header class="home-header">
     <h1>Agentic Edge</h1>
-    <p class="tagline">Get smarter about AI agents in 5 minutes a week.</p>
-    <p class="sub-tagline">700+ sources scanned. 20 stories picked. Zero AI slop.</p>
+    <p class="tagline">Your unfair advantage as an AI builder.</p>
+    <p class="sub-tagline">700+ sources scanned. Only what matters. Every Monday.</p>
   </header>
 
   <!-- Company logos carousel -->
@@ -73,7 +74,7 @@ const formatDate = (dateStr) => {
   <section class="signup-section">
     <div class="signup-box">
       <h2>Join the builders who ship with AI</h2>
-      <p>I'm an engineer building AI agents full-time. I was spending 2 hours a day reading AI news and still missing the stuff that mattered. So I built an agent that scans 700+ sources for me. Now I share what it finds every week.</p>
+      <p>I'm a Stanford-trained engineer building AI agents full-time. I was spending 2 hours a day reading AI news and still missing what mattered. So I built an agent that scans 700+ sources for me. Now I share what it finds every Monday.</p>
       <form class="signup-form" id="signup-form">
         <input type="email" placeholder="you@company.com" required id="signup-email" />
         <button type="submit" class="btn btn-primary" id="signup-btn">Join for free</button>
@@ -84,86 +85,303 @@ const formatDate = (dateStr) => {
 
   <!-- Welcome modal overlay -->
   <div class="modal-overlay" id="welcome-modal">
-    <div class="modal-card">
-      <div class="modal-confetti" id="confetti-container"></div>
+    <div class="modal-card modal-welcome">
+      <button class="modal-x" id="modal-x">×</button>
 
-      <div class="modal-icon">🎉</div>
-      <h2>Welcome to the club.</h2>
-      <p class="modal-email" id="modal-email"></p>
-
-      <div class="modal-checklist">
-        <div class="check-item animate-in" style="animation-delay: 0.3s">
-          <span class="check-mark">✓</span>
-          <span>Your first digest drops Monday morning</span>
-        </div>
-        <div class="check-item animate-in" style="animation-delay: 0.5s">
-          <span class="check-mark">✓</span>
-          <span>3 analysis sections on what matters this week</span>
-        </div>
-        <div class="check-item animate-in" style="animation-delay: 0.7s">
-          <span class="check-mark">✓</span>
-          <span>Source links so you can go deeper</span>
-        </div>
-        <div class="check-item animate-in" style="animation-delay: 0.9s">
-          <span class="check-mark">✓</span>
-          <span>Reply anytime. I read every one.</span>
-        </div>
+      <!-- Hand-drawn sketch at top -->
+      <div class="modal-sketch modal-animate" style="animation-delay: 0.05s">
+        <svg viewBox="0 0 240 120" class="modal-sketch-svg">
+          <circle cx="80" cy="50" r="20" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="80" cy="45" r="6" fill="none" stroke="currentColor" stroke-width="1"/>
+          <path d="M70,55 L90,55" fill="none" stroke="currentColor" stroke-width="1"/>
+          <circle cx="130" cy="50" r="20" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="130" cy="45" r="6" fill="none" stroke="currentColor" stroke-width="1"/>
+          <path d="M120,55 L140,55" fill="none" stroke="currentColor" stroke-width="1"/>
+          <circle cx="180" cy="50" r="20" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="180" cy="45" r="6" fill="none" stroke="currentColor" stroke-width="1"/>
+          <path d="M170,55 L190,55" fill="none" stroke="currentColor" stroke-width="1"/>
+          <path d="M100,50 L110,50" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="2,2" opacity="0.4"/>
+          <path d="M150,50 L160,50" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="2,2" opacity="0.4"/>
+          <path d="M60,80 L200,80" fill="none" stroke="currentColor" stroke-width="1" opacity="0.15"/>
+          <path d="M55,85 L205,85" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.1"/>
+        </svg>
       </div>
 
-      <div class="modal-divider"></div>
-
-      <p class="modal-upgrade-intro">Want to go deeper? Most builders upgrade within a week.</p>
-
-      <div class="modal-upgrade-options">
-        <a href="/upgrade" class="modal-upgrade-card">
-          <div class="upgrade-badge">Pro</div>
-          <strong>$12/mo</strong>
-          <p>Full source list, community, early access</p>
-        </a>
-        <a href="/upgrade?tier=inner" class="modal-upgrade-card gold">
-          <div class="upgrade-badge gold">Inner Circle</div>
-          <strong>$39/mo</strong>
-          <p>Templates, agents, scripts, DM access</p>
-        </a>
+      <div class="modal-welcome-body modal-animate" style="animation-delay: 0.15s">
+        <h2 class="modal-welcome-heading">Welcome to the frontier.</h2>
+        <p class="modal-welcome-sub">You have joined a community of world-class builders who are expanding what is possible.</p>
+        <p class="modal-email-line" id="modal-email"></p>
       </div>
 
-      <button class="modal-close" id="modal-close">Start with free — I'll explore later</button>
+      <div class="modal-welcome-divider"></div>
+
+      <div class="modal-pro-box modal-animate" style="animation-delay: 0.3s">
+        <div class="modal-pro-header">
+          <span class="modal-pro-badge">Pro — $12/mo</span>
+          <span class="modal-pro-sub">Most builders upgrade within a week</span>
+        </div>
+        <ul class="modal-pro-list">
+          <li>Behind-the-scenes of what I'm building</li>
+          <li>Builder community (Discord)</li>
+          <li>Synthesized takes + early access Friday</li>
+        </ul>
+        <a href="/upgrade" class="modal-pro-btn">Upgrade to Pro →</a>
+      </div>
+
+      <button class="modal-close-btn modal-animate" style="animation-delay: 0.4s" id="modal-close">Start with free</button>
     </div>
   </div>
 
-  <!-- Premium teasers — clear, not blocking -->
-  <section class="premium-teasers">
-    <div class="teaser-row">
-      <a href="/upgrade" class="teaser-card">
-        <span class="teaser-icon">📋</span>
-        <div>
-          <strong>15+ sources with one-liners</strong>
-          <p>Every link I scanned this week, ranked.</p>
-        </div>
-        <span class="teaser-arrow">Pro →</span>
-      </a>
-      <a href="/upgrade?tier=inner" class="teaser-card teaser-gold">
-        <span class="teaser-icon">🛠️</span>
-        <div>
-          <strong>CLAUDE.md, agent configs, scripts</strong>
-          <p>The exact setup I use. Copy-paste ready.</p>
-        </div>
-        <span class="teaser-arrow">Inner Circle →</span>
-      </a>
-    </div>
-  </section>
-
-  <!-- Latest digest — full free content, no fade blocking -->
+  <!-- Two-column digest layout -->
   {latest ? (
-    <section class="latest-digest">
-      <div class="section-header">
-        <h2>This Week's Digest</h2>
-        <p class="digest-date">{formatDate(latest.data.date)}</p>
+    <section class="digest-layout">
+      <!-- Main content column -->
+      <div class="digest-main">
+        <div class="digest-header-row">
+          <h2 class="digest-title">This Week's Digest</h2>
+          <p class="digest-date-label">{formatDate(latest.data.date)}</p>
+        </div>
+
+        <!-- Locked top story — FREE users see Pro article, PRO users see Founding article -->
+        <!-- Version for free users: Pro article -->
+        <a href="/upgrade" class="locked-card" id="locked-top-free">
+          <div class="locked-badge">PRO</div>
+          <div class="locked-content">
+            <h3>Agentic Design Patterns — 424 Pages of Code-Backed AI Architecture</h3>
+            <p>A senior Google engineer just dropped a 424-page doc covering every agentic design pattern at the frontier of AI. Every chapter is code-backed. We broke it down so you don't have to read all 424 pages.</p>
+          </div>
+          <div class="locked-blur"></div>
+          <span class="locked-cta">Unlock with Pro →</span>
+        </a>
+        <!-- Version for Pro users: Founding article (different content!) -->
+        <a href="/upgrade?tier=inner" class="locked-card locked-card-gold" id="locked-top-pro" style="display:none">
+          <div class="locked-badge" style="background:#f59e0b">INNER CIRCLE</div>
+          <div class="locked-content">
+            <h3>The Budget LLM Spreadsheet: One Model Switch. 87% Cost Reduction.</h3>
+            <p>The exact spreadsheet I use to compare LLM costs per task. Which models to use where, when to switch, and how I cut my API bill from $340/mo to $44/mo.</p>
+          </div>
+          <div class="locked-blur"></div>
+          <span class="locked-cta">Unlock with Inner Circle →</span>
+        </a>
+        <!-- Version for Inner Circle: Founding article unlocked -->
+        <a href="/pro/10-budget-llm-spreadsheet" class="locked-card locked-card-gold" id="locked-top-inner" style="display:none">
+          <div class="locked-badge" style="background:#f59e0b">INNER CIRCLE</div>
+          <div class="locked-content">
+            <h3>The Budget LLM Spreadsheet: One Model Switch. 87% Cost Reduction.</h3>
+            <p>The exact spreadsheet I use to compare LLM costs per task. Which models to use where, when to switch, and how I cut my API bill from $340/mo to $44/mo.</p>
+          </div>
+          <span class="locked-cta" style="background:rgba(245,158,11,0.15); color:#b45309;">Read now →</span>
+        </a>
+
+        <!-- Sketch divider -->
+        <div class="sketch-divider">
+          <svg viewBox="0 0 400 30" class="sketch-svg">
+            <path d="M0,15 Q20,5 40,15 T80,15 T120,15 T160,15 T200,15 T240,15 T280,15 T320,15 T360,15 T400,15" fill="none" stroke="currentColor" stroke-width="1" opacity="0.15"/>
+          </svg>
+        </div>
+
+        <!-- All cards — Leverage style -->
+        <div class="source-cards">
+          <h3 class="source-cards-label">Tools This Week</h3>
+          <p class="source-cards-sub">From vibe coding to autonomous companies. What shipped this week.</p>
+
+          <a href="https://polsia.ai" class="source-card" target="_blank">
+            <div class="source-card-text">
+              <strong>Polsia</strong>
+              <p>An AI that spins up a full company for you and runs it autonomously. Already at $1M+ ARR.</p>
+              <span class="source-meta">polsia.ai</span>
+            </div>
+            <svg class="source-card-sketch" viewBox="0 0 100 100">
+              <rect x="25" y="30" width="50" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="50" cy="50" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M50,42 L50,38 M42,50 L38,50 M58,50 L62,50 M50,58 L50,62" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+              <path d="M30,75 L45,75 M55,75 L70,75" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+              <path d="M35,25 L35,30 M50,22 L50,30 M65,25 L65,30" fill="none" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+            </svg>
+          </a>
+
+          <a href="https://techcrunch.com/2026/03/24/anthropic-hands-claude-code-more-control-but-keeps-it-on-a-leash" class="source-card" target="_blank">
+            <div class="source-card-text">
+              <strong>Claude Code: 74 Releases in 52 Days</strong>
+              <p>Auto mode, computer use, Telegram control, voice, cloud scheduling. Anthropic is shipping faster than anyone can track — and it's not slowing down.</p>
+              <span class="source-meta">Anthropic</span>
+            </div>
+            <svg class="source-card-sketch" viewBox="0 0 100 100">
+              <rect x="22" y="28" width="56" height="38" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M22,58 L78,58" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+              <rect x="42" y="66" width="16" height="3" rx="1" fill="none" stroke="currentColor" stroke-width="1"/>
+              <path d="M35,40 L50,40 L50,52 L65,52" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+              <circle cx="35" cy="40" r="3" fill="currentColor" opacity="0.15"/>
+              <circle cx="65" cy="52" r="3" fill="currentColor" opacity="0.15"/>
+              <path d="M40,46 L45,46" fill="none" stroke="currentColor" stroke-width="4" opacity="0.08"/>
+            </svg>
+          </a>
+
+          <h3 class="source-cards-label" style="margin-top: 1.5rem;">Companies Are Restructuring</h3>
+
+          <a href="https://www.a16z.news/p/there-are-only-two-paths-left-for" class="source-card" target="_blank">
+            <div class="source-card-text">
+              <strong>Only Two Paths Left</strong>
+              <p>The AI wave just killed the middle. You either grow 10+ points or hit 40% margins — anything in between is a burning platform. Mediocre SaaS doesn't survive this decade.</p>
+              <span class="source-meta">a16z</span>
+            </div>
+            <svg class="source-card-sketch" viewBox="0 0 100 100">
+              <path d="M25,75 L50,25 L75,75" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M35,55 L65,55" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="50" cy="25" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M20,80 L80,80" fill="none" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+              <path d="M42,68 L42,58" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+              <path d="M58,68 L58,58" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+            </svg>
+          </a>
+
+          <a href="https://vercel.com/blog/360-billion-tokens-3-million-customers-6-engineers" class="source-card" target="_blank">
+            <div class="source-card-text">
+              <strong>360 Billion Tokens, 6 Engineers</strong>
+              <p>3M customers. 6 engineers. $0 in infra headcount waste. This is what the AI-native stack unlocks — and it's the new bar every founder is being judged against.</p>
+              <span class="source-meta">Vercel</span>
+            </div>
+            <svg class="source-card-sketch" viewBox="0 0 100 100">
+              <rect x="20" y="35" width="25" height="45" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <rect x="55" y="50" width="25" height="30" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M25,45 L40,45 M25,55 L40,55 M25,65 L35,65" fill="none" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+              <path d="M60,60 L75,60 M60,68 L70,68" fill="none" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+              <path d="M45,60 L55,55" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="2,2" opacity="0.3"/>
+              <circle cx="67" cy="42" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M64,42 L67,39 L70,42" fill="none" stroke="currentColor" stroke-width="1"/>
+            </svg>
+          </a>
+
+          <h3 class="source-cards-label" style="margin-top: 1.5rem;">Distribution Flipped</h3>
+
+          <a href="https://www.onlycfo.io/p/revenue-durability-is-failing-in" class="source-card" target="_blank">
+            <div class="source-card-text">
+              <strong>Revenue Durability Is Failing</strong>
+              <p>Bill.com went from 90% growth to 12%. Investors aren't buying growth anymore — they're asking if your revenue shows up next quarter. Net retention is the new north star.</p>
+              <span class="source-meta">OnlyCFO</span>
+            </div>
+            <svg class="source-card-sketch" viewBox="0 0 100 100">
+              <path d="M20,30 Q35,28 45,40 T65,55 Q75,65 85,75" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M15,80 L85,80 M15,80 L15,25" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+              <path d="M45,40 L45,80" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="2,3" opacity="0.2"/>
+              <circle cx="45" cy="40" r="3" fill="currentColor" opacity="0.15"/>
+            </svg>
+          </a>
+
+          <a href="https://speedrun.substack.com/p/how-to-build-a-pmf-machine" class="source-card" target="_blank">
+            <div class="source-card-text">
+              <strong>How to Build a PMF Machine</strong>
+              <p>AI spam flooded every inbox. Reply rates collapsed. Now "written by a human" is a distribution advantage — and the builders who get in front of customers before everyone else automates them will win.</p>
+              <span class="source-meta">a16z Speedrun</span>
+            </div>
+            <svg class="source-card-sketch" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="25" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="50" cy="50" r="15" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+              <circle cx="50" cy="50" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M62,38 L52,48" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M62,38 L58,38 M62,38 L62,42" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+          </a>
+
+        </div>
+
+        {previous && (
+          <a href={`/archive/${previous.slug}`} class="prev-digest-card">
+            <span class="prev-digest-date">{formatDate(previous.data.date)}</span>
+            <strong>Nia, OpenClaw 2026.3.23, Cq, and more</strong>
+            <p>Codebase indexing for agents, DeepSeek plugin drops, Stack Overflow for agents, and global scale without DevOps.</p>
+            <span class="prev-digest-link">Read last week's digest →</span>
+          </a>
+        )}
       </div>
 
-      <div class="digest-full">
-        <latestContent.Content />
-      </div>
+      <!-- Right sidebar -->
+      <aside class="digest-sidebar">
+        <div class="sidebar-sticky">
+          <!-- Sketch illustration: tools -->
+          <div class="sketch-illustration">
+            <svg viewBox="0 0 200 120" class="sketch-svg sidebar-sketch">
+              <path d="M60,90 L60,40 Q60,30 70,30 L130,30 Q140,30 140,40 L140,90" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.12"/>
+              <path d="M50,90 L150,90" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.12"/>
+              <circle cx="100" cy="60" r="15" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.12"/>
+              <path d="M100,45 L100,35" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.12"/>
+              <path d="M85,60 L75,60" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.12"/>
+              <path d="M115,60 L125,60" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.12"/>
+            </svg>
+          </div>
+
+          <div class="sidebar-section" id="sidebar-pro-cards">
+            <h4 class="sidebar-label" id="sidebar-cards-label">Premium Content</h4>
+
+            <!-- Pro-tier articles (visible to free users, hidden for pro/inner) -->
+            <a href="/upgrade" class="sidebar-card tier-pro-card" data-article="/pro/07-vibecoding-masterclass" data-tier="pro">
+              <strong>The Vibecoding Masterclass</strong>
+              <p>8 hacks that separate 10x AI coders from everyone else.</p>
+            </a>
+
+            <a href="/upgrade" class="sidebar-card tier-pro-card" data-article="/pro/03-writing-voice-guide" data-tier="pro">
+              <strong>Anti-AI Writing Guide</strong>
+              <p>25 banned phrases and the formula for human copy.</p>
+            </a>
+
+            <!-- Founding-tier articles (always visible, behavior changes by tier) -->
+            <a href="/upgrade?tier=inner" class="sidebar-card tier-founding-card" data-article="/pro/10-budget-llm-spreadsheet" data-tier="founding">
+              <strong>The Budget LLM Spreadsheet</strong>
+              <p>One model switch. 87% cost reduction. Same output.</p>
+            </a>
+
+            <a href="/upgrade?tier=inner" class="sidebar-card tier-founding-card" data-article="/pro/11-agents-md-masterclass" data-tier="founding">
+              <strong>AGENTS.md Masterclass</strong>
+              <p>Why the "tech stack mini-map" approach fails.</p>
+            </a>
+
+            <a href="/upgrade?tier=inner" class="sidebar-card tier-founding-card" data-article="/pro/12-claude-code-cheat-sheet" data-tier="founding">
+              <strong>Claude Code Cheat Sheet</strong>
+              <p>Keybindings, hooks, and syntax not in the docs.</p>
+            </a>
+
+            <a href="/upgrade?tier=inner" class="sidebar-card tier-founding-card" data-article="/pro/13-openclaw-week-one-setup" data-tier="founding">
+              <strong>OpenClaw Week-One Setup</strong>
+              <p>Lock your gateway before you connect anything.</p>
+            </a>
+
+            <a href="/upgrade?tier=inner" class="sidebar-card tier-founding-card" data-article="/pro/14-auto-mode-breakdown" data-tier="founding">
+              <strong>Auto Mode Breakdown</strong>
+              <p>How memory consolidation works and what gets pruned.</p>
+            </a>
+          </div>
+
+          <!-- Sketch illustration: graph -->
+          <div class="sketch-illustration">
+            <svg viewBox="0 0 200 80" class="sketch-svg sidebar-sketch">
+              <path d="M20,60 Q40,55 60,50 T100,30 T140,25 T180,15" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.12"/>
+              <path d="M20,65 L180,65" fill="none" stroke="currentColor" stroke-width="1" opacity="0.08"/>
+              <circle cx="100" cy="30" r="3" fill="currentColor" opacity="0.1"/>
+              <circle cx="140" cy="25" r="3" fill="currentColor" opacity="0.1"/>
+              <circle cx="180" cy="15" r="3" fill="currentColor" opacity="0.1"/>
+            </svg>
+          </div>
+
+          <a href="/upgrade" class="sidebar-upgrade" id="sidebar-upgrade">
+            <strong>Unlock Pro</strong>
+            <span>$12/month</span>
+            <p>Behind-the-scenes, Discord, early access Friday.</p>
+          </a>
+          <a href="/upgrade?tier=inner" class="sidebar-upgrade sidebar-upgrade-gold" id="sidebar-upgrade-gold" style="display:none">
+            <strong>Unlock Inner Circle</strong>
+            <span>$39/month</span>
+            <p>Tool drops, templates, agents, DM access.</p>
+          </a>
+
+          <!-- Sketch illustration: paper airplane -->
+          <div class="sketch-illustration">
+            <svg viewBox="0 0 200 100" class="sketch-svg sidebar-sketch">
+              <path d="M30,70 L170,30 L120,55 L130,80 L105,58 Z" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.1"/>
+              <path d="M30,70 L120,55" fill="none" stroke="currentColor" stroke-width="1" opacity="0.08"/>
+            </svg>
+          </div>
+        </div>
+      </aside>
     </section>
   ) : (
     <div class="no-content">
@@ -171,637 +389,361 @@ const formatDate = (dateStr) => {
     </div>
   )}
 
-  <!-- Bottom fade teaser — soft preview of premium content -->
-  <section class="bottom-teaser">
-    <div class="bottom-teaser-content">
-      <div class="blurred-sources">
-        <p class="source-line">Claude Code just shipped auto mode. Here's what it means for your workflow...</p>
-        <p class="source-line">OpenClaw 2026.3.23 update: DeepSeek plugin, Qwen pay-as-you-go, new pricing...</p>
-        <p class="source-line">Polsia hit $1M ARR. The agent that builds startups. Real numbers inside...</p>
-        <p class="source-line">LM Studio compromised? 1020 upvotes. Check your install immediately...</p>
-        <p class="source-line">Jensen Huang: if your engineer isn't burning $250K in tokens, something's wrong...</p>
-        <p class="source-line">Harvard professor co-authored a paper with Claude in 2 weeks. It would've taken...</p>
-      </div>
-      <div class="bottom-teaser-fade"></div>
-      <div class="bottom-teaser-cta">
-        <h3>15+ more sources this week</h3>
-        <p>Pro members get the full source list, community access, and early delivery every Friday.</p>
-        <a href="/upgrade" class="btn btn-primary">See what you're missing</a>
-      </div>
+  <!-- About — minimal -->
+  <section class="about" id="about-section">
+    <div class="about-text">
+      <p>I'm a Stanford-trained engineer building AI agents full-time. I was spending 2 hours a day reading AI news and still missing what mattered. So I built an AI agent that scans 700+ sources for me. Now I share what it finds every Monday.</p>
     </div>
   </section>
 
-  <!-- About -->
-  <section class="about">
-    <h2>Why this exists</h2>
-    <div class="about-text">
-      <p>I was spending 2 hours a day reading AI news and still missing things that mattered. So I built an AI agent that does it for me — scans 700+ sources, scores every article by builder relevance, filters out the noise, and gives me the 20 that actually matter.</p>
-      <p>Now I'm sharing that feed with you. Every story earns its spot. No AI slop, no filler, no "delve into the landscape." Just the tools, launches, and shifts that affect what you're building this week.</p>
-    </div>
-    <div class="value-grid">
-      <div class="value-card">
-        <h3>Stanford-trained, builder-first</h3>
-        <p>I'm an engineer who builds AI agents full-time. This newsletter is what I wish existed when I started.</p>
-      </div>
-      <div class="value-card">
-        <h3>AI that curates AI news</h3>
-        <p>The system that makes this newsletter is itself an AI agent. It learns what matters to builders and gets smarter every week.</p>
-      </div>
-      <div class="value-card">
-        <h3>Tools you can use Monday morning</h3>
-        <p>MCP servers, CLAUDE.md templates, agent configs, scripts. Not theory — things you copy-paste into your stack.</p>
-      </div>
-      <div class="value-card">
-        <h3>Zero AI slop guarantee</h3>
-        <p>25 banned phrases. Every summary sounds like a text from a smart friend, not a corporate memo written by ChatGPT.</p>
-      </div>
+  <!-- Subscribed state (hidden by default, replaces about) -->
+  <section class="subscribed-section" id="subscribed-section" style="display:none">
+    <div class="subscribed-text">
+      <p>Welcome to the frontier. You have joined a community of world-class builders who are expanding what is possible.</p>
     </div>
   </section>
 
   <footer class="site-footer">
-    <p>Built by a Stanford engineer, for builders. <a href="/archive">Archive</a> · <a href="/pro">Pro Library</a> · <a href="/upgrade">Upgrade</a></p>
+    <p>Built by a Stanford engineer, for builders. <a href="/archive">Archive</a> · <a href="/pro">The Vault</a> · <a href="/upgrade">Upgrade</a></p>
   </footer>
 
   <style>
-    .home-header {
-      text-align: center;
-      padding: 3rem 0 2rem;
+    /* Header */
+    .home-header { text-align: center; padding: 3rem 0 1.5rem; margin-bottom: 1.5rem; }
+    h1 { font-size: 3em; margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+    .tagline { font-size: 1.15em; color: var(--color-muted); margin: 0 0 0.3rem; }
+    .sub-tagline { font-size: 0.85em; color: var(--color-muted); opacity: 0.7; margin: 0; }
+
+    /* Logo carousel */
+    .logos-section { text-align: center; margin-bottom: 2rem; overflow: hidden; }
+    .logos-label { font-size: 0.72em; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.12em; margin: 0 0 0.75rem; }
+    .logos-track { overflow: hidden; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
+    .logos-slide { display: flex; gap: 3rem; animation: scroll 25s linear infinite; width: max-content; }
+    .logo-item { font-size: 1em; font-weight: 600; color: var(--color-border); white-space: nowrap; letter-spacing: 0.02em; flex-shrink: 0; }
+    @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .logos-track:hover .logos-slide { animation-play-state: paused; }
+
+    /* Signup */
+    .signup-section { margin-bottom: 2.5rem; }
+    .signup-box { background: var(--color-card); border: 1px solid var(--color-border); border-radius: 10px; padding: 1.75rem; text-align: center; }
+    .signup-box h2 { margin: 0 0 0.4rem; font-size: 1.2em; }
+    .signup-box > p { color: var(--color-muted); margin: 0 0 1.25rem; font-size: 0.9em; line-height: 1.55; }
+    .signup-form { display: flex; gap: 0.5rem; justify-content: center; max-width: 440px; margin: 0 auto 0.75rem; }
+    .signup-form input { flex: 1; padding: 0.7rem 0.9rem; border: 1px solid var(--color-border); border-radius: 6px; font-size: 0.9em; background: var(--color-bg); color: var(--color-fg); }
+    .signup-form input:focus { outline: none; border-color: var(--color-accent); }
+    .signup-note { font-size: 0.75em; color: var(--color-muted); margin: 0; }
+    .btn-primary {
+      padding: 0.7rem 1.4rem;
+      background: #7c3aed;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.9em;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-primary:hover { background: #6d28d9; }
+
+    /* ===== Two-column digest layout ===== */
+    .digest-layout {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 2.5rem;
+      align-items: start;
       margin-bottom: 2rem;
     }
 
-    h1 {
-      font-size: 3.5em;
-      margin: 0 0 0.5rem 0;
-      letter-spacing: -0.02em;
+    .digest-header-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem; margin-bottom: 1.25rem;
+    }
+    .digest-title { margin: 0; font-size: 1.4em; }
+    .digest-date-label { font-size: 0.82em; color: var(--color-muted); margin: 0; }
+
+    /* Locked top story */
+    .locked-card {
+      display: block; position: relative; background: var(--color-card);
+      border: 2px solid var(--color-accent); border-radius: 10px;
+      padding: 1.5rem 1.5rem 1.25rem; margin-bottom: 1.5rem;
+      text-decoration: none; color: inherit; transition: box-shadow 0.2s;
+    }
+    .locked-card:hover { box-shadow: 0 4px 16px rgba(124,58,237,0.12); text-decoration: none; }
+    .locked-card-gold { border-color: #f59e0b; }
+    .locked-card-gold:hover { box-shadow: 0 4px 16px rgba(245,158,11,0.15); }
+    .locked-badge {
+      display: inline-block; background: var(--color-accent); color: white;
+      padding: 0.15rem 0.6rem; border-radius: 4px;
+      font-size: 0.68em; font-weight: 700; letter-spacing: 0.06em;
+      margin-bottom: 0.6rem;
+    }
+    .locked-content h3 { margin: 0 0 0.4rem; font-size: 1.05em; line-height: 1.35; }
+    .locked-content p { margin: 0; font-size: 0.85em; color: var(--color-muted); line-height: 1.5; }
+    .locked-blur { display: none; }
+    .locked-cta {
+      display: inline-block; margin-top: 0.75rem;
+      font-size: 0.82em; font-weight: 600; color: var(--color-accent);
     }
 
-    .tagline {
-      font-size: 1.2em;
-      color: #666;
-      margin: 0 0 0.3rem 0;
+    /* Sketch dividers & illustrations */
+    .sketch-divider { text-align: center; margin: 0.5rem 0; }
+    .sketch-svg { width: 100%; max-width: 300px; height: auto; color: var(--color-fg); }
+    .sketch-illustration { text-align: center; margin: 1.25rem 0; }
+    .sidebar-sketch { width: 120px; height: auto; color: var(--color-fg); }
+
+    /* Digest main content */
+    .digest-scroll { line-height: 1.75; }
+    .digest-scroll h2 { font-size: 1.25em; margin: 2rem 0 0.5rem; }
+    .digest-scroll h3 { font-size: 1.05em; margin: 1.25rem 0 0.25rem; }
+    .digest-scroll h3 a { color: var(--color-accent); }
+    .digest-scroll p { font-size: 0.92em; color: #555; margin-bottom: 0.6rem; }
+    .digest-scroll em { color: var(--color-muted); }
+    .digest-scroll hr { border: none; border-top: 1px solid var(--color-border); margin: 1.5rem 0; }
+    .digest-scroll blockquote {
+      border-left: 3px solid var(--color-accent); margin: 1rem 0; padding: 0.5rem 1rem;
+      font-style: italic; color: var(--color-muted); background: rgba(124,58,237,0.03); border-radius: 0 6px 6px 0;
+    }
+    .digest-scroll details {
+      background: var(--color-card); border: 1px solid var(--color-border);
+      border-radius: 8px; margin: 0.75rem 0; overflow: hidden;
+    }
+    .digest-scroll details:hover { border-color: #d0cec8; }
+    .digest-scroll summary {
+      padding: 1rem 1.25rem; cursor: pointer; list-style: none;
+      font-size: 0.92em; line-height: 1.5; color: var(--color-fg); user-select: none;
+    }
+    .digest-scroll summary::-webkit-details-marker { display: none; }
+    .digest-scroll summary::before { content: '+ '; color: var(--color-muted); font-weight: 400; }
+    .digest-scroll details[open] summary::before { content: '- '; color: var(--color-accent); }
+    .digest-scroll details > p,
+    .digest-scroll details > blockquote { padding: 0 1.25rem; margin-bottom: 0.75rem; }
+    .digest-scroll details > p:last-child { padding-bottom: 1.25rem; }
+
+    /* ===== Right sidebar ===== */
+    .digest-sidebar { font-size: 0.9em; }
+    .sidebar-sticky { position: sticky; top: 2rem; }
+    .sidebar-label {
+      font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--color-muted); margin: 0 0 0.75rem; padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--color-border); font-family: 'Inter', sans-serif; font-weight: 600;
     }
 
-    .sub-tagline {
-      font-size: 0.9em;
-      color: #999;
-      margin: 0;
+    .sidebar-card {
+      display: block; padding: 0.85rem 0; border-bottom: 1px solid var(--color-border);
+      text-decoration: none; color: inherit; transition: opacity 0.15s;
+    }
+    .sidebar-card:hover { opacity: 0.75; text-decoration: none; }
+    .sidebar-card strong { display: block; font-size: 0.88em; margin-bottom: 0.15rem; color: var(--color-fg); }
+    .sidebar-card p { margin: 0; font-size: 0.8em; color: var(--color-muted); line-height: 1.45; }
+
+    .sidebar-upgrade {
+      display: block; background: var(--color-accent); color: white;
+      padding: 1rem 1.1rem; border-radius: 8px; text-decoration: none;
+      margin-top: 1.25rem; transition: opacity 0.15s;
+    }
+    .sidebar-upgrade:hover { opacity: 0.92; text-decoration: none; }
+    .sidebar-upgrade strong { display: block; font-size: 0.95em; margin-bottom: 0.1rem; }
+    .sidebar-upgrade span { font-size: 0.82em; opacity: 0.85; }
+    .sidebar-upgrade p { margin: 0.4rem 0 0; font-size: 0.78em; opacity: 0.75; line-height: 1.4; }
+    .sidebar-upgrade-gold { background: #f59e0b; }
+
+    /* Source cards — Leverage style */
+    .source-cards { margin-top: 2rem; }
+    .source-cards-label {
+      font-size: 0.75em; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--color-muted); margin: 0 0 0.25rem; font-family: 'Inter', sans-serif; font-weight: 600;
+    }
+    .source-cards-sub {
+      font-size: 0.85em; color: var(--color-muted); margin: 0 0 0.25rem; font-style: italic;
+    }
+    .source-card {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1.1rem 0; border-bottom: 1px solid var(--color-border);
+      text-decoration: none; color: inherit; transition: opacity 0.15s;
+    }
+    .source-card:first-of-type { border-top: 1px solid var(--color-border); }
+    .source-card:hover { opacity: 0.75; text-decoration: none; }
+    .source-card-text { flex: 1; min-width: 0; }
+    .source-card-text strong {
+      display: block; font-size: 1em; font-family: 'Merriweather', serif;
+      margin-bottom: 0.2rem; color: var(--color-fg); line-height: 1.35;
+    }
+    .source-card-text p {
+      margin: 0; font-size: 0.85em; color: var(--color-muted); line-height: 1.45;
+    }
+    .source-meta {
+      display: block; margin-top: 0.3rem;
+      font-size: 0.72em; color: var(--color-muted); opacity: 0.7;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .source-card-sketch {
+      width: 80px; height: 80px; flex-shrink: 0; color: var(--color-fg); opacity: 0.2;
     }
 
-    /* Logo carousel */
-    .logos-section {
-      text-align: center;
-      margin-bottom: 2.5rem;
-      overflow: hidden;
+    /* Previous digest card */
+    .prev-digest-card {
+      display: block; margin-top: 1.5rem; padding: 1.25rem;
+      background: var(--color-card); border: 1px solid var(--color-border);
+      border-radius: 8px; text-decoration: none; color: inherit;
+      opacity: 0.6; transition: opacity 0.15s;
     }
-
-    .logos-label {
-      font-size: 0.8em;
-      color: #999;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin: 0 0 1rem 0;
+    .prev-digest-card:hover { opacity: 0.85; text-decoration: none; }
+    .prev-digest-date {
+      display: block; font-size: 0.7em; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--color-muted); margin-bottom: 0.3rem;
     }
-
-    .logos-track {
-      overflow: hidden;
-      mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-      -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-    }
-
-    .logos-slide {
-      display: flex;
-      gap: 3rem;
-      animation: scroll 25s linear infinite;
-      width: max-content;
-    }
-
-    .logo-item {
-      font-size: 1.1em;
-      font-weight: 600;
-      color: #bbb;
-      white-space: nowrap;
-      letter-spacing: 0.02em;
-      flex-shrink: 0;
-    }
-
-    @keyframes scroll {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
-
-    .logos-track:hover .logos-slide {
-      animation-play-state: paused;
-    }
-
-    /* Signup */
-    .signup-section {
-      margin-bottom: 3rem;
-    }
-
-    .signup-box {
-      background: rgba(0, 102, 204, 0.05);
-      border: 1px solid rgba(0, 102, 204, 0.15);
-      border-radius: 12px;
-      padding: 2rem;
-      text-align: center;
-    }
-
-    .signup-box h2 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.3em;
-    }
-
-    .signup-box > p {
-      color: #666;
-      margin: 0 0 1.5rem 0;
-    }
-
-    .signup-form {
-      display: flex;
-      gap: 0.75rem;
-      justify-content: center;
-      max-width: 500px;
-      margin: 0 auto 1rem;
-    }
-
-    .signup-form input {
-      flex: 1;
-      padding: 0.75rem 1rem;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 1em;
-    }
-
-    .signup-form input:focus {
-      outline: none;
-      border-color: var(--color-accent);
-    }
-
-    .signup-note {
-      font-size: 0.8em;
-      color: #999;
-      margin: 0;
-    }
-
-    /* Welcome/success state */
-    .signup-success {
-      background: rgba(124, 58, 237, 0.05);
-      border: 1px solid rgba(124, 58, 237, 0.2);
-      border-radius: 12px;
-      padding: 2rem;
-      text-align: left;
-    }
-
-    .signup-success h2 {
-      font-size: 1.5em;
-      margin: 0 0 0.5rem 0;
-      color: var(--color-accent, #7c3aed);
-    }
-
-    .signup-success > p {
-      color: #555;
-      margin: 0 0 1rem 0;
-      font-size: 0.95em;
-    }
-
-    .welcome-list {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 1.5rem 0;
-    }
-
-    .welcome-list li {
-      padding: 0.4rem 0;
-      font-size: 0.9em;
-      color: #444;
-    }
-
-    .welcome-list li::before {
-      content: "-> ";
-      color: var(--color-accent, #7c3aed);
-      font-weight: 600;
-    }
-
-    .welcome-note {
-      font-size: 0.85em;
-      color: #777;
-      line-height: 1.6;
-      border-top: 1px solid rgba(124, 58, 237, 0.15);
-      padding-top: 1rem;
-    }
-
-    /* Digest preview */
-    .latest-digest {
-      margin-bottom: 3rem;
-    }
-
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 1.5rem;
-      border-bottom: 1px solid var(--color-border);
-      padding-bottom: 1rem;
-    }
-
-    .section-header h2 { margin: 0; }
-    .digest-date { font-size: 0.9em; color: #888; margin: 0; }
-
-    .digest-full {
-      line-height: 1.7;
-    }
-
-    /* Premium teasers — top of page, clear not blocking */
-    .premium-teasers {
-      margin-bottom: 2.5rem;
-    }
-
-    .teaser-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-
-    .teaser-card {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 1rem 1.25rem;
-      border: 1px solid #e5e5e5;
-      border-radius: 10px;
-      text-decoration: none;
-      color: inherit;
-      transition: all 0.15s;
-      background: rgba(124, 58, 237, 0.02);
-    }
-
-    .teaser-card:hover {
-      border-color: #7c3aed;
-      background: rgba(124, 58, 237, 0.05);
-      text-decoration: none;
-    }
-
-    .teaser-card.teaser-gold {
-      background: rgba(245, 158, 11, 0.03);
-      border-color: #fde68a;
-    }
-    .teaser-card.teaser-gold:hover {
-      border-color: #f59e0b;
-      background: rgba(245, 158, 11, 0.06);
-    }
-
-    .teaser-icon {
-      font-size: 1.3em;
-      flex-shrink: 0;
-    }
-
-    .teaser-card strong {
-      display: block;
-      font-size: 0.85em;
-      margin-bottom: 0.15rem;
-    }
-
-    .teaser-card p {
-      margin: 0;
-      font-size: 0.78em;
-      color: #888;
-    }
-
-    .teaser-arrow {
-      margin-left: auto;
-      font-size: 0.75em;
-      font-weight: 600;
-      color: #7c3aed;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .teaser-gold .teaser-arrow { color: #d97706; }
-
-    /* Bottom fade teaser */
-    .bottom-teaser {
-      margin: 2rem 0 3rem;
-    }
-
-    .bottom-teaser-content {
-      position: relative;
-      border: 1px solid #e5e5e5;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .blurred-sources {
-      padding: 1.5rem 2rem 3rem;
-    }
-
-    .source-line {
-      padding: 0.6rem 0;
-      font-size: 0.9em;
-      color: #555;
-      border-bottom: 1px solid #f0f0f0;
-      margin: 0;
-    }
-
-    .source-line:last-child { border-bottom: none; }
-
-    .bottom-teaser-fade {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 200px;
-      background: linear-gradient(transparent, var(--color-bg) 80%);
-      pointer-events: none;
-    }
-
-    .bottom-teaser-cta {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-      padding: 0 2rem 2rem;
-      margin-top: -3rem;
-    }
-
-    .bottom-teaser-cta h3 {
-      font-size: 1.2em;
-      margin: 0 0 0.4rem 0;
-    }
-
-    .bottom-teaser-cta p {
-      font-size: 0.9em;
-      color: #666;
-      margin: 0 0 1rem 0;
+    .prev-digest-card strong { display: block; font-size: 0.95em; margin-bottom: 0.25rem; }
+    .prev-digest-card p { margin: 0; font-size: 0.82em; color: var(--color-muted); line-height: 1.45; }
+    .prev-digest-link {
+      display: block; margin-top: 0.5rem; font-size: 0.8em;
+      color: var(--color-accent); font-weight: 600;
     }
 
     @media (max-width: 768px) {
-      .teaser-row { grid-template-columns: 1fr; }
+      .source-card-sketch { width: 60px; height: 60px; }
     }
+
+    /* About — minimal */
+    .about { padding: 2rem 0; border-top: 1px solid var(--color-border); margin-top: 1rem; }
+    .about-text { max-width: 580px; margin: 0 auto; text-align: center; }
+    .about-text p { font-size: 0.9em; color: var(--color-muted); line-height: 1.6; margin: 0; }
+
+    .subscribed-section { padding: 2rem 0; border-top: 1px solid var(--color-border); margin-top: 1rem; }
+    .subscribed-text { max-width: 580px; margin: 0 auto; text-align: center; }
+    .subscribed-text p { font-size: 0.95em; color: var(--color-fg); line-height: 1.6; margin: 0; font-weight: 500; }
+
+    .site-footer { text-align: center; padding: 2rem 0; font-size: 0.82em; color: var(--color-muted); }
+    .no-content { text-align: center; padding: 3rem; color: var(--color-muted); }
 
     /* === Welcome Modal === */
     .modal-overlay {
-      display: none;
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
-      z-index: 9999; align-items: center; justify-content: center;
-      padding: 1rem;
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+      z-index: 9999; align-items: center; justify-content: center; padding: 1rem;
     }
     .modal-overlay.active { display: flex; }
-
     .modal-card {
-      background: white; border-radius: 16px; padding: 2.5rem;
-      max-width: 520px; width: 100%; text-align: center;
-      position: relative; overflow: hidden;
+      background: var(--color-card); border-radius: 14px; padding: 2.25rem 2rem 1.75rem;
+      max-width: 480px; width: 100%; position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
       animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 25px 50px rgba(0,0,0,0.25);
     }
+    @keyframes modalSlideUp { from { transform: translateY(48px) scale(0.97); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+    .modal-animate { opacity: 0; animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-x { position: absolute; top: 1.1rem; right: 1.25rem; background: none; border: none; color: #bbb; font-size: 1.4em; cursor: pointer; line-height: 1; padding: 0; z-index: 1; }
+    .modal-x:hover { color: #333; }
 
-    @keyframes modalSlideUp {
-      from { transform: translateY(60px) scale(0.95); opacity: 0; }
-      to { transform: translateY(0) scale(1); opacity: 1; }
-    }
+    .modal-welcome { padding: 1.5rem 2rem 1.75rem; max-width: 440px; }
 
-    .modal-icon {
-      font-size: 3.5em; margin-bottom: 0.5rem;
-      animation: iconPop 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
-    }
-    @keyframes iconPop {
-      from { transform: scale(0); }
-      50% { transform: scale(1.2); }
-      to { transform: scale(1); }
-    }
+    .modal-sketch { text-align: center; margin-bottom: 0.5rem; }
+    .modal-sketch-svg { width: 180px; height: auto; color: var(--color-fg); opacity: 0.15; }
 
-    .modal-card h2 { font-size: 1.8em; margin: 0 0 0.3rem; color: #111; }
-    .modal-email { font-size: 0.9em; color: #7c3aed; font-weight: 500; margin: 0 0 1.5rem; }
+    .modal-welcome-body { text-align: center; margin-bottom: 1.25rem; }
+    .modal-welcome-heading {
+      font-size: 1.6em; margin: 0 0 0.5rem; color: var(--color-fg);
+      font-family: 'Merriweather', serif; line-height: 1.25;
+    }
+    .modal-welcome-sub {
+      font-size: 0.95em; color: var(--color-muted); line-height: 1.55; margin: 0 0 0.75rem;
+    }
+    .modal-email-line { font-size: 0.82em; color: var(--color-accent); font-weight: 500; margin: 0; }
 
-    .modal-checklist { text-align: left; margin: 0 auto 1.5rem; max-width: 340px; }
-    .check-item {
-      display: flex; align-items: center; gap: 0.75rem;
-      padding: 0.5rem 0; font-size: 0.95em; color: #333;
-      opacity: 0; transform: translateX(-10px);
-    }
-    .check-item.animate-in {
-      animation: checkSlide 0.4s ease forwards;
-    }
-    @keyframes checkSlide {
-      to { opacity: 1; transform: translateX(0); }
-    }
-    .check-mark {
-      color: #22c55e; font-weight: 700; font-size: 1.1em;
-      width: 20px; flex-shrink: 0;
-    }
+    .modal-welcome-divider { height: 1px; background: var(--color-border); margin: 0 0 1.25rem; }
+    .modal-pro-box { background: rgba(124,58,237,0.04); border: 1.5px solid var(--color-accent); border-radius: 10px; padding: 1.1rem 1.25rem; margin-bottom: 1rem; }
+    .modal-pro-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem; }
+    .modal-pro-badge { background: var(--color-accent); color: white; padding: 0.2rem 0.7rem; border-radius: 20px; font-size: 0.75em; font-weight: 600; }
+    .modal-pro-sub { font-size: 0.78em; color: var(--color-muted); }
+    .modal-pro-list { list-style: none; padding: 0; margin: 0 0 0.85rem; }
+    .modal-pro-list li { font-size: 0.83em; color: #444; padding: 0.2rem 0; }
+    .modal-pro-list li::before { content: "✓ "; color: var(--color-accent); font-weight: 600; }
+    .modal-pro-btn { display: block; width: 100%; text-align: center; background: var(--color-accent); color: white; padding: 0.7rem; border-radius: 7px; font-size: 0.88em; font-weight: 600; text-decoration: none; }
+    .modal-pro-btn:hover { background: var(--color-accent-hover); text-decoration: none; }
+    .modal-close-btn { display: block; width: 100%; padding: 0.65rem; background: transparent; color: var(--color-muted); border: 1px solid var(--color-border); border-radius: 7px; font-size: 0.84em; cursor: pointer; font-family: 'Inter', sans-serif; }
+    .modal-close-btn:hover { color: var(--color-fg); border-color: #ccc; }
 
-    .modal-divider {
-      height: 1px; background: #eee; margin: 1.5rem 0;
-    }
-
-    .modal-upgrade-intro {
-      font-size: 0.85em; color: #888; margin: 0 0 1rem;
-    }
-
-    .modal-upgrade-options {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem;
-    }
-
-    .modal-upgrade-card {
-      border: 2px solid #eee; border-radius: 10px; padding: 1rem;
-      text-decoration: none; color: inherit; transition: all 0.2s;
-      text-align: center;
-    }
-    .modal-upgrade-card:hover { border-color: #7c3aed; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-    .modal-upgrade-card.gold:hover { border-color: #f59e0b; }
-
-    .upgrade-badge {
-      display: inline-block; background: #7c3aed; color: white;
-      padding: 0.15rem 0.6rem; border-radius: 6px;
-      font-size: 0.7em; font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;
-    }
-    .upgrade-badge.gold { background: #f59e0b; }
-
-    .modal-upgrade-card strong { display: block; font-size: 1.3em; margin-bottom: 0.25rem; }
-    .modal-upgrade-card p { margin: 0; font-size: 0.78em; color: #888; }
-
-    .modal-close {
-      background: none; border: none; color: #999; font-size: 0.85em;
-      cursor: pointer; padding: 0.5rem 1rem; transition: color 0.2s;
-    }
-    .modal-close:hover { color: #333; }
-
-    /* Confetti */
-    .modal-confetti {
-      position: absolute; top: 0; left: 0; right: 0; height: 100%;
-      pointer-events: none; overflow: hidden;
-    }
-    .confetti-piece {
-      position: absolute; width: 8px; height: 8px; border-radius: 2px;
-      top: -10px; animation: confettiFall 2s ease-in forwards;
-    }
-    @keyframes confettiFall {
-      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(500px) rotate(720deg); opacity: 0; }
-    }
-
-    .price-card {
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      padding: 2rem 1.5rem;
-      text-align: left;
-      position: relative;
-    }
-
-    .price-card.featured {
-      border-color: var(--color-accent);
-      box-shadow: 0 4px 12px rgba(0, 102, 204, 0.15);
-    }
-
-    .price-card .badge {
-      position: absolute;
-      top: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--color-accent);
-      color: white;
-      padding: 0.25rem 1rem;
-      border-radius: 12px;
-      font-size: 0.75em;
-      font-weight: 600;
-    }
-
-    .price-card h4 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.1em;
-    }
-
-    .price {
-      font-size: 2.5em;
-      font-weight: 700;
-      margin: 0 0 1rem 0;
-    }
-
-    .price span {
-      font-size: 0.35em;
-      font-weight: 400;
-      color: #888;
-    }
-
-    .price-card ul {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 1.5rem 0;
-    }
-
-    .price-card li {
-      padding: 0.4rem 0;
-      font-size: 0.9em;
-      color: #555;
-    }
-
-    .price-card li::before {
-      content: "✓ ";
-      color: var(--color-accent);
-      font-weight: 600;
-    }
-
-    /* Buttons */
-    .btn {
-      padding: 0.75rem 1.5rem;
-      border-radius: 6px;
-      font-weight: 500;
-      text-decoration: none;
-      display: inline-block;
-      text-align: center;
-      width: 100%;
-      cursor: pointer;
-      border: none;
-      font-size: 1em;
-    }
-
-    .btn-primary {
-      background: var(--color-accent);
-      color: white;
-    }
-
-    .btn-primary:hover { opacity: 0.9; }
-
-    .btn-secondary {
-      background: transparent;
-      border: 1px solid var(--color-border);
-      color: var(--color-fg);
-    }
-
-    .btn-secondary:hover {
-      border-color: var(--color-accent);
-    }
-
-    /* Value props */
-    .about {
-      margin-top: 3rem;
-      padding-top: 2rem;
-      border-top: 1px solid var(--color-border);
-    }
-
-    .about h2 {
-      text-align: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .about-text {
-      max-width: 600px;
-      margin: 0 auto 2rem;
-      text-align: center;
-    }
-
-    .about-text p {
-      font-size: 0.95em;
-      color: #555;
-      line-height: 1.6;
-      margin-bottom: 1rem;
-    }
-
-    .value-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
-    }
-
-    .value-card {
-      padding: 1.5rem;
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
-    }
-
-    .value-card h3 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1em;
-    }
-
-    .value-card p {
-      margin: 0;
-      font-size: 0.9em;
-      color: #666;
-    }
-
-    .site-footer {
-      text-align: center;
-      padding: 3rem 0 2rem;
-      font-size: 0.9em;
-      color: #888;
-    }
-
-    .no-content {
-      text-align: center;
-      padding: 3rem;
-      color: #888;
-    }
-
+    /* Responsive */
     @media (max-width: 768px) {
-      .pricing-cards { grid-template-columns: 1fr; }
-      .value-grid { grid-template-columns: 1fr; }
+      .digest-layout { grid-template-columns: 1fr; }
+      .digest-sidebar { order: -1; }
+      .sidebar-sticky { position: static; }
       .signup-form { flex-direction: column; }
-      h1 { font-size: 2.5em; }
+      h1 { font-size: 2.2em; }
     }
   </style>
 
   <script>
+    // Handle Stripe checkout success redirect
+    (async function() {
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('upgraded') === 'true' && params.get('session_id')) {
+        try {
+          var res = await fetch(window.API_URL + '/api/checkout/verify', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ session_id: params.get('session_id') })
+          });
+          var data = await res.json();
+          if (data.success) {
+            // Track upgrade event
+            if (window.plausible) window.plausible('Upgrade', {props: {tier: data.tier}});
+            // Update localStorage with new tier
+            localStorage.setItem('ae_tier', data.tier);
+            if (data.email) localStorage.setItem('ae_email', data.email);
+            // Clean URL and reload to reflect new tier
+            window.history.replaceState({}, '', '/');
+            window.location.reload();
+            return;
+          }
+        } catch (e) {
+          console.error('Checkout verify failed:', e);
+        }
+      }
+    })();
+
+    // Tier-based content gating
+    (function() {
+      var tier = localStorage.getItem('ae_tier');
+      var label = document.getElementById('sidebar-cards-label');
+      var upgradeCard = document.getElementById('sidebar-upgrade');
+      var goldCard = document.getElementById('sidebar-upgrade-gold');
+      var topCard = document.getElementById('locked-top-card');
+
+      var topFree = document.getElementById('locked-top-free');
+      var topPro = document.getElementById('locked-top-pro');
+      var topInner = document.getElementById('locked-top-inner');
+
+      if (tier === 'free' || !tier) {
+        // FREE: Show Pro article as locked, mix of pro+founding sidebar cards
+        // All defaults from HTML are correct
+      }
+
+      else if (tier === 'pro') {
+        // PRO: Show FOUNDING article as top card (different content, upsell to Inner Circle)
+        // Sidebar: hide pro cards, show only founding cards → /upgrade?tier=inner
+        if (topFree) topFree.style.display = 'none';
+        if (topPro) topPro.style.display = 'block';
+        if (label) label.textContent = 'Inner Circle Only';
+        document.querySelectorAll('.tier-pro-card').forEach(function(c) { c.style.display = 'none'; });
+        if (upgradeCard) upgradeCard.style.display = 'none';
+        if (goldCard) goldCard.style.display = 'block';
+      }
+
+      else if (tier === 'inner') {
+        // INNER CIRCLE: Show founding article unlocked, sidebar cards link to real articles
+        if (topFree) topFree.style.display = 'none';
+        if (topInner) topInner.style.display = 'block';
+        if (label) label.textContent = 'Your Inner Circle Content';
+        document.querySelectorAll('.tier-pro-card').forEach(function(c) { c.style.display = 'none'; });
+        document.querySelectorAll('.tier-founding-card').forEach(function(c) {
+          var url = c.dataset.article;
+          if (url) c.href = url;
+        });
+        if (upgradeCard) upgradeCard.style.display = 'none';
+        if (goldCard) goldCard.style.display = 'none';
+      }
+    })();
+
     // Signup form
     document.getElementById('signup-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -812,81 +754,64 @@ const formatDate = (dateStr) => {
       btn.textContent = 'Joining...';
       btn.disabled = true;
 
+      let data;
       try {
-        const res = await fetch(window.API_URL + '/api/subscribe', {
+        const res = await fetch(window.API_URL + '/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email }),
         });
-        const data = await res.json();
-        if (!res.ok || !data.success) {
-          btn.textContent = data.message || 'Something went wrong. Try again.';
+        data = await res.json();
+
+        // Dev mode: follow the link directly
+        if (data.dev_link) {
+          window.location.href = data.dev_link;
+          return;
+        }
+
+        if (!data.success) {
+          btn.textContent = 'Something went wrong. Try again.';
           btn.style.background = '#ef4444';
           btn.disabled = false;
-          setTimeout(() => {
-            btn.textContent = 'Join for free';
-            btn.style.background = '';
-            btn.disabled = false;
-          }, 3000);
+          setTimeout(() => { btn.textContent = 'Join for free'; btn.style.background = ''; }, 3000);
           return;
         }
       } catch (err) {
         btn.textContent = 'Connection error. Try again.';
         btn.style.background = '#ef4444';
         btn.disabled = false;
-        setTimeout(() => {
-          btn.textContent = 'Join for free';
-          btn.style.background = '';
-          btn.disabled = false;
-        }, 3000);
+        setTimeout(() => { btn.textContent = 'Join for free'; btn.style.background = ''; }, 3000);
         return;
       }
 
-      // Show the welcome modal
+      // Show welcome modal
       document.getElementById('modal-email').textContent = email;
-      const modal = document.getElementById('welcome-modal');
-      modal.classList.add('active');
+      document.getElementById('welcome-modal').classList.add('active');
+      if (window.plausible) window.plausible('Signup', {props: {email: email}});
 
-      // Trigger confetti
-      spawnConfetti();
+      // Update signup box
+      emailInput.style.display = 'none';
+      btn.textContent = "Check your inbox";
+      btn.style.background = '#7c3aed';
+      btn.style.color = 'white';
+      btn.disabled = true;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'default';
 
-      // Reset button
-      btn.textContent = "You're in!";
-      btn.style.background = '#22c55e';
-      emailInput.value = '';
+      const aboutEl = document.getElementById('about-section');
+      const subscribedEl = document.getElementById('subscribed-section');
+      if (aboutEl) aboutEl.style.display = 'none';
+      if (subscribedEl) subscribedEl.style.display = 'block';
     });
 
-    // Close modal
-    document.getElementById('modal-close')?.addEventListener('click', () => {
+    // Close modal handlers
+    function closeModal() {
       document.getElementById('welcome-modal').classList.remove('active');
-    });
-
-    // Close on overlay click
-    document.getElementById('welcome-modal')?.addEventListener('click', (e) => {
-      if (e.target === e.currentTarget) {
-        document.getElementById('welcome-modal').classList.remove('active');
-      }
-    });
-
-    // Confetti generator
-    function spawnConfetti() {
-      const container = document.getElementById('confetti-container');
-      const colors = ['#7c3aed', '#22c55e', '#f59e0b', '#3b82f6', '#ef4444', '#ec4899'];
-
-      for (let i = 0; i < 50; i++) {
-        const piece = document.createElement('div');
-        piece.className = 'confetti-piece';
-        piece.style.left = Math.random() * 100 + '%';
-        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
-        piece.style.animationDelay = Math.random() * 0.8 + 's';
-        piece.style.animationDuration = (1.5 + Math.random()) + 's';
-        piece.style.width = (5 + Math.random() * 8) + 'px';
-        piece.style.height = (5 + Math.random() * 8) + 'px';
-        container.appendChild(piece);
-      }
-
-      // Clean up after animation
-      setTimeout(() => { container.innerHTML = ''; }, 3000);
     }
+    document.getElementById('modal-close')?.addEventListener('click', closeModal);
+    document.getElementById('modal-x')?.addEventListener('click', closeModal);
+    document.getElementById('welcome-modal')?.addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeModal();
+    });
   </script>
 </BaseLayout>
