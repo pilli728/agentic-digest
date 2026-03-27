@@ -9,7 +9,7 @@ except ImportError:
 
 
 def _build_welcome_html(magic_link: str = None) -> str:
-    site_url = os.environ.get("SITE_URL", "https://agenticedge.com")
+    site_url = os.environ.get("SITE_URL", "https://agenticedge.tech")
     signin_block = ""
     if magic_link:
         signin_block = f"""
@@ -103,7 +103,7 @@ def send_welcome_email(email: str, magic_link: str = None) -> bool:
     if resend_key and resend is not None:
         try:
             resend.api_key = resend_key
-            sender = os.environ.get("RESEND_FROM", "Agentic Edge <digest@agenticedge.com>")
+            sender = os.environ.get("RESEND_FROM", "Agentic Edge <digest@agenticedge.tech>")
 
             resend.Emails.send({
                 "from": sender,

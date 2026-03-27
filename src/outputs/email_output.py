@@ -109,12 +109,12 @@ def _build_html(digest_content: str, unsubscribe_url: str = "#") -> str:
   <div class="upgrade-box">
     <strong>Want the full source list + tools?</strong><br>
     <span style="font-size: 14px; color: #666;">Pro members get 15+ ranked sources, early access, and community.</span><br>
-    <a href="{os.environ.get('SITE_URL', 'https://agenticedge.com')}/upgrade">Upgrade to Pro</a>
+    <a href="{os.environ.get('SITE_URL', 'https://agenticedge.tech')}/upgrade">Upgrade to Pro</a>
   </div>
 
   <div class="footer">
     <p>Agentic Edge — curated by a Stanford engineer for AI builders.</p>
-    <p><a href="{unsubscribe_url}">Unsubscribe</a> · <a href="{os.environ.get('SITE_URL', 'https://agenticedge.com')}">Web</a> · <a href="{os.environ.get('SITE_URL', 'https://agenticedge.com')}/pro">The Vault</a></p>
+    <p><a href="{unsubscribe_url}">Unsubscribe</a> · <a href="{os.environ.get('SITE_URL', 'https://agenticedge.tech')}">Web</a> · <a href="{os.environ.get('SITE_URL', 'https://agenticedge.tech')}/pro">The Vault</a></p>
     <p style="font-size: 11px; color: #bbb; margin-top: 8px;">Agentic Edge · Stanford, CA</p>
   </div>
 </body>
@@ -168,14 +168,14 @@ def _send_via_resend(digest_content: str, api_key: str, email_to: str = None) ->
         resend.api_key = api_key
 
         recipient = email_to or os.environ.get("DIGEST_EMAIL_TO")
-        sender = os.environ.get("RESEND_FROM", "Agentic Edge <digest@agenticedge.com>")
+        sender = os.environ.get("RESEND_FROM", "Agentic Edge <digest@agenticedge.tech>")
 
         if not recipient:
             print("  No recipient configured.")
             return False
 
         today = datetime.now().strftime("%B %d, %Y")
-        unsub_url = f"{os.environ.get('SITE_URL', 'https://agenticedge.com')}/unsubscribe?email={recipient}"
+        unsub_url = f"{os.environ.get('SITE_URL', 'https://agenticedge.tech')}/unsubscribe?email={recipient}"
         html = _build_html(digest_content, unsubscribe_url=unsub_url)
 
         params = {
@@ -185,7 +185,7 @@ def _send_via_resend(digest_content: str, api_key: str, email_to: str = None) ->
             "html": html,
             "text": digest_content,
             "headers": {
-                "List-Unsubscribe": f"<{os.environ.get('SITE_URL', 'https://agenticedge.com')}/unsubscribe?email={recipient}>",
+                "List-Unsubscribe": f"<{os.environ.get('SITE_URL', 'https://agenticedge.tech')}/unsubscribe?email={recipient}>",
                 "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
             },
         }
@@ -216,14 +216,14 @@ def _send_via_gmail(digest_content: str, email_from: str = None,
 
     try:
         today = datetime.now().strftime("%B %d, %Y")
-        unsub_url = f"{os.environ.get('SITE_URL', 'https://agenticedge.com')}/unsubscribe?email={recipient}"
+        unsub_url = f"{os.environ.get('SITE_URL', 'https://agenticedge.tech')}/unsubscribe?email={recipient}"
         html = _build_html(digest_content, unsubscribe_url=unsub_url)
 
         msg = MIMEMultipart("alternative")
         msg["Subject"] = f"Agentic Edge | {today}"
         msg["From"] = sender
         msg["To"] = recipient
-        msg["List-Unsubscribe"] = f"<{os.environ.get('SITE_URL', 'https://agenticedge.com')}/unsubscribe?email={recipient}>"
+        msg["List-Unsubscribe"] = f"<{os.environ.get('SITE_URL', 'https://agenticedge.tech')}/unsubscribe?email={recipient}>"
         msg["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
 
         msg.attach(MIMEText(digest_content, "plain"))

@@ -101,7 +101,7 @@ def send_magic_link_email(email: str, token: str, base_url: str = None) -> bool:
     if resend_key and resend is not None:
         try:
             resend.api_key = resend_key
-            sender = os.environ.get("RESEND_FROM", "Agentic Edge <digest@agenticedge.com>")
+            sender = os.environ.get("RESEND_FROM", "Agentic Edge <digest@agenticedge.tech>")
             resend.Emails.send({
                 "from": sender,
                 "to": [email],
