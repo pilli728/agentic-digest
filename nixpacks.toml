@@ -1,10 +1,13 @@
 providers = ["python"]
 
 [phases.setup]
-nixPkgs = ["python311", "python311Packages.pip"]
+nixPkgs = ["python311"]
 
 [phases.install]
-cmds = ["pip install -r requirements.txt"]
+cmds = ["python3 -m venv /opt/venv", "/opt/venv/bin/pip install -r requirements.txt"]
+
+[phases.build]
+cmds = []
 
 [start]
-cmd = "python3 src/api_server.py"
+cmd = "/opt/venv/bin/python3 src/api_server.py"
