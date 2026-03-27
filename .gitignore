@@ -51,7 +51,6 @@ Thumbs.db
 
 # Private — training dashboard & secret sauce (local only)
 internal_dashboard*.html
-src/api_server.py
 src/core/local_filter.py
 src/core/trending_fetcher.py
 src/core/preference_engine.py
