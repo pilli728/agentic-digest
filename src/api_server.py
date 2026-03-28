@@ -614,50 +614,51 @@ class APIHandler(BaseHTTPRequestHandler):
                 self.send_json({"success": False, "message": "Unauthorized"}, status=401)
                 return
 
-            today = datetime.now().strftime("%Y-%m-%d")
-
-            # Try multiple possible paths for digest files
-            base = os.path.dirname(os.path.abspath(__file__))
-            possible_paths = [
-                os.path.join(base, "..", "web", "src", "content", "digests"),
-                os.path.join(base, "web", "src", "content", "digests"),
-                "/app/web/src/content/digests",
-            ]
-
-            digest_file = None
-            for digest_path in possible_paths:
-                if not os.path.isdir(digest_path):
-                    continue
-                for f in os.listdir(digest_path):
-                    if f.startswith(today) and f.endswith(".md"):
-                        digest_file = os.path.join(digest_path, f)
-                        break
-                if digest_file:
-                    break
-
-            if not digest_file:
-                tried = [p for p in possible_paths if os.path.isdir(p)]
-                self.send_json({"success": False, "message": f"No digest found for {today}. Searched: {tried}"})
-                return
-
-            with open(digest_file, "r") as f:
-                content = f.read()
-                # Strip frontmatter
-                parts = content.split("---", 2)
-                if len(parts) >= 3:
-                    markdown = parts[2].strip()
-                else:
-                    markdown = content
-
-            email_results = {"sent": 0, "failed": 0}
             try:
+                today = datetime.now().strftime("%Y-%m-%d")
+
+                # Try multiple possible paths for digest files
+                base = os.path.dirname(os.path.abspath(__file__))
+                possible_paths = [
+                    os.path.join(base, "..", "web", "src", "content", "digests"),
+                    os.path.join(base, "web", "src", "content", "digests"),
+                    "/app/web/src/content/digests",
+                ]
+
+                digest_file = None
+                for digest_path in possible_paths:
+                    if not os.path.isdir(digest_path):
+                        continue
+                    for f in os.listdir(digest_path):
+                        if f.startswith(today) and f.endswith(".md"):
+                            digest_file = os.path.join(digest_path, f)
+                            break
+                    if digest_file:
+                        break
+
+                if not digest_file:
+                    tried = [p for p in possible_paths if os.path.isdir(p)]
+                    self.send_json({"success": False, "message": f"No digest for {today}. Paths: {tried}"})
+                    return
+
+                with open(digest_file, "r") as f:
+                    content = f.read()
+                    parts = content.split("---", 2)
+                    md = parts[2].strip() if len(parts) >= 3 else content
+
                 from outputs.email_output import send_to_all_subscribers
                 db = DigestDatabase()
-                email_results = send_to_all_subscribers(markdown, db)
+                email_results = send_to_all_subscribers(md, db)
                 db.close()
+
+                self.send_json({
+                    "success": True,
+                    "message": f"Sent {email_results.get('sent', 0)} emails for {today}",
+                    "emails_sent": email_results.get("sent", 0),
+                    "emails_failed": email_results.get("failed", 0),
+                })
             except Exception as e:
-                print(f"  Email sending failed: {e}")
-                self.send_json({"success": False, "message": str(e)[:200]})
+                self.send_json({"success": False, "message": f"Error: {str(e)[:300]}"})
                 return
 
             self.send_json({
