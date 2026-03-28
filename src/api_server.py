@@ -841,6 +841,7 @@ class APIHandler(BaseHTTPRequestHandler):
         elif path == "/api/unsubscribe":
             body = self.read_body()
             if not body:
+                self.send_json({"success": False, "message": "Email required"}, status=400)
                 return
             email = body.get("email")
             if not email:
