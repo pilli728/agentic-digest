@@ -615,19 +615,29 @@ class APIHandler(BaseHTTPRequestHandler):
                 return
 
             today = datetime.now().strftime("%Y-%m-%d")
-            digest_path = os.path.join(
-                os.path.dirname(__file__), "..", "web", "src", "content", "digests"
-            )
 
-            # Find today's digest file
+            # Try multiple possible paths for digest files
+            base = os.path.dirname(os.path.abspath(__file__))
+            possible_paths = [
+                os.path.join(base, "..", "web", "src", "content", "digests"),
+                os.path.join(base, "web", "src", "content", "digests"),
+                "/app/web/src/content/digests",
+            ]
+
             digest_file = None
-            for f in os.listdir(digest_path):
-                if f.startswith(today) and f.endswith(".md"):
-                    digest_file = os.path.join(digest_path, f)
+            for digest_path in possible_paths:
+                if not os.path.isdir(digest_path):
+                    continue
+                for f in os.listdir(digest_path):
+                    if f.startswith(today) and f.endswith(".md"):
+                        digest_file = os.path.join(digest_path, f)
+                        break
+                if digest_file:
                     break
 
             if not digest_file:
-                self.send_json({"success": False, "message": f"No digest found for {today}"})
+                tried = [p for p in possible_paths if os.path.isdir(p)]
+                self.send_json({"success": False, "message": f"No digest found for {today}. Searched: {tried}"})
                 return
 
             with open(digest_file, "r") as f:
