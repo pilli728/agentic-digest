@@ -615,7 +615,8 @@ class APIHandler(BaseHTTPRequestHandler):
                 return
 
             try:
-                today = datetime.now().strftime("%Y-%m-%d")
+                from datetime import datetime as dt
+                today = dt.now().strftime("%Y-%m-%d")
 
                 # Try multiple possible paths for digest files
                 base = os.path.dirname(os.path.abspath(__file__))
