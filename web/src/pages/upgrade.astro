@@ -30,8 +30,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <div class="plan-card pro-plan" id="plan-pro">
         <div class="badge">Most Popular</div>
         <h2>Pro</h2>
-        <p class="price">$12<span>/mo</span></p>
-        <p class="price-sub">or $99/year (save 31%)</p>
+        <p class="price" id="pro-price">$8<span>/mo</span></p>
+        <p class="price-sub" id="pro-price-sub"><s>$12/mo</s> billed annually at $99</p>
         <ul>
           <li class="has">15+ ranked sources with one-liners</li>
           <li class="has">The Vault: playbooks, guides, breakdowns</li>
@@ -39,13 +39,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <li class="missing">Tool drops + DM access</li>
         </ul>
         <div class="billing-toggle" id="pro-toggle">
-          <button class="toggle-option active" data-period="monthly">Monthly</button>
-          <button class="toggle-option" data-period="annual">Annual (save 31%)</button>
+          <button class="toggle-option" data-period="monthly">Monthly</button>
+          <button class="toggle-option active" data-period="annual">Annual (save 31%)</button>
         </div>
-        <button class="checkout-btn" id="checkout-pro" data-price="pro_monthly">
+        <button class="checkout-btn" id="checkout-pro" data-price="pro_monthly" style="display:none;">
           Go Pro — $12/month
         </button>
-        <button class="checkout-btn" id="checkout-pro-annual" data-price="pro_annual" style="display:none;">
+        <button class="checkout-btn" id="checkout-pro-annual" data-price="pro_annual">
           Go Pro — $99/year
         </button>
       </div>
@@ -54,8 +54,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <div class="plan-card inner-plan" id="plan-inner">
         <div class="badge gold">Limited spots</div>
         <h2>Inner Circle</h2>
-        <p class="price">$39<span>/mo</span></p>
-        <p class="price-sub">or $349/year (save 25%)</p>
+        <p class="price" id="inner-price">$29<span>/mo</span></p>
+        <p class="price-sub" id="inner-price-sub"><s>$39/mo</s> billed annually at $349</p>
         <ul>
           <li class="has">Everything in Pro</li>
           <li class="has">Monthly tool drops (CLAUDE.md, configs, scripts)</li>
@@ -63,13 +63,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <li class="has">First to see what I build before I write about it</li>
         </ul>
         <div class="billing-toggle" id="inner-toggle">
-          <button class="toggle-option active" data-period="monthly">Monthly</button>
-          <button class="toggle-option" data-period="annual">Annual (save 25%)</button>
+          <button class="toggle-option" data-period="monthly">Monthly</button>
+          <button class="toggle-option active" data-period="annual">Annual (save 25%)</button>
         </div>
-        <button class="checkout-btn gold" id="checkout-inner" data-price="inner_monthly">
+        <button class="checkout-btn gold" id="checkout-inner" data-price="inner_monthly" style="display:none;">
           Join Inner Circle — $39/month
         </button>
-        <button class="checkout-btn gold" id="checkout-inner-annual" data-price="inner_annual" style="display:none;">
+        <button class="checkout-btn gold" id="checkout-inner-annual" data-price="inner_annual">
           Join Inner Circle — $349/year
         </button>
       </div>
@@ -265,6 +265,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       color: #888;
       margin: 0.15rem 0 0.5rem 0;
     }
+    .price-sub s {
+      color: #bbb;
+      text-decoration: line-through;
+      margin-right: 0.25em;
+    }
 
     @media (max-width: 900px) {
       .pricing-section { grid-template-columns: 1fr; }
@@ -400,20 +405,38 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     })();
 
     // Billing toggle for Pro and Inner Circle
-    document.querySelectorAll('.billing-toggle').forEach(toggle => {
-      const isPro = toggle.id === 'pro-toggle';
-      const monthlyId = isPro ? 'checkout-pro' : 'checkout-inner';
-      const annualId = isPro ? 'checkout-pro-annual' : 'checkout-inner-annual';
+    var toggleConfig = {
+      'pro-toggle': {
+        monthlyBtn: 'checkout-pro', annualBtn: 'checkout-pro-annual',
+        priceEl: 'pro-price', subEl: 'pro-price-sub',
+        monthlyPrice: '$12<span>/mo</span>', monthlySub: 'billed monthly',
+        annualPrice: '$8<span>/mo</span>', annualSub: '<s>$12/mo</s> billed annually at $99',
+      },
+      'inner-toggle': {
+        monthlyBtn: 'checkout-inner', annualBtn: 'checkout-inner-annual',
+        priceEl: 'inner-price', subEl: 'inner-price-sub',
+        monthlyPrice: '$39<span>/mo</span>', monthlySub: 'billed monthly',
+        annualPrice: '$29<span>/mo</span>', annualSub: '<s>$39/mo</s> billed annually at $349',
+      }
+    };
 
-      toggle.querySelectorAll('.toggle-option').forEach(opt => {
-        opt.addEventListener('click', () => {
-          toggle.querySelectorAll('.toggle-option').forEach(o => o.classList.remove('active'));
+    document.querySelectorAll('.billing-toggle').forEach(function(toggle) {
+      var cfg = toggleConfig[toggle.id];
+      if (!cfg) return;
+
+      toggle.querySelectorAll('.toggle-option').forEach(function(opt) {
+        opt.addEventListener('click', function() {
+          toggle.querySelectorAll('.toggle-option').forEach(function(o) { o.classList.remove('active'); });
           opt.classList.add('active');
-          const isAnnual = opt.dataset.period === 'annual';
-          const monthlyBtn = document.getElementById(monthlyId);
-          const annualBtn = document.getElementById(annualId);
-          if (monthlyBtn) monthlyBtn.style.display = isAnnual ? 'none' : 'block';
-          if (annualBtn) annualBtn.style.display = isAnnual ? 'block' : 'none';
+          var isAnnual = opt.dataset.period === 'annual';
+          var mBtn = document.getElementById(cfg.monthlyBtn);
+          var aBtn = document.getElementById(cfg.annualBtn);
+          var priceEl = document.getElementById(cfg.priceEl);
+          var subEl = document.getElementById(cfg.subEl);
+          if (mBtn) mBtn.style.display = isAnnual ? 'none' : 'block';
+          if (aBtn) aBtn.style.display = isAnnual ? 'block' : 'none';
+          if (priceEl) priceEl.innerHTML = isAnnual ? cfg.annualPrice : cfg.monthlyPrice;
+          if (subEl) subEl.innerHTML = isAnnual ? cfg.annualSub : cfg.monthlySub;
         });
       });
     });
