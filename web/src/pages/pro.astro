@@ -190,13 +190,30 @@ const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === '
     .dl-icon { font-size: 1.3em; flex-shrink: 0; margin-top: 0.1em; }
     .download-card strong { display: block; font-size: 0.9em; margin-bottom: 0.15rem; }
     .download-card p { margin: 0; font-size: 0.78em; color: var(--color-muted); line-height: 1.4; }
-    @media (max-width: 768px) { .downloads-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) {
+      .downloads-grid { grid-template-columns: 1fr; }
+      .content-grid { grid-template-columns: 1fr; }
+    }
     @media (max-width: 480px) {
       .pro-header h1 { font-size: 1.8em; }
-      .pro-header { padding: 1rem 0; }
-      .content-grid { grid-template-columns: 1fr; }
+      .pro-header { padding: 1rem 0; margin-bottom: 1.25rem; }
+      .pro-header p { font-size: 0.9em; }
+      .content-grid { grid-template-columns: 1fr; gap: 1rem; }
       .content-card { padding: 1rem; }
-      .gate-card { padding: 1.5rem 1.25rem 1rem; }
+      .content-card h3 { font-size: 1em; }
+      .content-card p { font-size: 0.85em; }
+      .gate-card { padding: 1.5rem 1rem 1rem; }
+      .gate-card h2 { font-size: 1.3em; }
+      .gate-btn { display: block; width: 100%; text-align: center; padding: 0.85rem 1.5rem; min-height: 44px; }
+      .download-card { padding: 0.85rem; }
+      .download-card strong { font-size: 0.85em; }
+      .download-card p { font-size: 0.75em; }
+      .auth-gate { margin: 2rem auto; }
+    }
+    @media (max-width: 360px) {
+      .pro-header h1 { font-size: 1.5em; }
+      .content-card { padding: 0.85rem; }
+      .gate-card { padding: 1.25rem 0.85rem 0.85rem; }
     }
 
     /* Auth gate */

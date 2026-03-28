@@ -45,9 +45,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     .try-again:hover { border-color: #7c3aed; color: #7c3aed; }
 
     @media (max-width: 480px) {
-      .login-page { margin: 1.5rem auto; }
+      .login-page { margin: 1.5rem auto; padding: 0 0.25rem; }
       .login-card { padding: 1.5rem 1.25rem; }
       h1 { font-size: 1.3em; }
+      input { padding: 0.85rem 0.75rem; font-size: 1em; min-height: 44px; }
+      button[type="submit"] { padding: 0.85rem; font-size: 1em; min-height: 44px; }
+      .try-again { min-height: 44px; padding: 0.6rem 1.5rem; }
+    }
+    @media (max-width: 360px) {
+      .login-card { padding: 1.25rem 1rem; }
+      .login-card > p { font-size: 0.88em; }
     }
   </style>
 

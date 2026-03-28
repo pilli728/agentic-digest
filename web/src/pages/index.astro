@@ -659,17 +659,42 @@ const formatDate = (dateStr) => {
       .sidebar-sticky { position: static; }
       .sketch-illustration { display: none; }
       .signup-form { flex-direction: column; }
+      .signup-form input { text-align: left; min-height: 44px; }
+      .btn-primary { width: 100%; padding: 0.75rem 1rem; min-height: 44px; }
       h1 { font-size: 2.2em; }
+      .home-header { padding: 2rem 0 1rem; }
       .source-card-sketch { width: 50px; height: 50px; }
       .logos-slide { gap: 1.5rem; }
       .modal-card { padding: 1.25rem 1rem 1rem; }
+      .locked-card { padding: 1.25rem; }
     }
     @media (max-width: 480px) {
       h1 { font-size: 1.8em; }
+      .home-header { padding: 1.5rem 0 0.75rem; margin-bottom: 1rem; }
+      .tagline { font-size: 1em; }
+      .signup-box { padding: 1.25rem 1rem; }
+      .signup-box h2 { font-size: 1.05em; }
+      .signup-box > p { font-size: 0.85em; }
       .source-card-sketch { width: 40px; height: 40px; }
       .logos-slide { gap: 1rem; }
+      .locked-card { padding: 1rem; margin-bottom: 1rem; }
+      .locked-content h3 { font-size: 0.95em; }
+      .source-card-text strong { font-size: 0.92em; }
+      .source-card-text p { font-size: 0.82em; }
       .modal-card { padding: 1rem 0.85rem 0.85rem; max-width: 95vw; }
+      .modal-welcome { padding: 1.25rem 1rem 1.25rem; }
       .modal-welcome-heading { font-size: 1.1em; }
+      .modal-pro-box { padding: 0.85rem 1rem; }
+      .modal-pro-header { flex-direction: column; gap: 0.3rem; }
+      .prev-digest-card { padding: 1rem; }
+      .about-text p { font-size: 0.85em; }
+    }
+    @media (max-width: 360px) {
+      h1 { font-size: 1.5em; }
+      .signup-box { padding: 1rem 0.75rem; }
+      .signup-form input { padding: 0.65rem 0.75rem; font-size: 0.85em; }
+      .btn-primary { font-size: 0.85em; }
+      .source-cards-label { font-size: 0.95em; }
     }
   </style>
 
