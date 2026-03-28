@@ -4,7 +4,9 @@ import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
   const premium = await getCollection('premium');
-  return premium.map(entry => ({
+  const now = new Date();
+  const published = premium.filter(p => new Date(p.data.date) <= now);
+  return published.map(entry => ({
     params: { slug: entry.slug },
     props: { entry },
   }));

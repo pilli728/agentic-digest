@@ -2,7 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 
-const premium = await getCollection('premium');
+const allPremium = await getCollection('premium');
+const now = new Date();
+const premium = allPremium.filter(p => new Date(p.data.date) <= now);
 const sorted = premium.sort((a, b) =>
   new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
 );

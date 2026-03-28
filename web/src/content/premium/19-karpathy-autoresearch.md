@@ -1,7 +1,7 @@
 ---
 title: "Karpathy's Autoresearch: The Cognition Framework Nobody Read"
 description: "Andrej Karpathy dropped an autoresearch tool with a README that rewrites how you think about AI agents. Here's the part everyone skipped."
-date: "2026-03-27"
+date: "2026-04-02"
 tier: "pro"
 category: "guide"
 ---

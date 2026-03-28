@@ -1,7 +1,7 @@
 ---
 title: "15 Claude Code Skills and GitHub Repos Worth Installing This Week"
 description: "The skills, plugins, and repos that real developers are using with Claude Code right now. Tested, ranked, with install commands."
-date: "2026-03-27"
+date: "2026-04-01"
 tier: "pro"
 category: "tool-drop"
 ---

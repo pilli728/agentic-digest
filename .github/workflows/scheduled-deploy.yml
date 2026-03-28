@@ -1,9 +1,9 @@
-name: Scheduled Monday Deploy
+name: Scheduled Deploy
 
 on:
   schedule:
-    # Every Monday at 6am PT (1pm UTC)
-    - cron: '0 13 * * 1'
+    # Every day at 6am PT (1pm UTC)
+    - cron: '0 13 * * *'
   workflow_dispatch: # Allow manual trigger
 
 jobs:
