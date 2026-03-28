@@ -6,101 +6,226 @@ tier: "founding"
 category: "guide"
 ---
 
-OpenClaw is an open-source gateway for managing AI agent plugins. It lets you connect agents to tools — web search, code execution, database access, file systems — through a single control plane.
+OpenClaw is an open-source personal AI assistant that went from a side project (originally called Clawdbot, then Moltbot) to 100k+ GitHub stars in a matter of weeks. Created by PSPDFKit founder Peter Steinberger, it runs locally and connects to your chat apps (WhatsApp, Telegram, Discord) while using MCP servers and "skills" from ClawHub to do actual work on your machine.
 
 It's powerful. It's also dangerous if you set it up wrong.
 
-Most people install it, connect a bunch of plugins, and start building. That's backwards. You need to lock the gateway down first.
+Most people install it, connect a bunch of MCP servers and skills, and start building. That's backwards. You need to lock the gateway down first.
 
-## Why Setup Order Matters
+## What OpenClaw Actually Is (And Isn't)
 
-OpenClaw's default configuration is permissive. Out of the box, any connected plugin can access any resource. There's no spending cap. There's no request logging. There's no plugin isolation.
+OpenClaw is NOT an agent gateway in the traditional API-proxy sense. It's a local AI assistant that acts as the agent itself. It connects to LLM providers (Anthropic, OpenAI, Google, or local models via Ollama), takes instructions through your messaging apps, and executes tasks using tools.
 
-If you connect a third-party plugin before configuring security, that plugin has the same access as your own code. I've seen setups where a random community plugin could read environment variables. That means API keys. Database credentials. Everything.
+The architecture looks like this:
 
-Lock first. Connect second.
-
-## Step 1: Gateway Security (Day 1)
-
-Before you touch plugins, configure these three things:
-
-**Authentication**: Set up API key auth on the gateway itself. Every request to OpenClaw should require a key. This isn't optional.
-
-```yaml
-# openclaw.config.yaml
-gateway:
-  auth:
-    type: api_key
-    keys:
-      - name: "production"
-        key: "${OPENCLAW_API_KEY}"
-        permissions: ["read", "write", "execute"]
+```
+You (WhatsApp/Telegram/Discord/CLI)
+        |
+        v
+  OpenClaw Daemon (local, port 3000)
+        |
+        +--- LLM Provider (Anthropic/OpenAI/Google/Ollama)
+        |
+        +--- MCP Servers (filesystem, Brave Search, Postgres, GitHub, etc.)
+        |
+        +--- Skills (ClawHub marketplace + custom Python/JS scripts)
+        |
+        +--- SOUL.md (personality + constraints file)
 ```
 
-**Network isolation**: Restrict which hosts plugins can reach. By default, a plugin can make outbound requests to anywhere. Lock it to your approved list.
+The daemon binds to localhost by default. This matters. Do NOT expose it to the public internet. It is not hardened for that. If you need remote access, use SSH tunnels or Tailscale.
 
-```yaml
-network:
-  allowed_hosts:
-    - "api.openai.com"
-    - "api.anthropic.com"
-    - "your-database.internal"
-  deny_all_others: true
+## Step 0: Installation (15 minutes)
+
+You need Node.js 22.16+ (Node 24 recommended).
+
+```bash
+# Option A: One-liner (downloads, installs, runs onboarding wizard)
+curl -fsSL https://openclaw.ai/install.sh | bash
+
+# Option B: Manual via npm
+npm install -g openclaw@latest
+
+# Then run the onboarding wizard
+openclaw onboard --install-daemon
 ```
 
-**Request logging**: Turn on full request/response logging from day one. You'll need this when something goes wrong. And something will go wrong.
+The onboarding wizard asks for your LLM API key, picks your messaging channels, and starts the daemon. Resist the urge to connect everything during onboarding. Pick one messaging channel. Enter your API key. Stop there.
 
-## Step 2: Plugin Vetting (Day 2-3)
+Verify it worked:
 
-Not all plugins are equal. Before installing any plugin, check three things:
-
-1. **Source code availability.** If you can't read the code, don't install it. Period.
-2. **Permission scope.** What does the plugin ask for? A web search plugin shouldn't need file system access. If permissions look too broad, skip it.
-3. **Maintenance status.** Check the last commit date. Abandoned plugins don't get security patches.
-
-Start with the core plugins from the OpenClaw org. They're audited. Community plugins need manual review.
-
-Install one plugin at a time. Test it. Check the logs. Then move to the next one. Batch-installing five plugins and debugging which one is misbehaving is a miserable experience.
-
-## Step 3: Cost Controls (Day 4-5)
-
-AI agent plugins can run up bills fast. An agent in a loop hitting GPT-4o can burn through $50 in minutes.
-
-Set hard limits:
-
-```yaml
-cost_controls:
-  daily_limit_usd: 10.00
-  per_request_limit_usd: 0.50
-  alert_threshold_pct: 80
-  kill_on_limit: true
+```bash
+openclaw --version
 ```
 
-The `kill_on_limit` flag matters. Without it, OpenClaw will warn you but keep processing. Set it to true. You'd rather have a task fail than get a $500 surprise.
+## Step 1: Lock Down File Permissions (Day 1, First Thing)
 
-Also set per-plugin limits. Your code execution plugin probably needs a higher cap than your search plugin. Don't give them the same budget.
+OpenClaw stores everything in `~/.openclaw/`. Your API keys, config, credentials, conversation history. All of it.
+
+```bash
+chmod 700 ~/.openclaw
+chmod 600 ~/.openclaw/openclaw.json
+chmod 700 ~/.openclaw/credentials
+```
+
+If someone (or some process) can read `~/.openclaw/openclaw.json`, they have your API keys. Your LLM credentials. Everything the assistant can access. Lock it immediately.
+
+## Step 2: Gateway Security (Day 1)
+
+The main config lives at `~/.openclaw/openclaw.json`. Here's what a locked-down config looks like:
+
+```json
+{
+  "daemon": {
+    "host": "127.0.0.1",
+    "port": 3000,
+    "auth": {
+      "enabled": true,
+      "token": "${OPENCLAW_AUTH_TOKEN}"
+    }
+  },
+  "llm": {
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-20250514",
+    "apiKey": "${ANTHROPIC_API_KEY}"
+  },
+  "mcpServers": {},
+  "skills": [],
+  "safety": {
+    "confirmDestructive": true,
+    "blockedCommands": ["rm -rf", "DROP TABLE", "FORMAT"],
+    "maxConcurrentTools": 3
+  }
+}
+```
+
+Key things to notice:
+
+- **host is 127.0.0.1**, not 0.0.0.0. This means it only accepts local connections.
+- **auth is enabled**. Every request needs a token.
+- **mcpServers is empty**. We haven't connected anything yet. That's intentional.
+- **confirmDestructive is true**. OpenClaw will pause before running anything that could cause damage.
+
+Store secrets in environment variables or in `/etc/openclaw/env`, not hardcoded in the JSON file. OpenClaw reads env vars at startup.
+
+## Step 3: MCP Server Vetting (Day 2-3)
+
+MCP servers are how OpenClaw talks to external tools. The config goes in that `mcpServers` block. Start with these five (they're well-maintained and widely used):
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/you/projects"],
+      "env": {}
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      }
+    }
+  }
+}
+```
+
+Before adding ANY MCP server:
+
+1. **Read the source code.** If it's closed source, skip it.
+2. **Check the scope.** A search server shouldn't need filesystem access. If permissions look too broad, skip it.
+3. **Check maintenance.** Last commit more than 3 months old? That server isn't getting security patches.
+4. **Install one at a time.** Add a server, restart the daemon (`openclaw daemon restart`), test it, check logs. Then add the next one. Debugging five new servers at once is miserable.
+
+## Step 4: Skills Audit (Day 3-4)
+
+Skills are scripts (Python or JavaScript) that teach OpenClaw multi-step workflows. ClawHub is the marketplace. Since February 2026, ClawHub runs VirusTotal scans on uploads. That's a start, but it's not enough.
+
+Treat every third-party skill as untrusted code. Read it before enabling it.
+
+To install a skill from ClawHub:
+
+```bash
+openclaw skill install <skill-name>
+```
+
+Skills live in `~/.openclaw/skills/`. Open the file and read it. It's usually under 200 lines. If a "calendar integration" skill is making network calls to domains you don't recognize, delete it.
+
+## Step 5: SOUL.md Constraints (Day 4)
+
+SOUL.md is OpenClaw's personality and rules file. It sits at `~/.openclaw/SOUL.md`. Think of it as your CLAUDE.md equivalent. Whatever you put here, OpenClaw reads on every interaction.
+
+Add hard constraints:
+
+```markdown
+# SOUL.md
+
+## Safety Rules
+- Never execute commands that delete files without explicit confirmation
+- Never access or transmit API keys, passwords, or credentials in messages
+- Never make purchases or financial transactions
+- Rate limit: max 10 LLM calls per task
+- If a task requires more than 5 tool calls, pause and summarize progress
+
+## Allowed Domains for Network Access
+- github.com
+- api.anthropic.com
+- your-internal-tools.company.com
+```
+
+## Step 6: Cost Monitoring (Day 5)
+
+OpenClaw calls your LLM provider on every interaction. An agent loop can rack up costs fast. A skill that retries on failure can burn $50+ in minutes if you're on Claude Opus or GPT-4.
+
+There's no built-in cost dashboard yet, but you can monitor costs:
+
+**Check your provider dashboards directly.** Anthropic, OpenAI, and Google all have usage pages. Set billing alerts there.
+
+**Set model-level guards in your config:**
+
+```json
+{
+  "llm": {
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-20250514",
+    "maxTokensPerRequest": 4096,
+    "maxRequestsPerMinute": 30,
+    "maxRequestsPerDay": 500
+  }
+}
+```
+
+**Use Sonnet for routine tasks.** Only switch to Opus for complex reasoning. Most skills work fine on Sonnet and cost ~10x less.
+
+**Log everything from day one.** Check `~/.openclaw/logs/` daily for the first week. Look for retry loops (the #1 cost killer) and unexpected tool calls.
 
 ## Common Mistakes
 
-**Connecting a database plugin without query restrictions.** The plugin can run any SQL. Including `DROP TABLE`. Use read-only database credentials for agent plugins. Always.
+**Exposing the gateway to the internet.** Don't bind to 0.0.0.0. Don't set up a public reverse proxy. Use SSH tunnels or Tailscale if you need remote access.
 
-**Skipping TLS on internal connections.** "It's on my local network" isn't security. Plugins can be compromised. Encrypt everything.
+**Installing 12 MCP servers on day one.** Start with 2-3. Add more after you understand the interaction patterns.
 
-**No rate limiting.** An agent in a retry loop will hammer your gateway. Set rate limits per plugin — 60 requests per minute is a reasonable starting point.
+**Skipping SOUL.md.** Without constraints, OpenClaw will try anything you ask. Including things you didn't mean to ask. Set boundaries.
 
-**Using the default admin credentials.** I shouldn't have to say this. Change them.
+**Using the same API key for OpenClaw and production apps.** Create a separate API key with its own billing alerts. Isolate the blast radius.
+
+**Not reading skills before installing them.** ClawHub's VirusTotal scanning catches malware. It doesn't catch a skill that "accidentally" sends your file contents to a third-party API. Read the code.
 
 ## Week-One Checklist
 
-- [ ] Gateway auth configured with API keys
-- [ ] Network isolation rules in place
-- [ ] Request logging enabled
-- [ ] Install and test ONE core plugin
-- [ ] Cost controls set with kill switches
-- [ ] Rate limits configured per plugin
-- [ ] Database plugins use read-only credentials
-- [ ] TLS enabled on all connections
-- [ ] Default credentials changed
-- [ ] Review logs daily for the first week
+- [ ] OpenClaw installed and daemon running
+- [ ] File permissions locked (chmod 700/600 on ~/.openclaw)
+- [ ] Gateway auth enabled with token
+- [ ] Daemon bound to 127.0.0.1 only
+- [ ] One messaging channel connected
+- [ ] Secrets in env vars, not hardcoded in config
+- [ ] 1-2 MCP servers added and tested individually
+- [ ] Skills audited (source code read before enabling)
+- [ ] SOUL.md written with safety constraints
+- [ ] LLM provider billing alerts configured
+- [ ] Rate limits set in config
+- [ ] Logs reviewed daily
+- [ ] confirmDestructive set to true
 
-Do this in order. Skip nothing. Your future self will thank you when an agent plugin doesn't accidentally expose your production database.
+Do this in order. Skip nothing. The people who get burned by OpenClaw are the ones who connected everything on day one and asked questions later.

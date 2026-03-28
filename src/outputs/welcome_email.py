@@ -80,7 +80,7 @@ def _build_welcome_html(magic_link: str = None) -> str:
 
 <div class="cta-box">
   <strong>Want to go deeper?</strong><br>
-  <span style="font-size: 14px; color: #666;">Pro members get 15+ source links, the builder Discord, and early delivery every Friday.</span><br>
+  <span style="font-size: 14px; color: #666;">Pro members get 15+ source links, The Vault, and the builder Discord.</span><br>
   <a href="{site_url}/upgrade">See what's behind the paywall</a>
 </div>
 

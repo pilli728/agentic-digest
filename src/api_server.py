@@ -77,14 +77,16 @@ def create_stripe_checkout(price_key: str, customer_email: str = None) -> str:
             return None
 
         site_url = os.environ.get("SITE_URL", "http://localhost:4321")
+        is_local = not os.environ.get("RAILWAY_ENVIRONMENT")
+        base_url = "http://localhost:4321" if is_local else site_url
         founding_price = os.environ.get("STRIPE_PRICE_FOUNDING", "")
         tier = "inner" if (founding_price and price_id == founding_price) else "pro"
 
         session_params = {
             "mode": "subscription",
             "line_items": [{"price": price_id, "quantity": 1}],
-            "success_url": f"{site_url}/?upgraded=true&session_id={{CHECKOUT_SESSION_ID}}",
-            "cancel_url": f"{site_url}/upgrade",
+            "success_url": f"{base_url}/?upgraded=true&session_id={{CHECKOUT_SESSION_ID}}",
+            "cancel_url": f"{base_url}/upgrade",
         }
         if customer_email:
             session_params["customer_email"] = customer_email
@@ -808,8 +810,9 @@ class APIHandler(BaseHTTPRequestHandler):
             db.close()
 
             site_url = os.environ.get("SITE_URL", "http://localhost:4321")
-            magic_url = f"{site_url}/auth/verify?token={token}"
-            is_local = "localhost" in site_url
+            is_local = not os.environ.get("RAILWAY_ENVIRONMENT")
+            base_url = "http://localhost:4321" if is_local else site_url
+            magic_url = f"{base_url}/auth/verify?token={token}"
 
             if is_new:
                 # New subscriber: send welcome email with magic link embedded
@@ -1019,10 +1022,14 @@ class APIHandler(BaseHTTPRequestHandler):
         else:
             self.send_error(404)
 
+    def _get_cors_origin(self):
+        if not os.environ.get('RAILWAY_ENVIRONMENT'):
+            return '*'
+        return os.environ.get('CORS_ORIGIN', '*')
+
     def do_OPTIONS(self):
         self.send_response(200)
-        allowed_origin = os.environ.get('CORS_ORIGIN', '*')
-        self.send_header("Access-Control-Allow-Origin", allowed_origin)
+        self.send_header("Access-Control-Allow-Origin", self._get_cors_origin())
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
@@ -1039,8 +1046,7 @@ class APIHandler(BaseHTTPRequestHandler):
     def send_json(self, data, status=200):
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
-        allowed_origin = os.environ.get('CORS_ORIGIN', '*')
-        self.send_header("Access-Control-Allow-Origin", allowed_origin)
+        self.send_header("Access-Control-Allow-Origin", self._get_cors_origin())
         self.end_headers()
         self.wfile.write(json.dumps(data).encode())
 
