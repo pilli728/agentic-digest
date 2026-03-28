@@ -312,9 +312,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     .unsubscribe-link a:hover { color: #888; text-decoration: underline; }
 
     .current-plan-btn {
-      background: var(--color-accent) !important; color: white !important;
-      opacity: 1 !important; cursor: default !important;
-      border: none !important;
+      background: #f0f0f0 !important;
+      color: #888 !important;
+      opacity: 1 !important;
+      cursor: default !important;
+      border: 1px solid #e0e0e0 !important;
+      font-weight: 500 !important;
+    }
+    .current-plan-btn:hover {
+      box-shadow: none !important;
+      opacity: 1 !important;
     }
 
     @media (max-width: 768px) {
