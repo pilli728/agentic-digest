@@ -75,6 +75,7 @@ def create_stripe_checkout(price_key: str, customer_email: str = None) -> str:
             "pro_annual": os.environ.get("STRIPE_PRICE_PRO_ANNUAL", ""),
             "founding_monthly": os.environ.get("STRIPE_PRICE_FOUNDING", ""),
             "inner_monthly": os.environ.get("STRIPE_PRICE_FOUNDING", ""),  # alias
+            "inner_annual": os.environ.get("STRIPE_PRICE_INNER_ANNUAL", ""),
         }
 
         price_id = price_ids.get(price_key)

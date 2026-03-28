@@ -55,15 +55,22 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <div class="badge gold">Limited spots</div>
         <h2>Inner Circle</h2>
         <p class="price">$39<span>/mo</span></p>
-        <p class="price-sub">Price locked forever</p>
+        <p class="price-sub">or $349/year (save 25%)</p>
         <ul>
           <li class="has">Everything in Pro</li>
           <li class="has">Monthly tool drops (CLAUDE.md, configs, scripts)</li>
           <li class="has">DM me — get stack reviews, ask anything</li>
           <li class="has">First to see what I build before I write about it</li>
         </ul>
+        <div class="billing-toggle" id="inner-toggle">
+          <button class="toggle-option active" data-period="monthly">Monthly</button>
+          <button class="toggle-option" data-period="annual">Annual (save 25%)</button>
+        </div>
         <button class="checkout-btn gold" id="checkout-inner" data-price="inner_monthly">
           Join Inner Circle — $39/month
+        </button>
+        <button class="checkout-btn gold" id="checkout-inner-annual" data-price="inner_annual" style="display:none;">
+          Join Inner Circle — $349/year
         </button>
       </div>
     </div>
@@ -397,17 +404,22 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       });
     })();
 
-    // Billing toggle for Pro annual vs monthly
-    document.querySelectorAll('.toggle-option').forEach(opt => {
-      opt.addEventListener('click', () => {
-        const toggle = opt.closest('.billing-toggle');
-        toggle.querySelectorAll('.toggle-option').forEach(o => o.classList.remove('active'));
-        opt.classList.add('active');
-        const isAnnual = opt.dataset.period === 'annual';
-        const monthlyBtn = document.getElementById('checkout-pro');
-        const annualBtn = document.getElementById('checkout-pro-annual');
-        if (monthlyBtn) monthlyBtn.style.display = isAnnual ? 'none' : 'block';
-        if (annualBtn) annualBtn.style.display = isAnnual ? 'block' : 'none';
+    // Billing toggle for Pro and Inner Circle
+    document.querySelectorAll('.billing-toggle').forEach(toggle => {
+      const isPro = toggle.id === 'pro-toggle';
+      const monthlyId = isPro ? 'checkout-pro' : 'checkout-inner';
+      const annualId = isPro ? 'checkout-pro-annual' : 'checkout-inner-annual';
+
+      toggle.querySelectorAll('.toggle-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+          toggle.querySelectorAll('.toggle-option').forEach(o => o.classList.remove('active'));
+          opt.classList.add('active');
+          const isAnnual = opt.dataset.period === 'annual';
+          const monthlyBtn = document.getElementById(monthlyId);
+          const annualBtn = document.getElementById(annualId);
+          if (monthlyBtn) monthlyBtn.style.display = isAnnual ? 'none' : 'block';
+          if (annualBtn) annualBtn.style.display = isAnnual ? 'block' : 'none';
+        });
       });
     });
 
