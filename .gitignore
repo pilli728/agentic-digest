@@ -66,3 +66,5 @@ web/.astro/
 web/dist/
 test-results/
 playwright-report/
+.specific
+specific.local

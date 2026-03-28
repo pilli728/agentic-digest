@@ -942,6 +942,80 @@ class APIHandler(BaseHTTPRequestHandler):
                 print(f"  Stripe webhook error: {e}")
                 self.send_json({"success": True})  # Always 200 to Stripe
 
+        elif path == "/api/quick-add":
+            # Quick-add an article via URL — from Telegram bot, Discord, or direct API call
+            body = self.read_body()
+            if not body:
+                return
+
+            url = body.get("url", "").strip()
+            note = body.get("note", "").strip()
+            secret = body.get("secret", "")
+
+            # Auth: check secret token (set QUICK_ADD_SECRET in .env)
+            expected_secret = os.environ.get("QUICK_ADD_SECRET", "")
+            if expected_secret and secret != expected_secret:
+                self.send_json({"success": False, "message": "Unauthorized"}, status=401)
+                return
+
+            if not url:
+                self.send_json({"success": False, "message": "URL required"}, status=400)
+                return
+
+            # Fetch article title and summary from URL
+            import hashlib
+            import urllib.request
+
+            try:
+                req = urllib.request.Request(url, headers={"User-Agent": "AgenticDigest/1.0"})
+                with urllib.request.urlopen(req, timeout=10) as resp:
+                    html = resp.read().decode("utf-8", errors="ignore")
+
+                # Extract title
+                import re as _re
+                title_match = _re.search(r"<title[^>]*>(.*?)</title>", html, _re.IGNORECASE | _re.DOTALL)
+                title = title_match.group(1).strip() if title_match else url
+
+                # Extract meta description
+                desc_match = _re.search(r'<meta[^>]+name=["\']description["\'][^>]+content=["\'](.*?)["\']', html, _re.IGNORECASE)
+                summary = desc_match.group(1).strip() if desc_match else ""
+
+                # Clean HTML entities
+                title = title.replace("&amp;", "&").replace("&#39;", "'").replace("&quot;", '"').replace("&#x27;", "'")
+                summary = summary.replace("&amp;", "&").replace("&#39;", "'").replace("&quot;", '"')
+
+            except Exception as e:
+                title = url
+                summary = ""
+
+            # Store in database
+            article_id = hashlib.sha256(url.encode()).hexdigest()
+            db = DigestDatabase()
+            try:
+                from datetime import datetime
+                db.conn.execute("""
+                    INSERT OR IGNORE INTO articles (id, source, tier, title, link, summary, published_at, fetched_at, relevance_score, why_it_matters)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    article_id, "Quick Add", 1, title, url, summary,
+                    datetime.now().isoformat(), datetime.now().isoformat(),
+                    8.0, note or "Manually added via quick-add."
+                ))
+                db.conn.commit()
+                added = db.conn.total_changes > 0
+            except Exception:
+                added = False
+            db.close()
+
+            self.send_json({
+                "success": True,
+                "added": added,
+                "title": title,
+                "url": url,
+                "note": note,
+                "message": f"Added: {title[:60]}" if added else f"Already exists: {title[:60]}"
+            })
+
         else:
             self.send_error(404)
 
