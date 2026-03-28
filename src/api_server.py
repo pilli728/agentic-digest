@@ -83,8 +83,11 @@ def create_stripe_checkout(price_key: str, customer_email: str = None) -> str:
             return None
 
         site_url = os.environ.get("SITE_URL", "http://localhost:4321")
-        founding_price = os.environ.get("STRIPE_PRICE_FOUNDING", "")
-        tier = "inner" if (founding_price and price_id == founding_price) else "pro"
+        inner_prices = {
+            os.environ.get("STRIPE_PRICE_FOUNDING", ""),
+            os.environ.get("STRIPE_PRICE_INNER_ANNUAL", ""),
+        }
+        tier = "inner" if price_id in inner_prices else "pro"
 
         session_params = {
             "mode": "subscription",
@@ -774,8 +777,11 @@ class APIHandler(BaseHTTPRequestHandler):
                 # Determine tier from price
                 line_items = stripe.checkout.Session.list_line_items(session_id)
                 price_id = line_items.data[0].price.id if line_items.data else ""
-                founding_price = os.environ.get("STRIPE_PRICE_FOUNDING", "")
-                tier = "inner" if (founding_price and price_id == founding_price) else "pro"
+                inner_prices = {
+                    os.environ.get("STRIPE_PRICE_FOUNDING", ""),
+                    os.environ.get("STRIPE_PRICE_INNER_ANNUAL", ""),
+                }
+                tier = "inner" if price_id in inner_prices else "pro"
 
                 # Upgrade subscriber
                 db = DigestDatabase()
