@@ -1,4 +1,4 @@
-name: Scheduled Deploy
+name: Scheduled Deploy & Send
 
 on:
   schedule:
@@ -7,8 +7,18 @@ on:
   workflow_dispatch: # Allow manual trigger
 
 jobs:
-  deploy:
+  deploy-and-send:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Vercel Deploy
         run: curl -s -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"
+
+      - name: Wait for deploy to finish
+        run: sleep 60
+
+      - name: Send digest email (if today has one)
+        run: |
+          response=$(curl -s -X POST "${{ secrets.RAILWAY_API_URL }}/api/digest/send-latest" \
+            -H "Content-Type: application/json" \
+            -d "{\"api_key\": \"${{ secrets.DIGEST_SEND_KEY }}\"}")
+          echo "$response"

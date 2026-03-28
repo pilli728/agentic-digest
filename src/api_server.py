@@ -605,6 +605,58 @@ class APIHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 self.send_json({"success": False, "message": str(e)[:200]})
 
+        elif path == "/api/digest/send-latest":
+            # Auto-send: reads today's digest file and emails all subscribers
+            body = self.read_body() or {}
+            api_key = body.get("api_key", "")
+            expected_key = os.environ.get("DIGEST_SEND_KEY", "")
+            if not expected_key or api_key != expected_key:
+                self.send_json({"success": False, "message": "Unauthorized"}, status=401)
+                return
+
+            today = datetime.now().strftime("%Y-%m-%d")
+            digest_path = os.path.join(
+                os.path.dirname(__file__), "..", "web", "src", "content", "digests"
+            )
+
+            # Find today's digest file
+            digest_file = None
+            for f in os.listdir(digest_path):
+                if f.startswith(today) and f.endswith(".md"):
+                    digest_file = os.path.join(digest_path, f)
+                    break
+
+            if not digest_file:
+                self.send_json({"success": False, "message": f"No digest found for {today}"})
+                return
+
+            with open(digest_file, "r") as f:
+                content = f.read()
+                # Strip frontmatter
+                parts = content.split("---", 2)
+                if len(parts) >= 3:
+                    markdown = parts[2].strip()
+                else:
+                    markdown = content
+
+            email_results = {"sent": 0, "failed": 0}
+            try:
+                from outputs.email_output import send_to_all_subscribers
+                db = DigestDatabase()
+                email_results = send_to_all_subscribers(markdown, db)
+                db.close()
+            except Exception as e:
+                print(f"  Email sending failed: {e}")
+                self.send_json({"success": False, "message": str(e)[:200]})
+                return
+
+            self.send_json({
+                "success": True,
+                "message": f"Sent {email_results.get('sent', 0)} emails for {today}",
+                "emails_sent": email_results.get("sent", 0),
+                "emails_failed": email_results.get("failed", 0),
+            })
+
         elif path == "/api/checkout":
             body = self.read_body()
             if not body:
