@@ -2,8 +2,10 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 
-// Get all digests and sort by date descending
-const digests = await getCollection('digests');
+// Get all digests, filter out future ones, sort by date descending
+const allDigests = await getCollection('digests');
+const now = new Date();
+const digests = allDigests.filter(d => new Date(d.data.date) <= now);
 const sorted = digests.sort((a, b) =>
   new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
 );
