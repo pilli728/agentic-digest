@@ -45,6 +45,27 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       const params = new URLSearchParams(window.location.search);
       const token = params.get('token');
 
+      // If already logged in and no new token to verify, redirect to /pro
+      if (!token) {
+        const existingSession = localStorage.getItem('ae_session');
+        if (existingSession) {
+          try {
+            const sessionRes = await fetch(`${API}/api/auth/session`, {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({ session_id: existingSession })
+            });
+            const sessionData = await sessionRes.json();
+            if (sessionData.success) {
+              window.location.href = '/pro';
+              return;
+            }
+          } catch (e) {
+            // Session check failed, fall through to show error
+          }
+        }
+      }
+
       if (!token) {
         document.getElementById('verifying').style.display = 'none';
         document.getElementById('verify-fail').style.display = 'block';

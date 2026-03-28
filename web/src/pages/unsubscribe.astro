@@ -51,14 +51,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       e.preventDefault();
       const email = document.getElementById('unsub-email').value;
       try {
-        await fetch(window.API_URL + '/api/unsubscribe', {
+        const res = await fetch(window.API_URL + '/api/unsubscribe', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ email })
         });
-      } catch(err) {}
-      document.getElementById('unsub-form-card').style.display = 'none';
-      document.getElementById('unsub-done').style.display = 'block';
+        if (!res.ok) throw new Error('API error');
+        document.getElementById('unsub-form-card').style.display = 'none';
+        document.getElementById('unsub-done').style.display = 'block';
+      } catch(err) {
+        const btn = e.target.querySelector('button');
+        if (btn) {
+          btn.textContent = 'Something went wrong. Try again.';
+          btn.style.background = '#999';
+          setTimeout(() => {
+            btn.textContent = 'Unsubscribe';
+            btn.style.background = '';
+          }, 3000);
+        }
+      }
     });
   </script>
 </BaseLayout>

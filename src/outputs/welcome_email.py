@@ -96,6 +96,34 @@ def _build_welcome_html(magic_link: str = None) -> str:
 </html>"""
 
 
+def _build_welcome_text(magic_link: str = None) -> str:
+    site_url = os.environ.get("SITE_URL", "https://agenticedge.tech")
+    signin_block = ""
+    if magic_link:
+        signin_block = (
+            f"Sign in to your account:\n{magic_link}\n(This link expires in 15 minutes.)\n\n"
+        )
+    return (
+        "Welcome to the club of people who are at the agentic edge.\n\n"
+        f"{signin_block}"
+        "You're now part of a small group of builders who refuse to fall behind in the AI agent space. "
+        "That's why you're here. And that's exactly who this is for.\n\n"
+        "Here's what happens next:\n"
+        "-> Monday morning: your first digest lands in this inbox\n"
+        "-> 3 deep analysis sections on what actually moved this week\n"
+        "-> 700+ sources scanned. You read for 5 minutes.\n"
+        "-> Reply to any issue. I read every one.\n\n"
+        "How it works: I built an AI agent that scans 700+ sources every week, scores them by builder relevance, "
+        "and cuts the noise. I review the top stories, write the analysis, and send it Monday. No AI slop. No filler.\n\n"
+        f"Want to go deeper? Pro members get 15+ source links, The Vault, and the builder Discord.\n"
+        f"See what's behind the paywall: {site_url}/upgrade\n\n"
+        "Talk soon,\nAgentic Edge\n\n"
+        "---\n"
+        f"Unsubscribe: {site_url}/unsubscribe\n"
+        "Agentic Edge · Stanford, CA\n"
+    )
+
+
 def send_welcome_email(email: str, magic_link: str = None) -> bool:
     """Send welcome email to a new subscriber. Optionally embed a magic link."""
     resend_key = os.environ.get("RESEND_API_KEY")
@@ -105,11 +133,17 @@ def send_welcome_email(email: str, magic_link: str = None) -> bool:
             resend.api_key = resend_key
             sender = os.environ.get("RESEND_FROM", "Agentic Edge <digest@agenticedge.tech>")
 
+            site_url = os.environ.get("SITE_URL", "https://agenticedge.tech")
             resend.Emails.send({
                 "from": sender,
                 "to": [email],
                 "subject": "Welcome to Agentic Edge — you're in.",
                 "html": _build_welcome_html(magic_link),
+                "text": _build_welcome_text(magic_link),
+                "headers": {
+                    "List-Unsubscribe": f"<{site_url}/unsubscribe?email={email}>",
+                    "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+                },
             })
             print(f"  Welcome email sent to {email}")
             return True
@@ -128,10 +162,14 @@ def send_welcome_email(email: str, magic_link: str = None) -> bool:
             if not sender_email or not password:
                 return False
 
+            site_url = os.environ.get("SITE_URL", "https://agenticedge.tech")
             msg = MIMEMultipart("alternative")
             msg["Subject"] = "Welcome to Agentic Edge — you're in."
             msg["From"] = sender_email
             msg["To"] = email
+            msg["List-Unsubscribe"] = f"<{site_url}/unsubscribe?email={email}>"
+            msg["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
+            msg.attach(MIMEText(_build_welcome_text(magic_link), "plain"))
             msg.attach(MIMEText(_build_welcome_html(magic_link), "html"))
 
             with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:

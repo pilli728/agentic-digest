@@ -44,8 +44,20 @@ def _get_db():
         tier TEXT NOT NULL,
         expires_at TEXT NOT NULL
     )""")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_auth_sessions_email ON auth_sessions(email)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_auth_tokens_email ON auth_tokens(email)")
     conn.commit()
     return conn
+
+
+def cleanup_expired():
+    """Delete expired auth tokens and sessions."""
+    conn = _get_db()
+    now = datetime.now().isoformat()
+    conn.execute("DELETE FROM auth_tokens WHERE expires_at < ?", (now,))
+    conn.execute("DELETE FROM auth_sessions WHERE expires_at < ?", (now,))
+    conn.commit()
+    conn.close()
 
 
 def create_magic_link(email: str, db) -> tuple:
@@ -94,8 +106,22 @@ def send_magic_link_email(email: str, token: str, base_url: str = None) -> bool:
   <a href="{link}" style="display: inline-block; background: #7c3aed; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; margin: 16px 0;">Sign in</a>
   <p style="font-size: 13px; color: #999;">If you didn't request this, you can ignore this email.</p>
   <p style="font-size: 13px; color: #999;">Or copy this link: {link}</p>
+  <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #eee; font-size: 13px; color: #999; text-align: center;">
+    <p><a href="{base_url}/unsubscribe?email={email}" style="color: #999;">Unsubscribe</a></p>
+    <p style="font-size: 11px; color: #bbb; margin-top: 8px;">Agentic Edge &middot; Stanford, CA</p>
+  </div>
 </body>
 </html>"""
+
+    plain_text = (
+        "Sign in to Agentic Edge\n\n"
+        f"Click the link below to sign in. This link expires in {TOKEN_EXPIRY_MINUTES} minutes.\n\n"
+        f"{link}\n\n"
+        "If you didn't request this, you can ignore this email.\n\n"
+        "---\n"
+        f"Unsubscribe: {base_url}/unsubscribe?email={email}\n"
+        "Agentic Edge · Stanford, CA\n"
+    )
 
     resend_key = os.environ.get("RESEND_API_KEY")
     if resend_key and resend is not None:
@@ -107,6 +133,11 @@ def send_magic_link_email(email: str, token: str, base_url: str = None) -> bool:
                 "to": [email],
                 "subject": "Sign in to Agentic Edge",
                 "html": html,
+                "text": plain_text,
+                "headers": {
+                    "List-Unsubscribe": f"<{base_url}/unsubscribe?email={email}>",
+                    "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+                },
             })
             return True
         except Exception as e:
@@ -116,6 +147,7 @@ def send_magic_link_email(email: str, token: str, base_url: str = None) -> bool:
         # Gmail fallback
         try:
             import smtplib
+            from email.mime.multipart import MIMEMultipart
             from email.mime.text import MIMEText
 
             sender_email = os.environ.get("DIGEST_EMAIL_FROM")
@@ -123,10 +155,14 @@ def send_magic_link_email(email: str, token: str, base_url: str = None) -> bool:
             if not sender_email or not password:
                 return False
 
-            msg = MIMEText(html, "html")
+            msg = MIMEMultipart("alternative")
             msg["Subject"] = "Sign in to Agentic Edge"
             msg["From"] = sender_email
             msg["To"] = email
+            msg["List-Unsubscribe"] = f"<{base_url}/unsubscribe?email={email}>"
+            msg["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
+            msg.attach(MIMEText(plain_text, "plain"))
+            msg.attach(MIMEText(html, "html"))
 
             with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
                 server.login(sender_email, password)

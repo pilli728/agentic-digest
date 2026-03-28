@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://agenticedge.tech/sitemap.xml
+Sitemap: https://agenticedge.tech/sitemap-index.xml

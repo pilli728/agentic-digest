@@ -121,6 +121,12 @@ def _build_html(digest_content: str, unsubscribe_url: str = "#") -> str:
 </html>"""
 
 
+# TODO: Add bounce handling via Resend webhooks.
+# Resend can POST bounce/complaint events to a webhook endpoint, which should
+# automatically deactivate the subscriber (set active=0) in the subscribers table.
+# See: https://resend.com/docs/webhooks
+
+
 def send_digest_email(
     digest_content: str,
     email_from: str = None,

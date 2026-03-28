@@ -15,11 +15,16 @@ import json
 import os
 import re
 import threading
+import time
+from collections import defaultdict
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse
 from datetime import datetime
 import sys
 from pathlib import Path
+
+# --- In-memory rate limiter (sliding window) ---
+_rate_limit_store: dict[str, list[float]] = defaultdict(list)
 
 # Load .env file
 try:
@@ -194,6 +199,47 @@ def run_background_fetch():
 class APIHandler(BaseHTTPRequestHandler):
     """Unified HTTP request handler for all API endpoints."""
 
+    def _check_rate_limit(self, key, max_requests=5, window_seconds=60):
+        """Return True if rate limited (too many requests). Sliding window."""
+        now = time.time()
+        timestamps = _rate_limit_store[key]
+        # Purge old entries outside the window
+        _rate_limit_store[key] = [t for t in timestamps if now - t < window_seconds]
+        if len(_rate_limit_store[key]) >= max_requests:
+            return True
+        _rate_limit_store[key].append(now)
+        return False
+
+    def _check_admin_auth(self, body=None):
+        """Check ADMIN_API_KEY from body or Authorization header. Returns True if authorized."""
+        admin_key = os.environ.get("ADMIN_API_KEY", "")
+        if not admin_key:
+            # No key configured — reject all admin requests in production
+            if os.environ.get("RAILWAY_ENVIRONMENT"):
+                self.send_json({"success": False, "message": "Admin auth not configured"}, status=401)
+                return False
+            # Allow in local dev if no key is set
+            return True
+
+        # Check body field
+        if body and body.get("api_key") == admin_key:
+            return True
+
+        # Check Authorization header
+        auth_header = self.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer ") and auth_header[7:] == admin_key:
+            return True
+
+        self.send_json({"success": False, "message": "Unauthorized"}, status=401)
+        return False
+
+    def _get_client_ip(self):
+        """Get the client IP, respecting X-Forwarded-For behind a proxy."""
+        forwarded = self.headers.get("X-Forwarded-For", "")
+        if forwarded:
+            return forwarded.split(",")[0].strip()
+        return self.client_address[0]
+
     def do_GET(self):
         parsed = urlparse(self.path)
         path = parsed.path
@@ -343,6 +389,8 @@ class APIHandler(BaseHTTPRequestHandler):
             self.send_json({"success": True, "articles": curated})
 
         elif path == "/api/topics":
+            if not self._check_admin_auth():
+                return
             db = DigestDatabase()
             cursor = db.conn.cursor()
             cursor.execute("SELECT id, title, synthesis, sort_order, created_at FROM digest_topics ORDER BY sort_order")
@@ -420,6 +468,13 @@ class APIHandler(BaseHTTPRequestHandler):
             body = self.read_body()
             if not body:
                 return
+            if not self._check_admin_auth(body):
+                return
+            # Rate limit: max 10 per minute per IP
+            client_ip = self._get_client_ip()
+            if self._check_rate_limit(f"iterate:{client_ip}", max_requests=10, window_seconds=60):
+                self.send_json({"success": False, "message": "Rate limited. Try again shortly."}, status=429)
+                return
             current_draft = body.get("current_draft", "")
             feedback = body.get("feedback", "")
 
@@ -474,6 +529,8 @@ class APIHandler(BaseHTTPRequestHandler):
         elif path == "/api/topics":
             body = self.read_body()
             if not body:
+                return
+            if not self._check_admin_auth(body):
                 return
             action = body.get("action", "create")
             db = DigestDatabase()
@@ -546,6 +603,8 @@ class APIHandler(BaseHTTPRequestHandler):
             db.close()
 
         elif path == "/api/pipeline/fetch":
+            if not self._check_admin_auth():
+                return
             if not _HAS_PIPELINE:
                 self.send_json({"success": False, "message": "Pipeline not available in this deployment"}, status=501)
                 return
@@ -560,6 +619,8 @@ class APIHandler(BaseHTTPRequestHandler):
 
         elif path == "/api/digest/publish":
             body = self.read_body() or {}
+            if not self._check_admin_auth(body):
+                return
             markdown = body.get("markdown", "")
 
             if not markdown:
@@ -660,14 +721,6 @@ class APIHandler(BaseHTTPRequestHandler):
                 })
             except Exception as e:
                 self.send_json({"success": False, "message": f"Error: {str(e)[:300]}"})
-                return
-
-            self.send_json({
-                "success": True,
-                "message": f"Sent {email_results.get('sent', 0)} emails for {today}",
-                "emails_sent": email_results.get("sent", 0),
-                "emails_failed": email_results.get("failed", 0),
-            })
 
         elif path == "/api/checkout":
             body = self.read_body()
@@ -737,7 +790,7 @@ class APIHandler(BaseHTTPRequestHandler):
                 db.conn.commit()
                 db.close()
 
-                print(f"  Checkout verified: {customer_email} → {tier}")
+                print(f"  Checkout verified: {customer_email[:3]}*** → {tier}")
                 self.send_json({"success": True, "email": customer_email, "tier": tier})
 
             except Exception as e:
@@ -754,6 +807,11 @@ class APIHandler(BaseHTTPRequestHandler):
                 return
             if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
                 self.send_json({"success": False, "message": "Invalid email format"}, status=400)
+                return
+            # Rate limit: max 5 per minute per IP
+            client_ip = self._get_client_ip()
+            if self._check_rate_limit(f"subscribe:{client_ip}", max_requests=5, window_seconds=60):
+                self.send_json({"success": False, "message": "Too many requests. Try again in a minute."}, status=429)
                 return
             db = DigestDatabase()
 
@@ -824,21 +882,11 @@ class APIHandler(BaseHTTPRequestHandler):
                     subs = stripe.Subscription.list(customer=customer_id, status="active")
                     cancelled = 0
                     for sub in subs.data:
-                        stripe.Subscription.cancel(sub.id)
+                        stripe.Subscription.modify(sub.id, cancel_at_period_end=True)
                         cancelled += 1
 
-                    # Downgrade to free
-                    db.conn.execute(
-                        "UPDATE subscribers SET tier = 'free', stripe_customer_id = NULL WHERE email = ?",
-                        (email,)
-                    )
-                    db.conn.execute(
-                        "UPDATE auth_sessions SET tier = 'free' WHERE email = ?",
-                        (email,)
-                    )
-                    db.conn.commit()
                     db.close()
-                    self.send_json({"success": True, "message": f"Subscription cancelled. {cancelled} subscription(s) ended.", "cancelled": cancelled})
+                    self.send_json({"success": True, "message": f"Subscription set to cancel at end of billing period. {cancelled} subscription(s) scheduled for cancellation.", "cancelled": cancelled})
                 except Exception as e:
                     db.close()
                     print(f"  Cancel error: {e}")
@@ -865,8 +913,22 @@ class APIHandler(BaseHTTPRequestHandler):
             if not email:
                 self.send_json({"success": False, "message": "Email required"}, status=400)
                 return
+            # Email validation (#11)
+            if not re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', email):
+                self.send_json({"success": False, "message": "Invalid email format"}, status=400)
+                return
+            # Rate limit: max 5 per minute per IP
+            client_ip = self._get_client_ip()
+            if self._check_rate_limit(f"login:{client_ip}", max_requests=5, window_seconds=60):
+                self.send_json({"success": False, "message": "Too many login attempts. Try again in a minute."}, status=429)
+                return
 
-            from auth import create_magic_link, send_magic_link_email
+            from auth import create_magic_link, send_magic_link_email, cleanup_expired
+            # Opportunistic cleanup of expired tokens/sessions (cheap)
+            try:
+                cleanup_expired()
+            except Exception:
+                pass
             db = DigestDatabase()
             token, is_new = create_magic_link(email, db)
             db.close()
@@ -882,7 +944,10 @@ class APIHandler(BaseHTTPRequestHandler):
                     threading.Thread(
                         target=send_welcome_email, args=(email, magic_url), daemon=True
                     ).start()
-                    print(f"  [NEW SUBSCRIBER] {email}")
+                    if not os.environ.get("RAILWAY_ENVIRONMENT"):
+                        print(f"  [NEW SUBSCRIBER] {email}")
+                    else:
+                        print(f"  [NEW SUBSCRIBER] {email[:3]}***")
                 except Exception:
                     pass
             else:
@@ -978,9 +1043,13 @@ class APIHandler(BaseHTTPRequestHandler):
                             "UPDATE subscribers SET tier = ?, stripe_customer_id = ? WHERE email = ?",
                             (tier, customer_id, customer_email)
                         )
+                        db.conn.execute(
+                            "UPDATE auth_sessions SET tier = ? WHERE email = ?",
+                            (tier, customer_email)
+                        )
                         db.conn.commit()
                         db.close()
-                        print(f"  Upgraded {customer_email} to {tier}")
+                        print(f"  Upgraded {customer_email[:3]}*** to {tier}")
 
                 elif event.get("type") == "customer.subscription.deleted":
                     customer_id = event["data"]["object"].get("customer")
@@ -999,6 +1068,57 @@ class APIHandler(BaseHTTPRequestHandler):
                         db.conn.commit()
                         db.close()
                         print(f"  Downgraded customer {customer_id} to free")
+
+                elif event.get("type") == "invoice.payment_failed":
+                    invoice = event["data"]["object"]
+                    customer_id = invoice.get("customer")
+                    customer_email = invoice.get("customer_email", "unknown")
+                    attempt_count = invoice.get("attempt_count", 0)
+                    print(f"  Payment failed for {customer_email[:3]}*** (customer {customer_id}), attempt #{attempt_count}")
+                    # Optionally send notification email
+                    try:
+                        resend_key = os.environ.get("RESEND_API_KEY")
+                        resend_from = os.environ.get("RESEND_FROM")
+                        if resend_key and resend_from and customer_email and customer_email != "unknown":
+                            import requests
+                            requests.post("https://api.resend.com/emails", headers={
+                                "Authorization": f"Bearer {resend_key}",
+                                "Content-Type": "application/json"
+                            }, json={
+                                "from": resend_from,
+                                "to": [customer_email],
+                                "subject": "Payment failed — please update your billing info",
+                                "html": "<p>Your recent payment for Agentic Edge failed. "
+                                        "Please update your payment method to keep your subscription active.</p>"
+                                        "<p>You can manage your billing at any time from your account.</p>"
+                            })
+                    except Exception as notify_err:
+                        print(f"  Failed to send payment failure notification: {notify_err}")
+
+                elif event.get("type") == "customer.subscription.updated":
+                    subscription = event["data"]["object"]
+                    customer_id = subscription.get("customer")
+                    status = subscription.get("status")
+                    if customer_id and status == "active":
+                        # Determine new tier from the subscription's current plan
+                        items = subscription.get("items", {}).get("data", [])
+                        price_id = items[0]["price"]["id"] if items else ""
+                        founding_price = os.environ.get("STRIPE_PRICE_FOUNDING", "")
+                        tier = "inner" if (founding_price and price_id == founding_price) else "pro"
+
+                        db = DigestDatabase()
+                        db.conn.execute(
+                            "UPDATE subscribers SET tier = ? WHERE stripe_customer_id = ?",
+                            (tier, customer_id)
+                        )
+                        db.conn.execute(
+                            "UPDATE auth_sessions SET tier = ? WHERE email IN "
+                            "(SELECT email FROM subscribers WHERE stripe_customer_id = ?)",
+                            (tier, customer_id)
+                        )
+                        db.conn.commit()
+                        db.close()
+                        print(f"  Subscription updated for customer {customer_id} → {tier}")
 
                 self.send_json({"success": True})
 
@@ -1090,15 +1210,21 @@ class APIHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Access-Control-Allow-Origin", self._get_cors_origin())
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
         self.end_headers()
 
     def read_body(self):
-        content_length = int(self.headers.get("Content-Length", 0))
-        body = self.rfile.read(content_length)
         try:
+            content_length = int(self.headers.get("Content-Length", 0))
+        except (ValueError, TypeError):
+            content_length = 0
+        if content_length == 0:
+            self.send_json({"success": False, "message": "Request body is empty"}, status=400)
+            return None
+        try:
+            body = self.rfile.read(content_length)
             return json.loads(body.decode("utf-8"))
-        except:
+        except Exception:
             self.send_json({"success": False, "message": "Invalid JSON"}, status=400)
             return None
 
@@ -1119,6 +1245,14 @@ def main():
     port = int(os.environ.get("PORT", 8000))
     host = os.environ.get("HOST", "0.0.0.0")
     server = HTTPServer((host, port), APIHandler)
+
+    # Clean up expired auth tokens/sessions at startup
+    try:
+        from auth import cleanup_expired
+        cleanup_expired()
+        print("  [STARTUP] Expired auth tokens/sessions cleaned up")
+    except Exception as e:
+        print(f"  [STARTUP] Auth cleanup skipped: {e}")
 
     print()
     print("=" * 60)

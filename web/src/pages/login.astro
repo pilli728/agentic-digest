@@ -85,26 +85,36 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       btn.textContent = 'Sending...';
       btn.disabled = true;
 
-      const res = await fetch(`${API}/api/auth/login`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json();
+      try {
+        const res = await fetch(`${API}/api/auth/login`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
 
-      if (data.dev_link) {
-        window.location.href = data.dev_link;
-        return;
-      }
-      if (data.success) {
-        document.getElementById('sent-to-email').textContent = email;
-        document.getElementById('login-card').style.display = 'none';
-        document.getElementById('check-email').style.display = 'block';
-      } else {
-        btn.textContent = 'Send magic link';
+        if (data.dev_link) {
+          window.location.href = data.dev_link;
+          return;
+        }
+        if (data.success) {
+          document.getElementById('sent-to-email').textContent = email;
+          document.getElementById('login-card').style.display = 'none';
+          document.getElementById('check-email').style.display = 'block';
+        } else {
+          btn.textContent = 'Send magic link';
+          btn.disabled = false;
+          btn.style.background = '#ef4444';
+          setTimeout(() => { btn.style.background = ''; }, 2000);
+        }
+      } catch (err) {
+        btn.textContent = 'Something went wrong. Try again.';
         btn.disabled = false;
         btn.style.background = '#ef4444';
-        setTimeout(() => { btn.style.background = ''; }, 2000);
+        setTimeout(() => {
+          btn.textContent = 'Send magic link';
+          btn.style.background = '';
+        }, 3000);
       }
     });
   </script>

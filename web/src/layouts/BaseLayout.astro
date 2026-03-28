@@ -5,24 +5,27 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
+const fullTitle = title === 'Agentic Edge' ? title : `${title} | Agentic Edge`;
 ---
 
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='5' y='5' width='90' height='90' rx='18' fill='%237c3aed'/><text x='50' y='68' text-anchor='middle' font-family='Georgia,serif' font-size='48' font-weight='700' fill='white'>AE</text></svg>" />
-    <title>{title} | Agentic Edge</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <meta property="og:title" content={`${title} | Agentic Edge`} />
+    <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description || 'Your unfair advantage as an AI builder.'} />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Agentic Edge" />
+    <meta property="og:url" content={Astro.url.href} />
+    <meta property="og:image" content="https://agenticedge.tech/og-image.png" />
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content={`${title} | Agentic Edge`} />
+    <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description || 'Your unfair advantage as an AI builder.'} />
-    <meta name="api-url" content={import.meta.env.PUBLIC_API_URL || 'http://localhost:8000'} />
+    <meta name="api-url" content={import.meta.env.PUBLIC_API_URL || ''} />
     <!-- Privacy-friendly analytics by Plausible -->
     <script async src="https://plausible.io/js/pa-uHDu7oFzXabKDy2C5GJFZ.js"></script>
     <script is:inline>
@@ -187,7 +190,7 @@ const { title, description } = Astro.props;
 
     <script is:inline>
       // Global API URL from meta tag
-      window.API_URL = document.querySelector('meta[name="api-url"]')?.content || 'http://localhost:8000';
+      window.API_URL = document.querySelector('meta[name="api-url"]')?.content || '';
 
       // Check login state
       const sid = localStorage.getItem('ae_session');

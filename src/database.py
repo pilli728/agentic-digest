@@ -133,6 +133,10 @@ class DigestDatabase:
             )
         """)
 
+        # Indexes for frequently queried columns
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_feedback_article_id ON feedback(article_id)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_subscribers_active_tier ON subscribers(active, tier)")
+
         self.conn.commit()
 
     def _article_hash(self, url: str) -> str:

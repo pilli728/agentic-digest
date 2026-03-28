@@ -38,8 +38,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <li class="has">Behind-the-scenes of what I'm building</li>
           <li class="missing">Tool drops + DM access</li>
         </ul>
+        <div class="billing-toggle" id="pro-toggle">
+          <button class="toggle-option active" data-period="monthly">Monthly</button>
+          <button class="toggle-option" data-period="annual">Annual (save 31%)</button>
+        </div>
         <button class="checkout-btn" id="checkout-pro" data-price="pro_monthly">
           Go Pro — $12/month
+        </button>
+        <button class="checkout-btn" id="checkout-pro-annual" data-price="pro_annual" style="display:none;">
+          Go Pro — $99/year
         </button>
       </div>
 
@@ -217,6 +224,31 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       background: #f59e0b;
     }
 
+    .billing-toggle {
+      display: flex;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 0.75rem;
+    }
+
+    .toggle-option {
+      flex: 1;
+      padding: 0.4rem 0.5rem;
+      border: none;
+      background: transparent;
+      font-size: 0.78em;
+      font-weight: 500;
+      cursor: pointer;
+      color: #888;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .toggle-option.active {
+      background: var(--color-accent);
+      color: white;
+    }
+
     .badge.gold {
       background: #f59e0b;
     }
@@ -343,7 +375,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       // Cancel subscription handler
       document.getElementById('cancel-btn')?.addEventListener('click', async (e) => {
         e.preventDefault();
-        if (!confirm('Are you sure you want to cancel? You will lose access to Pro/Inner Circle content immediately.')) return;
+        if (!confirm('Are you sure you want to cancel? You will retain access until the end of your current billing period.')) return;
         const cancelSid = localStorage.getItem('ae_session');
         if (!cancelSid) return;
         try {
@@ -364,6 +396,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         }
       });
     })();
+
+    // Billing toggle for Pro annual vs monthly
+    document.querySelectorAll('.toggle-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        const toggle = opt.closest('.billing-toggle');
+        toggle.querySelectorAll('.toggle-option').forEach(o => o.classList.remove('active'));
+        opt.classList.add('active');
+        const isAnnual = opt.dataset.period === 'annual';
+        const monthlyBtn = document.getElementById('checkout-pro');
+        const annualBtn = document.getElementById('checkout-pro-annual');
+        if (monthlyBtn) monthlyBtn.style.display = isAnnual ? 'none' : 'block';
+        if (annualBtn) annualBtn.style.display = isAnnual ? 'block' : 'none';
+      });
+    });
 
     document.querySelectorAll('.checkout-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -390,7 +436,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             if (window.plausible) window.plausible('Checkout', {props: {plan: priceKey}});
             window.location.href = data.checkout_url;
           } else {
-            alert(data.message || 'Stripe not configured yet. Add STRIPE_SECRET_KEY to .env');
+            alert(data.message || 'Payment system is temporarily unavailable. Please try again later.');
             btn.textContent = btn.dataset.price.includes('founding') ? 'Become a Founding Member' : 'Start Pro';
             btn.disabled = false;
           }
