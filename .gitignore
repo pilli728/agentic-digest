@@ -10,7 +10,8 @@ ENV/
 build/
 develop-eggs/
 dist/
-downloads/
+# Python packaging downloads (not web/src/data/downloads/)
+/downloads/
 eggs/
 .eggs/
 lib/
