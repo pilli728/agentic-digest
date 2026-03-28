@@ -342,33 +342,28 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         const proBtn = document.getElementById('checkout-pro');
         const innerBtn = document.getElementById('checkout-inner');
 
+        const proAnnualBtn = document.getElementById('checkout-pro-annual');
+        const innerAnnualBtn = document.getElementById('checkout-inner-annual');
+        const proToggle = document.getElementById('pro-toggle');
+        const innerToggle = document.getElementById('inner-toggle');
+
         if (t === 'pro') {
-          // Free: not current
           if (freeBtn) { freeBtn.textContent = 'Free plan'; freeBtn.classList.remove('secondary'); freeBtn.style.opacity = '0.5'; }
           if (freeSub) freeSub.textContent = '';
-          // Pro: current
-          if (proBtn) {
-            proBtn.textContent = 'Current plan';
-            proBtn.disabled = true;
-            proBtn.classList.add('current-plan-btn');
-          }
+          if (proBtn) { proBtn.textContent = 'Current plan'; proBtn.disabled = true; proBtn.classList.add('current-plan-btn'); }
+          if (proAnnualBtn) { proAnnualBtn.textContent = 'Switch to annual — $99/year'; proAnnualBtn.disabled = false; }
         } else if (t === 'inner') {
-          // Free: not current
           if (freeBtn) { freeBtn.textContent = 'Free plan'; freeBtn.classList.remove('secondary'); freeBtn.style.opacity = '0.5'; }
           if (freeSub) freeSub.textContent = '';
-          // Pro: included
-          if (proBtn) {
-            proBtn.textContent = 'Included';
-            proBtn.disabled = true;
-            proBtn.style.opacity = '0.5';
-          }
-          // Inner: current
-          if (innerBtn) {
-            innerBtn.textContent = 'Current plan';
-            innerBtn.disabled = true;
-            innerBtn.classList.add('current-plan-btn');
-            innerBtn.classList.remove('gold');
-          }
+          // Gray out entire Pro card
+          if (proBtn) { proBtn.textContent = 'Included in Inner Circle'; proBtn.disabled = true; proBtn.style.opacity = '0.5'; }
+          if (proAnnualBtn) { proAnnualBtn.textContent = 'Included in Inner Circle'; proAnnualBtn.disabled = true; proAnnualBtn.style.opacity = '0.5'; }
+          if (proToggle) proToggle.style.display = 'none';
+          var proCard = document.getElementById('plan-pro');
+          if (proCard) proCard.style.opacity = '0.6';
+          // Inner: current monthly, allow switch to annual
+          if (innerBtn) { innerBtn.textContent = 'Current plan'; innerBtn.disabled = true; innerBtn.classList.add('current-plan-btn'); innerBtn.classList.remove('gold'); }
+          if (innerAnnualBtn) { innerAnnualBtn.textContent = 'Switch to annual — $349/year'; innerAnnualBtn.disabled = false; }
         }
         // else free: default state already correct
       }

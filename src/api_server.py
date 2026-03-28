@@ -1037,8 +1037,11 @@ class APIHandler(BaseHTTPRequestHandler):
                         # Get the price ID from the subscription
                         line_items = stripe.checkout.Session.list_line_items(session["id"])
                         price_id = line_items.data[0].price.id if line_items.data else ""
-                        founding_price = os.environ.get("STRIPE_PRICE_FOUNDING", "")
-                        tier = "inner" if (founding_price and price_id == founding_price) else "pro"
+                        inner_prices = [p for p in [
+                            os.environ.get("STRIPE_PRICE_FOUNDING", ""),
+                            os.environ.get("STRIPE_PRICE_INNER_ANNUAL", ""),
+                        ] if p]
+                        tier = "inner" if price_id in inner_prices else "pro"
 
                         db = DigestDatabase()
                         db.conn.execute(
@@ -1105,8 +1108,11 @@ class APIHandler(BaseHTTPRequestHandler):
                         # Determine new tier from the subscription's current plan
                         items = subscription.get("items", {}).get("data", [])
                         price_id = items[0]["price"]["id"] if items else ""
-                        founding_price = os.environ.get("STRIPE_PRICE_FOUNDING", "")
-                        tier = "inner" if (founding_price and price_id == founding_price) else "pro"
+                        inner_prices = [p for p in [
+                            os.environ.get("STRIPE_PRICE_FOUNDING", ""),
+                            os.environ.get("STRIPE_PRICE_INNER_ANNUAL", ""),
+                        ] if p]
+                        tier = "inner" if price_id in inner_prices else "pro"
 
                         db = DigestDatabase()
                         db.conn.execute(
