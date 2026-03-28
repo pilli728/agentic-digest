@@ -28,6 +28,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     input:focus { outline: none; border-color: var(--color-accent); }
     button { padding: 0.75rem 1.5rem; background: #ef4444; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
     button:hover { background: #dc2626; }
+
+    @media (max-width: 480px) {
+      .unsub-page { margin: 1.5rem auto; }
+      .unsub-card { padding: 2rem 1.25rem; }
+      form { flex-direction: column; }
+    }
   </style>
 
   <script>

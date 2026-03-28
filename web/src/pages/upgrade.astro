@@ -36,7 +36,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <li class="has">15+ ranked sources with one-liners</li>
           <li class="has">The Vault: playbooks, guides, breakdowns</li>
           <li class="has">Behind-the-scenes of what I'm building</li>
-          <li class="has">Early access every Friday</li>
           <li class="missing">Tool drops + DM access</li>
         </ul>
         <button class="checkout-btn" id="checkout-pro" data-price="pro_monthly">
@@ -269,6 +268,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     @media (max-width: 768px) {
       .pricing-section { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .upgrade-page { padding: 1rem 0; }
+      .upgrade-page h1 { font-size: 1.5em; }
+      .price { font-size: 1.8em; }
+      .plan-card { padding: 1rem; }
     }
   </style>
 

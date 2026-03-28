@@ -15,9 +15,9 @@ const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === '
   <div class="auth-gate" id="auth-gate-signin" style="display:none">
     <div class="gate-card">
       <h2>The Vault</h2>
-      <p>Playbooks, guides, and tools for serious AI builders.</p>
-      <a href="/login" class="gate-btn">Sign in</a>
-      <p class="gate-sub">New here? <a href="/">Join free on the homepage.</a></p>
+      <p>Playbooks, guides, and tools for serious AI builders.<br><strong>Pro members only.</strong></p>
+      <a href="/login" class="gate-btn">Sign in to access</a>
+      <p class="gate-sub">Not a Pro member? <a href="/upgrade">Upgrade to Pro</a> · <a href="/">Join free</a></p>
     </div>
   </div>
 
@@ -52,62 +52,62 @@ const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === '
       ))}
     </div>
 
-    <!-- Downloadable Templates Section -->
+    <!-- Templates Section — visible to all Pro, clickable for Inner Circle only -->
     <div class="downloads-section" id="downloads-section">
       <h2>Copy-Paste Templates</h2>
       <p class="downloads-sub">Drop these into your project. Ready to use.</p>
 
       <div class="downloads-grid">
-        <a href="/downloads/CLAUDE.md" download class="download-card">
+        <a href="/pro/template/claude-md" class="download-card">
           <span class="dl-icon">📄</span>
           <div>
             <strong>CLAUDE.md</strong>
             <p>Project context for Claude Code. The template every project needs.</p>
           </div>
         </a>
-        <a href="/downloads/AGENTS.md" download class="download-card">
+        <a href="/pro/template/agents-md" class="download-card">
           <span class="dl-icon">🤖</span>
           <div>
             <strong>AGENTS.md</strong>
             <p>Constraints, danger zones, verification steps. Not a tech stack list.</p>
           </div>
         </a>
-        <a href="/downloads/react-agent-CLAUDE.md" download class="download-card">
+        <a href="/pro/template/react-agent" class="download-card">
           <span class="dl-icon">⚛️</span>
           <div>
             <strong>React Agent CLAUDE.md</strong>
             <p>Next.js + Claude API + Prisma. Pre-configured for agent projects.</p>
           </div>
         </a>
-        <a href="/downloads/python-agent-CLAUDE.md" download class="download-card">
+        <a href="/pro/template/python-agent" class="download-card">
           <span class="dl-icon">🐍</span>
           <div>
             <strong>Python Agent CLAUDE.md</strong>
             <p>FastAPI + SQLAlchemy + Claude. Agent rules baked in.</p>
           </div>
         </a>
-        <a href="/downloads/SKILLS-code-review.md" download class="download-card">
+        <a href="/pro/template/skill-code-review" class="download-card">
           <span class="dl-icon">🔍</span>
           <div>
             <strong>Code Review Skill</strong>
             <p>Security, performance, readability. Drop into .claude/skills/</p>
           </div>
         </a>
-        <a href="/downloads/SKILLS-security-audit.md" download class="download-card">
+        <a href="/pro/template/skill-security-audit" class="download-card">
           <span class="dl-icon">🛡️</span>
           <div>
             <strong>Security Audit Skill</strong>
             <p>OWASP Top 10 checklist as a Claude skill. Catches what you miss.</p>
           </div>
         </a>
-        <a href="/downloads/SKILLS-test-writer.md" download class="download-card">
+        <a href="/pro/template/skill-test-writer" class="download-card">
           <span class="dl-icon">🧪</span>
           <div>
             <strong>Test Writer Skill</strong>
             <p>Edge cases, failure modes, AAA pattern. Makes Claude write real tests.</p>
           </div>
         </a>
-        <a href="/downloads/pre-commit-hook.sh" download class="download-card">
+        <a href="/pro/template/pre-commit-hook" class="download-card">
           <span class="dl-icon">🪝</span>
           <div>
             <strong>Pre-Commit Hook</strong>
@@ -189,6 +189,13 @@ const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === '
     .download-card strong { display: block; font-size: 0.9em; margin-bottom: 0.15rem; }
     .download-card p { margin: 0; font-size: 0.78em; color: var(--color-muted); line-height: 1.4; }
     @media (max-width: 768px) { .downloads-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 480px) {
+      .pro-header h1 { font-size: 1.8em; }
+      .pro-header { padding: 1rem 0; }
+      .content-grid { grid-template-columns: 1fr; }
+      .content-card { padding: 1rem; }
+      .gate-card { padding: 1.5rem 1.25rem 1rem; }
+    }
 
     /* Auth gate */
     .auth-gate { max-width: 400px; margin: 4rem auto; text-align: center; }
@@ -205,6 +212,12 @@ const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === '
     .gate-sub a { color: var(--color-accent); }
 
     .tier-gated { opacity: 0.45; pointer-events: auto; position: relative; }
+    .template-locked { opacity: 0.5; cursor: pointer; position: relative; }
+    .template-locked::after {
+      content: 'Inner Circle'; position: absolute; top: 0.6rem; right: 0.6rem;
+      background: #f59e0b; color: white; font-size: 0.65em; font-weight: 700;
+      padding: 0.15rem 0.5rem; border-radius: 4px; letter-spacing: 0.04em;
+    }
     .tier-gated::after {
       content: 'Inner Circle'; position: absolute; top: 0.75rem; right: 0.75rem;
       background: #f59e0b; color: white; font-size: 0.65em; font-weight: 700;
@@ -247,9 +260,16 @@ const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === '
               card.classList.remove('tier-gated');
             });
           } else {
-            // Pro — lock founding content, redirect to upgrade
+            // Pro — lock founding content and templates, redirect to upgrade
             document.querySelectorAll('.founding-locked').forEach(card => {
               card.classList.add('tier-gated');
+              card.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.location.href = '/upgrade?tier=inner';
+              });
+            });
+            document.querySelectorAll('.download-card').forEach(card => {
+              card.classList.add('template-locked');
               card.addEventListener('click', (e) => {
                 e.preventDefault();
                 window.location.href = '/upgrade?tier=inner';
