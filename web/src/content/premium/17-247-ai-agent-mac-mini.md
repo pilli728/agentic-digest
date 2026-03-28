@@ -1,7 +1,7 @@
 ---
 title: "Running a 24/7 AI Agent on a Mac Mini: 18 Cron Jobs, Zero Babysitting"
 description: "One developer's setup for running AI agents around the clock. 18 cron jobs, 35 scripts, 6 custom skills, and a context system that gets smarter every day."
-date: "2026-03-31"
+date: "2026-03-30"
 tier: "founding"
 category: "playbook"
 ---

@@ -1,7 +1,7 @@
 ---
 title: "The Agent Startup Wave: Ghostwriter, Glimpse, ARC-AGI-3, and What's Next"
 description: "Sierra's agent builder, Glimpse's $35M raise, the benchmark that humbles every AI, and the GitHub repos blowing up. The agent economy just shifted."
-date: "2026-04-03"
+date: "2026-03-30"
 tier: "pro"
 category: "playbook"
 ---
