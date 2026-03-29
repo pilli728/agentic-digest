@@ -4,6 +4,7 @@ description: "The exact tools, patterns, and CLAUDE.md structures that top devel
 date: "2026-03-24"
 tier: "pro"
 category: "playbook"
+featured_free: true
 ---
 
 # The Vibecoding Masterclass

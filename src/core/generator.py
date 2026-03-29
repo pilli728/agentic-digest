@@ -1,8 +1,9 @@
 """Markdown digest generation for the Agentic Digest.
 
-Writing style: intersection of Packy McCormick (conversational, analogies),
-Lenny Rachitsky (direct, opinionated, no filler), Paul Graham (short sentences,
-contrarian), Ben Thompson (connects dots, frameworks), Trung Phan (witty, fun),
+Writing style: Paul Graham's directness meets Trung Phan's comedic timing.
+Intersection of Packy McCormick (conversational, analogies), Lenny Rachitsky
+(direct, opinionated, no filler), Paul Graham (short sentences, contrarian),
+Ben Thompson (connects dots, frameworks), Trung Phan (witty, fun),
 Simon Willison (hands-on, "I tried this").
 
 Rules:
@@ -12,6 +13,10 @@ Rules:
 - Write like you're texting a smart friend
 - Short sentences. Opinions. Specifics over vague claims.
 - Every sentence earns its place — if it doesn't add value, cut it
+- One earned wry observation per section. Not a punchline — a dry aside that
+  makes the reader think "yeah, exactly." Humor should land quietly, not perform.
+- Sharp takes over safe takes. Contrarian is fine. Smug is not.
+- If a take could appear in any newsletter, cut it. Only write what only you'd write.
 """
 
 from datetime import datetime

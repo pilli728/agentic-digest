@@ -14,11 +14,53 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await entry.render();
+
+// Extract first 3 non-empty prose paragraphs for the teaser
+function extractTeaser(body: string): string[] {
+  const lines = body.split('\n');
+  const paragraphs: string[] = [];
+  let current = '';
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      if (current) { paragraphs.push(current); current = ''; }
+      if (paragraphs.length >= 3) break;
+    } else if (!trimmed.startsWith('#') && !trimmed.startsWith('---') && !trimmed.startsWith('|')) {
+      current += (current ? ' ' : '') + trimmed;
+    }
+  }
+  if (current && paragraphs.length < 3) paragraphs.push(current);
+  return paragraphs.slice(0, 3);
+}
+const teaserParagraphs = extractTeaser(entry.body || '');
 ---
 
 <BaseLayout title={entry.data.title}>
-  <!-- Auth gate -->
-  <div class="auth-gate" id="auth-gate">
+  <!-- Teaser for non-authenticated users -->
+  <div class="article-teaser" id="article-teaser">
+    <header class="article-header">
+      <a href="/pro" class="back-link">← The Vault</a>
+      <div class="article-meta">
+        <span class={`tier-badge ${entry.data.tier}`}>{entry.data.tier === 'founding' ? 'Founding Only' : 'Pro'}</span>
+        <span class="category">{entry.data.category}</span>
+      </div>
+      <h1>{entry.data.title}</h1>
+      <p class="description">{entry.data.description}</p>
+    </header>
+    <div class="teaser-body">
+      {teaserParagraphs.map(para => <p>{para}</p>)}
+      <div class="teaser-fade"></div>
+    </div>
+    <div class="paywall-prompt">
+      <p class="paywall-heading">Continue reading in The Vault</p>
+      <p class="paywall-sub">This article is available to {entry.data.tier === 'founding' ? 'Inner Circle' : 'Pro'} members.</p>
+      <a href="/upgrade" class="gate-btn">Unlock access →</a>
+      <p class="gate-sub">Already a member? <a href="/login">Sign in</a></p>
+    </div>
+  </div>
+
+  <!-- Auth gate (shown when session is invalid/expired) -->
+  <div class="auth-gate" id="auth-gate" style="display:none">
     <div class="gate-card">
       <h2>The Vault</h2>
       <p>This guide is available to Pro and Inner Circle members.</p>
@@ -61,11 +103,23 @@ const { Content } = await entry.render();
     .description { font-size: 1.05em; color: #666; margin: 0; }
     .article-content { margin-bottom: 3rem; }
     .article-footer { padding-top: 1.5rem; border-top: 1px solid var(--color-border); text-align: center; color: #888; font-size: 0.9em; }
-    /* Auth gate */
-    .auth-gate { max-width: 400px; margin: 4rem auto; text-align: center; }
-    .gate-card { border: 1px solid var(--color-border); border-radius: 12px; padding: 2.5rem; }
-    .gate-card h2 { margin: 0 0 0.5rem; font-size: 1.5em; }
-    .gate-card > p { color: #666; font-size: 0.92em; margin: 0 0 1.5rem; }
+    /* Teaser */
+    .article-teaser { max-width: 760px; }
+    .teaser-body { position: relative; overflow: hidden; max-height: 320px; margin-bottom: 0; }
+    .teaser-body p { font-size: 1em; line-height: 1.7; color: var(--color-fg); margin-bottom: 1em; }
+    .teaser-fade {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 160px;
+      background: linear-gradient(to bottom, transparent, var(--color-bg));
+    }
+
+    /* Paywall prompt */
+    .paywall-prompt {
+      text-align: center; padding: 2rem 1.5rem;
+      border: 1px solid var(--color-border); border-radius: 12px;
+      background: var(--color-card); margin-top: 0;
+    }
+    .paywall-heading { font-size: 1.15em; font-weight: 700; margin: 0 0 0.4rem; color: var(--color-fg); font-family: 'Merriweather', serif; }
+    .paywall-sub { font-size: 0.9em; color: #666; margin: 0 0 1.25rem; }
     .gate-btn {
       display: inline-block; background: var(--color-accent); color: white;
       padding: 0.75rem 2rem; border-radius: 8px; font-weight: 600;
@@ -74,6 +128,12 @@ const { Content } = await entry.render();
     .gate-btn:hover { opacity: 0.9; text-decoration: none; }
     .gate-sub { font-size: 0.82em; color: #888; margin: 1rem 0 0; }
     .gate-sub a { color: var(--color-accent); }
+
+    /* Auth gate (fallback) */
+    .auth-gate { max-width: 400px; margin: 4rem auto; text-align: center; }
+    .gate-card { border: 1px solid var(--color-border); border-radius: 12px; padding: 2.5rem; }
+    .gate-card h2 { margin: 0 0 0.5rem; font-size: 1.5em; }
+    .gate-card > p { color: #666; font-size: 0.92em; margin: 0 0 1.5rem; }
   </style>
 
   <script>
@@ -82,12 +142,23 @@ const { Content } = await entry.render();
 
     const contentTier = document.querySelector('[data-content-tier]')?.dataset.contentTier;
 
+    function showTeaser() {
+      document.getElementById('article-teaser').style.display = 'block';
+      document.getElementById('auth-gate').style.display = 'none';
+      document.getElementById('pro-content').style.display = 'none';
+    }
+
+    function showContent() {
+      document.getElementById('article-teaser').style.display = 'none';
+      document.getElementById('auth-gate').style.display = 'none';
+      document.getElementById('pro-content').style.display = 'block';
+    }
+
     if (sid) {
       const cachedTier = localStorage.getItem('ae_tier');
       // Quick show for valid cached tier (avoids flash)
       if (cachedTier === 'inner' || (cachedTier === 'pro' && contentTier !== 'founding')) {
-        document.getElementById('auth-gate').style.display = 'none';
-        document.getElementById('pro-content').style.display = 'block';
+        showContent();
       }
 
       // Verify with server in background
@@ -100,16 +171,13 @@ const { Content } = await entry.render();
           localStorage.setItem('ae_tier', data.tier);
           // Founding content requires inner tier
           if (contentTier === 'founding' && data.tier !== 'inner') {
-            document.getElementById('auth-gate').style.display = 'block';
-            document.getElementById('pro-content').style.display = 'none';
+            showTeaser();
             return;
           }
-          document.getElementById('auth-gate').style.display = 'none';
-          document.getElementById('pro-content').style.display = 'block';
+          showContent();
         } else {
-          // Session invalid — show gate
-          document.getElementById('auth-gate').style.display = 'block';
-          document.getElementById('pro-content').style.display = 'none';
+          // Session invalid — show teaser
+          showTeaser();
           localStorage.removeItem('ae_session');
           localStorage.removeItem('ae_tier');
         }

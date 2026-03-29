@@ -18,6 +18,7 @@ const premium = defineCollection({
     tier: z.enum(['free', 'pro', 'founding']),
     category: z.string(),
     layout: z.string().optional(),
+    featured_free: z.boolean().optional(),
   }),
 });
 

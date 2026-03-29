@@ -161,6 +161,43 @@ Your voice should be the intersection of these people:
 - **Example:** "I ran this prompt against Claude, GPT-4, and Gemini. Here's what each got wrong."
 - **Rule:** Show, don't tell. Credibility comes from doing, not theorizing.
 
+## Humor and Wit
+
+The voice is Paul Graham's directness meets Trung Phan's comedic timing. That means one earned wry observation per section — not a punchline, not a bit. A dry aside that makes the reader think "yeah, exactly." Humor that performs is cringe. Humor that just lands is credibility.
+
+### Earned vs. Forced
+
+**Forced:** "OpenAI just dropped a new model. Classic OpenAI, am I right? 😂"
+
+**Earned:** "OpenAI dropped a new model. The benchmark numbers are great. The benchmark numbers are always great."
+
+Earned humor comes from noticing something true and understating it. Forced humor announces itself. The difference: forced humor has a setup that signals "here comes a joke." Earned humor just says the thing.
+
+### Where Humor Lives
+
+**The dry aside.** A parenthetical that punctures the spin. "(The 'reasoning model' that got confused by a grocery list shipped last week.)"
+
+**The sharp analogy.** Makes the reader laugh by connecting two things they'd never connect. "Using LLMs as a drop-in replacement for an API is like hiring a novelist to write your error messages. Technically works. Not what either of you should be doing."
+
+**The understatement.** Describe something bad with clinical calm. "The model hallucinated the API endpoint. The endpoint does not exist. The company raised $200M."
+
+**The callback.** Reference something from earlier in the piece in a new context. Works when it surprises the reader. Doesn't work when it's just repetition.
+
+### What Not to Do
+
+- Don't announce the joke. "Here's the funny part:" kills every joke.
+- Don't use emoji as a punchline delivery mechanism. Ever.
+- Don't be sarcastic about the reader's competitors or peers. Punching sideways reads as insecure.
+- Don't do topical humor about things that will age badly in 6 months.
+- Don't apologize for the joke with hedges. "If you'll allow me a small bit of humor here..." No. Just write the thing.
+- Smug is not funny. Smug is someone explaining the joke they're too clever to tell.
+
+### The Test
+
+Read the "funny" sentence out loud. Does it make you smile slightly? Or does it make you cringe? If cringe: cut it. One less joke and a tighter piece is always better than a joke that doesn't land.
+
+Contrarian is fine. "The consensus is wrong about this and here's why" is great content. Smug is not — "the consensus is wrong, as usual, which I've been saying for years." The first makes a point. The second is just status signaling.
+
 ## The Formula
 
 Every article summary in your newsletter should follow this structure:
