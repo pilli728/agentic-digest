@@ -17,13 +17,13 @@ if (latest) {
   latestContent = await latest.render();
 }
 
-// Get latest premium articles for locked cards (filter out future dates)
+// Get latest premium articles for locked cards (filter out future dates, except featured_free)
 const allPremium = await getCollection('premium');
-const publishedPremium = allPremium.filter(p => parseLocal(p.data.date) <= now);
+const publishedPremium = allPremium.filter(p => parseLocal(p.data.date) <= now || p.data.featured_free);
 const premiumSorted = publishedPremium.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
-const latestPro = premiumSorted.find(p => p.data.tier === 'pro');
-const latestFounding = premiumSorted.find(p => p.data.tier === 'founding');
 const featuredFreeArticle = publishedPremium.find(p => p.data.featured_free === true);
+const latestPro = premiumSorted.find(p => p.data.tier === 'pro' && !p.data.featured_free);
+const latestFounding = premiumSorted.find(p => p.data.tier === 'founding');
 
 // Opinion section keyword detection
 const OPINION_KEYWORDS = ["pilli's take", "your move", "my take", "the take", "editor's note", "hot take"];
@@ -102,14 +102,10 @@ const formatDate = (dateStr) => {
 <BaseLayout title="Agentic Edge" description="Pilli's weekly brief for AI builders. Stanford engineer, building AI agents since before ChatGPT. 700+ sources scanned. Only what matters.">
   <header class="home-header">
     <h1>Agentic Edge</h1>
-    <p class="tagline">The world is changing. Let's talk about it.</p>
+    <p class="tagline">Your unfair advantage as an AI builder.</p>
     <p class="sub-tagline">700+ sources scanned. Only what matters. Every Monday.</p>
   </header>
 
-  <!-- Personal intro -->
-  <section class="personal-intro">
-    <p>I'm <strong>Pilli</strong> — Stanford-trained engineer, building AI agents for 2 years, in AI since before ChatGPT dropped. I was spending 2 hours a day reading AI news and still missing what mattered. So I built an agent to do it for me. This is what it finds.</p>
-  </section>
 
   <!-- Company logos carousel -->
   <section class="logos-section">
@@ -152,8 +148,8 @@ const formatDate = (dateStr) => {
   <!-- Email signup -->
   <section class="signup-section">
     <div class="signup-box">
-      <h2>The briefing I built for myself</h2>
-      <p>700+ sources. One Monday read. No filler, no fluff — just what actually matters to builders working with AI right now.</p>
+      <h2>Join the builders who ship with AI</h2>
+      <p class="signup-bio">I'm Pilli. Stanford engineer. I build AI agents for a living, and I still spent two hours a day just finding what mattered. So I automated it. Every week: the signal, and what top engineers are doing to stay ahead.</p>
       <form class="signup-form" id="signup-form">
         <input type="email" placeholder="you@company.com" required id="signup-email" />
         <button type="submit" class="btn btn-primary" id="signup-btn">Join for free</button>
@@ -222,8 +218,8 @@ const formatDate = (dateStr) => {
         </div>
 
         <!-- Locked top story — FREE users see Pro article, PRO users see Founding article -->
-        <!-- Version for free users: featured free article OR latest Pro article -->
-        {latestPro && !latestPro.data.featured_free && (
+        <!-- Version for free users: latest Pro article (hidden when featured free exists) -->
+        {latestPro && !featuredFreeArticle && (
         <a href="/upgrade" class="locked-card" id="locked-top-free">
           <div class="locked-badge">PRO</div>
           <div class="locked-content">
@@ -336,39 +332,39 @@ const formatDate = (dateStr) => {
           <div class="sidebar-section" id="sidebar-pro-cards">
             <h4 class="sidebar-label" id="sidebar-cards-label">Premium Content</h4>
 
-            <!-- Pro-tier articles (visible to free users, hidden for pro/inner) -->
-            <a href="/upgrade" class="sidebar-card tier-pro-card" data-article="/pro/07-vibecoding-masterclass" data-tier="pro">
+            <!-- Pro-tier articles — link to article (teaser handles gating) -->
+            <a href="/pro/07-vibecoding-masterclass" class="sidebar-card tier-pro-card">
               <strong>The Vibecoding Masterclass</strong>
               <p>8 hacks that separate 10x AI coders from everyone else.</p>
             </a>
 
-            <a href="/upgrade" class="sidebar-card tier-pro-card" data-article="/pro/03-writing-voice-guide" data-tier="pro">
+            <a href="/pro/03-writing-voice-guide" class="sidebar-card tier-pro-card">
               <strong>Anti-AI Writing Guide</strong>
               <p>25 banned phrases and the formula for human copy.</p>
             </a>
 
-            <!-- Founding-tier articles (always visible, behavior changes by tier) -->
-            <a href="/upgrade?tier=inner" class="sidebar-card tier-founding-card" data-article="/pro/10-budget-llm-spreadsheet" data-tier="founding">
+            <!-- Founding-tier articles -->
+            <a href="/pro/10-budget-llm-spreadsheet" class="sidebar-card tier-founding-card">
               <strong>The Budget LLM Spreadsheet</strong>
               <p>One model switch. 87% cost reduction. Same output.</p>
             </a>
 
-            <a href="/upgrade?tier=inner" class="sidebar-card tier-founding-card" data-article="/pro/11-agents-md-masterclass" data-tier="founding">
+            <a href="/pro/11-agents-md-masterclass" class="sidebar-card tier-founding-card">
               <strong>AGENTS.md Masterclass</strong>
               <p>Why the "tech stack mini-map" approach fails.</p>
             </a>
 
-            <a href="/upgrade?tier=inner" class="sidebar-card tier-founding-card" data-article="/pro/12-claude-code-cheat-sheet" data-tier="founding">
+            <a href="/pro/12-claude-code-cheat-sheet" class="sidebar-card tier-founding-card">
               <strong>Claude Code Cheat Sheet</strong>
               <p>Keybindings, hooks, and syntax not in the docs.</p>
             </a>
 
-            <a href="/upgrade?tier=inner" class="sidebar-card tier-founding-card" data-article="/pro/13-openclaw-week-one-setup" data-tier="founding">
+            <a href="/pro/13-openclaw-week-one-setup" class="sidebar-card tier-founding-card">
               <strong>OpenClaw Week-One Setup</strong>
               <p>Lock your gateway before you connect anything.</p>
             </a>
 
-            <a href="/upgrade?tier=inner" class="sidebar-card tier-founding-card" data-article="/pro/14-auto-mode-breakdown" data-tier="founding">
+            <a href="/pro/14-auto-mode-breakdown" class="sidebar-card tier-founding-card">
               <strong>Auto Mode Breakdown</strong>
               <p>How memory consolidation works and what gets pruned.</p>
             </a>
@@ -441,6 +437,7 @@ const formatDate = (dateStr) => {
     .personal-intro { max-width: 560px; margin: 0 auto 1.75rem; text-align: center; }
     .personal-intro p { font-size: 0.9em; color: var(--color-muted); line-height: 1.6; margin: 0; }
     .personal-intro strong { color: var(--color-fg); }
+    .briefing-desc { margin-top: 0.75rem !important; font-size: 0.85em !important; color: #999 !important; }
 
     /* Logo carousel */
     .logos-section { text-align: center; margin-bottom: 2rem; overflow: hidden; }
@@ -460,6 +457,7 @@ const formatDate = (dateStr) => {
     .signup-form input { flex: 1; padding: 0.7rem 0.9rem; border: 1px solid var(--color-border); border-radius: 6px; font-size: 0.9em; background: var(--color-bg); color: var(--color-fg); }
     .signup-form input:focus { outline: none; border-color: var(--color-accent); }
     .signup-note { font-size: 0.75em; color: var(--color-muted); margin: 0; }
+    .signup-bio { font-size: 0.88em; color: var(--color-muted); line-height: 1.6; margin: 0 0 1.25rem; }
     .btn-primary {
       padding: 0.7rem 1.4rem;
       background: #7c3aed;
