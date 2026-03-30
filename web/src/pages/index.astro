@@ -214,14 +214,15 @@ const formatDate = (dateStr) => {
   <!-- Featured free pro article -->
   {featuredFreeArticle && (
     <section class="featured-free-section">
-      <div class="featured-free-label">From The Vault — Free Preview</div>
+      <div class="featured-free-label">This Week's Free Pro Article</div>
       <a href={`/pro/${featuredFreeArticle.slug}`} class="featured-free-card">
         <div class="featured-free-meta">
+          <span class="featured-free-badge">FREE THIS WEEK</span>
           <span class="featured-free-category">{featuredFreeArticle.data.category}</span>
         </div>
         <h3>{featuredFreeArticle.data.title}</h3>
         <p>{featuredFreeArticle.data.description}</p>
-        <span class="featured-free-cta">Read it free →</span>
+        <span class="featured-free-cta">Read the full article — free, no login →</span>
       </a>
     </section>
   )}
@@ -490,7 +491,12 @@ const formatDate = (dateStr) => {
       transition: box-shadow 0.2s; opacity: 0.95;
     }
     .featured-free-card:hover { box-shadow: 0 4px 16px rgba(124,58,237,0.1); text-decoration: none; opacity: 1; }
-    .featured-free-meta { margin-bottom: 0.4rem; }
+    .featured-free-meta { margin-bottom: 0.5rem; display: flex; gap: 0.5rem; align-items: center; }
+    .featured-free-badge {
+      font-size: 0.65em; text-transform: uppercase; letter-spacing: 0.1em;
+      background: #16a34a; color: white;
+      padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 700;
+    }
     .featured-free-category {
       font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.08em;
       background: rgba(124,58,237,0.08); color: var(--color-accent);
