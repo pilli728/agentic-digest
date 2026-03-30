@@ -70,7 +70,7 @@ const teaserParagraphs = extractTeaser(entry.body || '');
     </div>
   </div>
 
-  <div id="pro-content" style="display:none" data-content-tier={entry.data.tier}>
+  <div id="pro-content" style="display:none" data-content-tier={entry.data.tier} data-featured-free={entry.data.featured_free ? 'true' : 'false'}>
     <header class="article-header">
       <a href="/pro" class="back-link">← The Vault</a>
       <div class="article-meta">
@@ -144,8 +144,9 @@ const teaserParagraphs = extractTeaser(entry.body || '');
 
     const contentTier = document.querySelector('[data-content-tier]')?.dataset.contentTier;
 
-    // Free articles: show full content immediately, no gating
-    if (contentTier === 'free') {
+    // Free articles or featured free: show full content immediately, no gating
+    const isFeaturedFree = document.querySelector('[data-featured-free]')?.dataset.featuredFree === 'true';
+    if (contentTier === 'free' || isFeaturedFree) {
       document.getElementById('article-teaser')?.remove();
       document.getElementById('auth-gate')?.remove();
       document.getElementById('pro-content').style.display = 'block';

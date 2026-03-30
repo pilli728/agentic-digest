@@ -2,7 +2,7 @@
 title: "What the Iran War Means for the AI Industry"
 description: "The 2026 Iran war is reshaping AI infrastructure in ways that aren't getting enough attention. Helium shortages, data center strikes, and a K-shaped market."
 date: "2026-03-29"
-tier: "free"
+tier: "pro"
 category: "analysis"
 featured_free: true
 ---

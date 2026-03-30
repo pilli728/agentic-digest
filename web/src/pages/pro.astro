@@ -10,7 +10,7 @@ const sorted = premium.sort((a, b) =>
   new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
 );
 
-const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === 'founding' || p.data.tier === 'free');
+const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === 'founding' || p.data.tier === 'free' || p.data.featured_free);
 ---
 
 <BaseLayout title="The Vault" description="Playbooks, guides, templates, and tools for AI builders.">
@@ -46,7 +46,7 @@ const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === '
       {proContent.map(item => (
         <a href={`/pro/${item.slug}`} class={`content-card ${item.data.tier === 'founding' ? 'founding-locked' : ''}`} data-tier={item.data.tier}>
           <div class="card-meta">
-            <span class={`tier-badge ${item.data.tier}`}>{item.data.tier === 'founding' ? 'Inner Circle' : item.data.tier === 'free' ? 'Free' : 'Pro'}</span>
+            <span class={`tier-badge ${item.data.featured_free ? 'free' : item.data.tier}`}>{item.data.featured_free ? 'Free this week' : item.data.tier === 'founding' ? 'Inner Circle' : item.data.tier === 'free' ? 'Free' : 'Pro'}</span>
             <span class="category">{item.data.category}</span>
           </div>
           <h3>{item.data.title}</h3>
