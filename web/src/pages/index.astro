@@ -287,16 +287,13 @@ const formatDate = (dateStr) => {
                 </div>
               ) : (
                 section.stories.map(story => (
-                  <div class="source-card">
+                  <a href={story.url} class="source-card" target={story.url.startsWith('/') ? '_self' : '_blank'} rel={story.url.startsWith('/') ? undefined : 'noopener noreferrer'}>
                     <div class="source-card-text">
                       <strong>{story.title}</strong>
                       <p>{story.summary.length > 200 ? story.summary.substring(0, 200) + '...' : story.summary}</p>
-                      <div class="source-card-footer">
-                        <span class="source-meta">{story.source}</span>
-                        {story.url && <a href={story.url} class="read-original" target="_blank" rel="noopener noreferrer">Read original →</a>}
-                      </div>
+                      <span class="source-meta">{story.source}</span>
                     </div>
-                  </div>
+                  </a>
                 ))
               )}
             </>
@@ -625,8 +622,10 @@ const formatDate = (dateStr) => {
     .source-card {
       display: flex; align-items: flex-start; gap: 1rem;
       padding: 1.1rem 0; border-bottom: 1px solid var(--color-border);
-      color: inherit;
+      color: inherit; text-decoration: none; cursor: pointer;
+      transition: opacity 0.15s;
     }
+    .source-card:hover { opacity: 0.75; text-decoration: none; }
     .source-card:first-child { border-top: 1px solid var(--color-border); }
     .source-card-text { flex: 1; min-width: 0; }
     .source-card-text strong {
