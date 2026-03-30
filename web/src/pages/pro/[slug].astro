@@ -256,12 +256,14 @@ const teaserParagraphs = extractTeaser(entry.body || '');
           }
           showContent();
         } else {
-          // Session invalid — show teaser
+          // Session invalid — show teaser but don't nuke the session
+          // (could be a transient API error, not an invalid session)
           showTeaser();
-          localStorage.removeItem('ae_session');
-          localStorage.removeItem('ae_tier');
         }
-      }).catch(() => {});
+      }).catch(() => {
+        // Network error — don't clear session, just show teaser
+        showTeaser();
+      });
     }
   </script>
 </BaseLayout>
