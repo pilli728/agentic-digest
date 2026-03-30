@@ -14,28 +14,8 @@ const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === '
 ---
 
 <BaseLayout title="The Vault" description="Playbooks, guides, templates, and tools for AI builders.">
-  <!-- Auth gate: not logged in -->
-  <div class="auth-gate" id="auth-gate-signin" style="display:none">
-    <div class="gate-card">
-      <h2>The Vault</h2>
-      <p>Playbooks, guides, and tools for serious AI builders.<br><strong>Pro members only.</strong></p>
-      <a href="/login" class="gate-btn">Sign in to access</a>
-      <p class="gate-sub">Not a Pro member? <a href="/upgrade">Upgrade to Pro</a> · <a href="/">Join free</a></p>
-    </div>
-  </div>
-
-  <!-- Auth gate: logged in but free tier -->
-  <div class="auth-gate" id="auth-gate-upgrade" style="display:none">
-    <div class="gate-card">
-      <h2>The Vault is a Pro benefit</h2>
-      <p>You're signed in, but The Vault requires a Pro membership. Upgrade to access playbooks, guides, templates, and tools.</p>
-      <a href="/upgrade" class="gate-btn">Upgrade to Pro — $12/mo</a>
-      <p class="gate-sub">Already upgraded? <a href="/login">Sign in again</a> to refresh your session.</p>
-    </div>
-  </div>
-
-  <!-- Pro content (hidden until auth check) -->
-  <div class="pro-content" id="pro-content" style="display:none">
+  <!-- Pro content (always visible — individual articles handle their own gating) -->
+  <div class="pro-content" id="pro-content">
     <header class="pro-header">
       <a href="/" class="back-link">← Back to Agentic Edge</a>
       <h1>The Vault</h1>
@@ -247,64 +227,46 @@ const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === '
   </style>
 
   <script>
+    // Check tier for template/founding card styling
     const API = window.API_URL;
     const sid = localStorage.getItem('ae_session');
+    const userTier = localStorage.getItem('ae_tier') || 'free';
 
-    async function checkAccess() {
-      if (!sid) return false;
-      try {
-        const res = await fetch(`${API}/api/auth/session`, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ session_id: sid })
-        });
-        const data = await res.json();
-        if (data.success && (data.tier === 'pro' || data.tier === 'inner')) {
-          // Sync localStorage with server tier
+    // Verify tier with server if logged in
+    if (sid) {
+      fetch(`${API}/api/auth/session`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ session_id: sid })
+      }).then(r => r.json()).then(data => {
+        if (data.success) {
           localStorage.setItem('ae_tier', data.tier);
-          return true;
+          applyTier(data.tier);
+        } else {
+          applyTier('free');
         }
-        return false;
-      } catch { return false; }
+      }).catch(() => applyTier(userTier));
+    } else {
+      applyTier('free');
     }
 
-    if (sid) {
-      checkAccess().then(ok => {
-        if (ok) {
-          document.getElementById('pro-content').style.display = 'block';
-
-          const userTier = localStorage.getItem('ae_tier');
-
-          if (userTier === 'inner') {
-            // Inner Circle — full access, remove all locks
-            document.querySelectorAll('.founding-locked').forEach(card => {
-              card.classList.remove('tier-gated');
-            });
-          } else {
-            // Pro — lock founding content and templates, redirect to upgrade
-            document.querySelectorAll('.founding-locked').forEach(card => {
-              card.classList.add('tier-gated');
-              card.addEventListener('click', (e) => {
-                e.preventDefault();
-                window.location.href = '/upgrade?tier=inner';
-              });
-            });
-            document.querySelectorAll('.download-card').forEach(card => {
-              card.classList.add('template-locked');
-              card.addEventListener('click', (e) => {
-                e.preventDefault();
-                window.location.href = '/upgrade?tier=inner';
-              });
-            });
-          }
-        } else {
-          // Signed in but free tier — show upgrade gate
-          document.getElementById('auth-gate-upgrade').style.display = 'block';
-        }
-      });
-    } else {
-      // Not signed in — show sign in gate
-      document.getElementById('auth-gate-signin').style.display = 'block';
+    function applyTier(tier) {
+      if (tier === 'inner') {
+        // Inner Circle — full access, show templates
+        document.querySelectorAll('.founding-locked').forEach(card => {
+          card.classList.remove('tier-gated');
+        });
+        var dl = document.getElementById('downloads-section');
+        if (dl) dl.style.display = 'block';
+      } else {
+        // Free or Pro — dim founding cards, lock templates
+        document.querySelectorAll('.founding-locked').forEach(card => {
+          card.classList.add('tier-gated');
+        });
+        document.querySelectorAll('.download-card').forEach(card => {
+          card.classList.add('template-locked');
+        });
+      }
     }
   </script>
 </BaseLayout>
