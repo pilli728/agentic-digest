@@ -307,6 +307,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     .cancel-link { font-size: 0.8em; margin-bottom: 0.5rem; }
     .cancel-link a { color: #ef4444; text-decoration: none; }
     .cancel-link a:hover { text-decoration: underline; }
+    .cancel-pending {
+      font-size: 0.85em; color: #16a34a; background: rgba(34,197,94,0.08);
+      padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid rgba(34,197,94,0.15);
+    }
     .unsubscribe-link { font-size: 0.72em; }
     .unsubscribe-link a { color: #bbb; text-decoration: none; }
     .unsubscribe-link a:hover { color: #888; text-decoration: underline; }
@@ -410,9 +414,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       // Cancel subscription handler
       document.getElementById('cancel-btn')?.addEventListener('click', async (e) => {
         e.preventDefault();
-        if (!confirm('Are you sure you want to cancel? You will retain access until the end of your current billing period.')) return;
+        if (!confirm('Are you sure? You\'ll keep full access until the end of your current billing period, then your plan will revert to free.')) return;
         const cancelSid = localStorage.getItem('ae_session');
         if (!cancelSid) return;
+        var cancelBtn = document.getElementById('cancel-btn');
+        cancelBtn.textContent = 'Cancelling...';
         try {
           const res = await fetch(window.API_URL + '/api/cancel-subscription', {
             method: 'POST',
@@ -421,13 +427,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           });
           const data = await res.json();
           if (data.success) {
-            localStorage.setItem('ae_tier', 'free');
-            window.location.reload();
+            // Don't change tier — user keeps access until period ends
+            // Stripe webhook (customer.subscription.deleted) handles the actual downgrade
+            var cancelLink = document.getElementById('cancel-link');
+            cancelLink.innerHTML = '<p class="cancel-pending">Your subscription has been cancelled. You\'ll keep full access until the end of your current billing period.</p>';
           } else {
-            document.getElementById('cancel-btn').textContent = data.message || 'Error cancelling';
+            cancelBtn.textContent = data.message || 'Error cancelling';
           }
         } catch {
-          document.getElementById('cancel-btn').textContent = 'Connection error';
+          cancelBtn.textContent = 'Connection error. Try again.';
         }
       });
     })();
