@@ -373,15 +373,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         applyTier(tier);
       }
 
-      // Check for pending cancellation
-      if (localStorage.getItem('ae_cancel_pending') === 'true') {
-        var cancelLink = document.getElementById('cancel-link');
-        if (cancelLink) {
-          cancelLink.style.display = 'block';
-          cancelLink.innerHTML = '<p class="cancel-pending">Your subscription has been cancelled. You\'ll keep full access until the end of your current billing period.</p>';
-        }
-      }
-
       function applyTier(t) {
         const freeBtn = document.getElementById('free-btn');
         const freeSub = document.getElementById('free-sub');
@@ -410,13 +401,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           // Inner: current monthly, allow switch to annual
           if (innerBtn) { innerBtn.textContent = 'Current plan'; innerBtn.disabled = true; innerBtn.classList.add('current-plan-btn'); innerBtn.classList.remove('gold'); }
           if (innerAnnualBtn) { innerAnnualBtn.textContent = 'Switch to annual — $349/year'; innerAnnualBtn.disabled = false; }
+        } else {
+          // Free: clear any pending cancel flag
+          localStorage.removeItem('ae_cancel_pending');
         }
-        // else free: default state, clear any pending cancel flag
-        localStorage.removeItem('ae_cancel_pending');
       }
       function applyCancel(t) {
         if (t === 'pro' || t === 'inner') {
-          document.getElementById('cancel-link').style.display = 'block';
+          var cancelLink = document.getElementById('cancel-link');
+          cancelLink.style.display = 'block';
+          // If cancel is pending, show the pending message instead of the cancel button
+          if (localStorage.getItem('ae_cancel_pending') === 'true') {
+            cancelLink.innerHTML = '<p class="cancel-pending">Your subscription has been cancelled. You\'ll keep full access until the end of your current billing period.</p>';
+          }
         }
       }
       applyCancel(tier);
