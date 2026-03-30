@@ -107,7 +107,7 @@ const fullTitle = title === 'Agentic Edge' ? title : `${title} | Agentic Edge`;
       <a href="/" class="nav-brand"><svg class="nav-logo" viewBox="0 0 100 100" width="22" height="22"><rect x="5" y="5" width="90" height="90" rx="18" fill="#7c3aed"/><text x="50" y="68" text-anchor="middle" font-family="Georgia,serif" font-size="48" font-weight="700" fill="white">AE</text></svg> Agentic Edge</a>
       <div class="nav-links">
         <a href="/">Home</a>
-        <a href="/pro">The Vault</a>
+        <a href="/pro" class="nav-vault"><span class="vault-full">The Vault</span><span class="vault-short">Vault</span></a>
         <a href="/upgrade" class="nav-upgrade">Upgrade</a>
         <a href="/archive" class="nav-archive">Archive</a>
         <a href="/login" class="nav-signin" id="nav-signin">Sign in</a>
@@ -141,6 +141,7 @@ const fullTitle = title === 'Agentic Edge' ? title : `${title} | Agentic Edge`;
       .nav-links a { text-decoration: none; color: var(--color-muted); }
       .nav-links a:hover { color: var(--color-fg); }
       .nav-upgrade { color: var(--color-accent) !important; font-weight: 600; }
+      .vault-short { display: none; }
       .nav-archive { color: var(--color-muted) !important; }
       .nav-archive:hover { color: var(--color-fg) !important; }
       .nav-signin { background: var(--color-accent); color: white !important; padding: 0.4rem 1rem; border-radius: 6px; font-weight: 500; }
@@ -210,6 +211,8 @@ const fullTitle = title === 'Agentic Edge' ? title : `${title} | Agentic Edge`;
           font-size: 0.82em; border-radius: 20px;
         }
         .nav-archive { display: none; }
+        .vault-full { display: none; }
+        .vault-short { display: inline; }
         .container { padding: 0 0.75rem 1rem; }
       }
       @media (max-width: 360px) {
