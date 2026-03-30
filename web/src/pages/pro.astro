@@ -4,12 +4,13 @@ import { getCollection } from 'astro:content';
 
 const allPremium = await getCollection('premium');
 const now = new Date();
-const premium = allPremium.filter(p => new Date(p.data.date) <= now);
+const parseLocal = (s) => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const premium = allPremium.filter(p => parseLocal(p.data.date) <= now);
 const sorted = premium.sort((a, b) =>
   new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
 );
 
-const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === 'founding');
+const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === 'founding' || p.data.tier === 'free');
 ---
 
 <BaseLayout title="The Vault" description="Playbooks, guides, templates, and tools for AI builders.">
@@ -45,7 +46,7 @@ const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === '
       {proContent.map(item => (
         <a href={`/pro/${item.slug}`} class={`content-card ${item.data.tier === 'founding' ? 'founding-locked' : ''}`} data-tier={item.data.tier}>
           <div class="card-meta">
-            <span class={`tier-badge ${item.data.tier}`}>{item.data.tier === 'founding' ? 'Inner Circle' : 'Pro'}</span>
+            <span class={`tier-badge ${item.data.tier}`}>{item.data.tier === 'founding' ? 'Inner Circle' : item.data.tier === 'free' ? 'Free' : 'Pro'}</span>
             <span class="category">{item.data.category}</span>
           </div>
           <h3>{item.data.title}</h3>
@@ -164,6 +165,7 @@ const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === '
     }
     .tier-badge.pro { background: rgba(0,102,204,0.1); color: var(--color-accent); }
     .tier-badge.founding { background: rgba(245,158,11,0.1); color: #b45309; }
+    .tier-badge.free { background: rgba(34,197,94,0.1); color: #16a34a; }
 
     .category {
       padding: 0.25rem 0.75rem;

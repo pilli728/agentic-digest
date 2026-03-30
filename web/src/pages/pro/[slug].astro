@@ -5,7 +5,8 @@ import { getCollection } from 'astro:content';
 export async function getStaticPaths() {
   const premium = await getCollection('premium');
   const now = new Date();
-  const published = premium.filter(p => new Date(p.data.date) <= now);
+  const parseLocal = (s) => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+  const published = premium.filter(p => parseLocal(p.data.date) <= now);
   return published.map(entry => ({
     params: { slug: entry.slug },
     props: { entry },
@@ -97,6 +98,7 @@ const teaserParagraphs = extractTeaser(entry.body || '');
     .tier-badge { padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75em; font-weight: 600; }
     .tier-badge.pro { background: rgba(0,102,204,0.1); color: var(--color-accent); }
     .tier-badge.founding { background: rgba(245,158,11,0.1); color: #b45309; }
+    .tier-badge.free { background: rgba(34,197,94,0.1); color: #16a34a; }
     .category { padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75em; background: rgba(0,0,0,0.05); color: #666; }
     .date { font-size: 0.85em; color: #888; }
     h1 { font-size: 2em; line-height: 1.2; margin: 0 0 0.75rem; }
@@ -141,6 +143,13 @@ const teaserParagraphs = extractTeaser(entry.body || '');
     const sid = localStorage.getItem('ae_session');
 
     const contentTier = document.querySelector('[data-content-tier]')?.dataset.contentTier;
+
+    // Free articles: show full content immediately, no gating
+    if (contentTier === 'free') {
+      document.getElementById('article-teaser')?.remove();
+      document.getElementById('auth-gate')?.remove();
+      document.getElementById('pro-content').style.display = 'block';
+    }
 
     function showTeaser() {
       document.getElementById('article-teaser').style.display = 'block';

@@ -4,7 +4,8 @@ import { getCollection } from 'astro:content';
 
 const allDigests = await getCollection('digests');
 const now = new Date();
-const digests = allDigests.filter(d => new Date(d.data.date) <= now);
+const parseLocal = (s: string) => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const digests = allDigests.filter(d => parseLocal(d.data.date) <= now);
 const sorted = digests.sort((a, b) =>
   new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
 );
@@ -18,7 +19,7 @@ if (latest) {
 
 // Get latest premium articles for locked cards (filter out future dates)
 const allPremium = await getCollection('premium');
-const publishedPremium = allPremium.filter(p => new Date(p.data.date) <= now);
+const publishedPremium = allPremium.filter(p => parseLocal(p.data.date) <= now);
 const premiumSorted = publishedPremium.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
 const latestPro = premiumSorted.find(p => p.data.tier === 'pro');
 const latestFounding = premiumSorted.find(p => p.data.tier === 'founding');

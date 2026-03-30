@@ -5,7 +5,8 @@ import { getCollection } from 'astro:content';
 export async function getStaticPaths() {
   const digests = await getCollection('digests');
   const now = new Date();
-  const published = digests.filter(d => new Date(d.data.date) <= now);
+  const parseLocal = (s) => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+  const published = digests.filter(d => parseLocal(d.data.date) <= now);
   return published.map(digest => ({
     params: { slug: digest.slug },
     props: { digest }
