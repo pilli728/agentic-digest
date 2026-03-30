@@ -6,9 +6,12 @@ const allPremium = await getCollection('premium');
 const now = new Date();
 const parseLocal = (s) => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
 const premium = allPremium.filter(p => parseLocal(p.data.date) <= now);
-const sorted = premium.sort((a, b) =>
-  new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
-);
+const sorted = premium.sort((a, b) => {
+  // Featured free articles always first
+  if (a.data.featured_free && !b.data.featured_free) return -1;
+  if (!a.data.featured_free && b.data.featured_free) return 1;
+  return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
+});
 
 const proContent = sorted.filter(p => p.data.tier === 'pro' || p.data.tier === 'founding' || p.data.tier === 'free' || p.data.featured_free);
 ---

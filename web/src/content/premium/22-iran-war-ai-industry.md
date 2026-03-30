@@ -1,7 +1,7 @@
 ---
 title: "What AI Founders Need to Know About the Iran War"
 description: "The conflict changed your cost model, your infrastructure risk, your fundraising environment, and your security requirements. Here's what to do about each one."
-date: "2026-03-29"
+date: "2026-03-30"
 tier: "pro"
 category: "analysis"
 featured_free: true
