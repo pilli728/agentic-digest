@@ -820,9 +820,9 @@ const formatDate = (dateStr) => {
       }
 
       else if (tier === 'pro') {
-        // PRO: Show FOUNDING article as top card (different content, upsell to Inner Circle)
-        // Sidebar: hide pro cards, show only founding cards → /upgrade?tier=inner
         if (topFree) topFree.style.display = 'none';
+        var freeArticle = document.getElementById('locked-top-free-article');
+        if (freeArticle) freeArticle.style.display = 'none';
         if (topPro) topPro.style.display = 'block';
         if (label) label.textContent = 'Inner Circle Only';
         document.querySelectorAll('.tier-pro-card').forEach(function(c) { c.style.display = 'none'; });
@@ -831,8 +831,9 @@ const formatDate = (dateStr) => {
       }
 
       else if (tier === 'inner') {
-        // INNER CIRCLE: Show founding article unlocked, sidebar cards link to real articles
         if (topFree) topFree.style.display = 'none';
+        var freeArticle2 = document.getElementById('locked-top-free-article');
+        if (freeArticle2) freeArticle2.style.display = 'none';
         if (topInner) topInner.style.display = 'block';
         if (label) label.textContent = 'Your Inner Circle Content';
         document.querySelectorAll('.tier-pro-card').forEach(function(c) { c.style.display = 'none'; });
