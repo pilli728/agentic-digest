@@ -238,7 +238,6 @@ const formatDate = (dateStr) => {
         <a href={`/pro/${featuredFreeArticle.slug}`} class="featured-free-card featured-free-top" id="locked-top-free-article">
           <div class="featured-free-meta">
             <span class="featured-free-badge">Free Pro Article</span>
-            <span class="featured-free-category">pro</span>
           </div>
           <h3>{featuredFreeArticle.data.title}</h3>
           <p>{featuredFreeArticle.data.description}</p>
@@ -489,7 +488,7 @@ const formatDate = (dateStr) => {
     .featured-free-meta { margin-bottom: 0.5rem; display: flex; gap: 0.5rem; align-items: center; }
     .featured-free-badge {
       font-size: 0.65em; text-transform: uppercase; letter-spacing: 0.1em;
-      background: #f59e0b; color: white;
+      background: rgba(124,58,237,0.12); color: var(--color-accent);
       padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 700;
     }
     .featured-free-category {
