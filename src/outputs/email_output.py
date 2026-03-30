@@ -26,6 +26,11 @@ def _build_html(digest_content: str, unsubscribe_url: str = "#") -> str:
     if markdown is None:
         return digest_content
 
+    import re
+    site_url = os.environ.get("SITE_URL", "https://agenticedge.tech")
+    # Convert relative URLs to absolute before rendering markdown
+    digest_content = re.sub(r'\]\((/[^)]+)\)', lambda m: f']({site_url}{m.group(1)})', digest_content)
+
     html_content = markdown.markdown(digest_content)
 
     return f"""<!DOCTYPE html>

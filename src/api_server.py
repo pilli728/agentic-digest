@@ -713,6 +713,27 @@ class APIHandler(BaseHTTPRequestHandler):
                     parts = content.split("---", 2)
                     md = parts[2].strip() if len(parts) >= 3 else content
 
+                # Find featured_free article and prepend to digest
+                site_url = os.environ.get("SITE_URL", "https://agenticedge.tech")
+                premium_path = os.path.join(base, "..", "web", "src", "content", "premium")
+                if not os.path.isdir(premium_path):
+                    premium_path = os.path.join(base, "web", "src", "content", "premium")
+                if os.path.isdir(premium_path):
+                    for pf in os.listdir(premium_path):
+                        if pf.endswith(".md"):
+                            with open(os.path.join(premium_path, pf), "r") as pfile:
+                                pcontent = pfile.read()
+                                if "featured_free: true" in pcontent:
+                                    # Extract title and slug
+                                    import re as _re
+                                    title_match = _re.search(r'title:\s*"([^"]+)"', pcontent)
+                                    slug = pf.replace(".md", "")
+                                    if title_match:
+                                        featured_title = title_match.group(1)
+                                        featured_url = f"{site_url}/pro/{slug}"
+                                        md = f"**This week's free Pro article:** [{featured_title}]({featured_url}) — read the full piece, no login needed.\n\n---\n\n{md}"
+                                    break
+
                 from outputs.email_output import send_to_all_subscribers
                 db = DigestDatabase()
                 email_results = send_to_all_subscribers(md, db)
