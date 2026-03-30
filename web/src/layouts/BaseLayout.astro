@@ -21,10 +21,13 @@ const fullTitle = title === 'Agentic Edge' ? title : `${title} | Agentic Edge`;
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Agentic Edge" />
     <meta property="og:url" content={Astro.url.href} />
-    <meta property="og:image" content="https://agenticedge.tech/og-image.png" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content="https://agenticedge.tech/og-image.svg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description || "Pilli's weekly brief for AI builders. 700+ sources scanned. Only what matters. Every Monday."} />
+    <meta name="twitter:image" content="https://agenticedge.tech/og-image.svg" />
     <meta name="api-url" content={import.meta.env.PUBLIC_API_URL || ''} />
     <!-- Privacy-friendly analytics by Plausible -->
     <script async src="https://plausible.io/js/pa-uHDu7oFzXabKDy2C5GJFZ.js"></script>

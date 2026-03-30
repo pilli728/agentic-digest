@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#faf8f4"/>
+
+  <!-- Purple accent bar at top -->
+  <rect width="1200" height="6" fill="#7c3aed"/>
+
+  <!-- Logo -->
+  <rect x="80" y="180" width="80" height="80" rx="16" fill="#7c3aed"/>
+  <text x="120" y="235" text-anchor="middle" font-family="Georgia,serif" font-size="42" font-weight="700" fill="white">AE</text>
+
+  <!-- Title -->
+  <text x="190" y="220" font-family="Georgia,serif" font-size="52" font-weight="700" fill="#1a1a1a">Agentic Edge</text>
+  <text x="190" y="256" font-family="system-ui,sans-serif" font-size="22" fill="#888">Your unfair advantage as an AI builder.</text>
+
+  <!-- Divider -->
+  <line x1="80" y1="300" x2="1120" y2="300" stroke="#e5e5e5" stroke-width="1"/>
+
+  <!-- Description -->
+  <text x="80" y="350" font-family="Georgia,serif" font-size="28" fill="#1a1a1a">700+ sources scanned. Only what matters.</text>
+  <text x="80" y="390" font-family="Georgia,serif" font-size="28" fill="#1a1a1a">Every Monday morning.</text>
+
+  <!-- Tags -->
+  <rect x="80" y="430" width="85" height="32" rx="16" fill="rgba(124,58,237,0.1)"/>
+  <text x="122" y="451" text-anchor="middle" font-family="system-ui,sans-serif" font-size="14" font-weight="600" fill="#7c3aed">AI Agents</text>
+
+  <rect x="180" y="430" width="110" height="32" rx="16" fill="rgba(124,58,237,0.1)"/>
+  <text x="235" y="451" text-anchor="middle" font-family="system-ui,sans-serif" font-size="14" font-weight="600" fill="#7c3aed">Dev Tools</text>
+
+  <rect x="305" y="430" width="90" height="32" rx="16" fill="rgba(124,58,237,0.1)"/>
+  <text x="350" y="451" text-anchor="middle" font-family="system-ui,sans-serif" font-size="14" font-weight="600" fill="#7c3aed">Startups</text>
+
+  <rect x="410" y="430" width="95" height="32" rx="16" fill="rgba(124,58,237,0.1)"/>
+  <text x="457" y="451" text-anchor="middle" font-family="system-ui,sans-serif" font-size="14" font-weight="600" fill="#7c3aed">Playbooks</text>
+
+  <!-- URL -->
+  <text x="80" y="560" font-family="system-ui,sans-serif" font-size="20" fill="#aaa">agenticedge.tech</text>
+
+  <!-- Decorative dots -->
+  <circle cx="1050" cy="180" r="40" fill="none" stroke="#7c3aed" stroke-width="1.5" opacity="0.12"/>
+  <circle cx="1100" cy="220" r="25" fill="none" stroke="#7c3aed" stroke-width="1.5" opacity="0.1"/>
+  <circle cx="1020" cy="240" r="15" fill="none" stroke="#7c3aed" stroke-width="1.5" opacity="0.08"/>
+  <path d="M1050,180 L1100,220" fill="none" stroke="#7c3aed" stroke-width="1" opacity="0.08"/>
+  <path d="M1020,240 L1050,220" fill="none" stroke="#7c3aed" stroke-width="1" opacity="0.08" stroke-dasharray="3,3"/>
+</svg>
