@@ -209,7 +209,7 @@ const fullTitle = title === 'Agentic Edge' ? title : `${title} | Agentic Edge`;
       // Check login state
       const sid = localStorage.getItem('ae_session');
       const email = localStorage.getItem('ae_email');
-      if (sid && email) {
+      if (sid) {
         // Hide sign in, show user button
         var signIn = document.getElementById('nav-signin');
         var userWrap = document.getElementById('nav-user-wrap');
@@ -217,8 +217,8 @@ const fullTitle = title === 'Agentic Edge' ? title : `${title} | Agentic Edge`;
         var dropdownEmail = document.getElementById('nav-dropdown-email');
         if (signIn) signIn.style.display = 'none';
         if (userWrap) userWrap.style.display = 'block';
-        if (userBtn) userBtn.textContent = email;
-        if (dropdownEmail) dropdownEmail.textContent = email;
+        if (userBtn) userBtn.textContent = email || 'Account';
+        if (dropdownEmail) dropdownEmail.textContent = email || '';
 
         // Hide signup section when logged in
         document.querySelectorAll('.signup-section').forEach(function(el) { el.style.display = 'none'; });
