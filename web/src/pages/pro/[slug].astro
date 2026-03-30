@@ -70,11 +70,11 @@ const teaserParagraphs = extractTeaser(entry.body || '');
     </div>
   </div>
 
-  <div id="pro-content" style="display:none" data-content-tier={entry.data.tier} data-featured-free={entry.data.featured_free ? 'true' : 'false'}>
+  <div id="pro-content" class="article-wrapper" style="display:none" data-content-tier={entry.data.tier} data-featured-free={entry.data.featured_free ? 'true' : 'false'}>
     <header class="article-header">
       <a href="/pro" class="back-link">← The Vault</a>
       <div class="article-meta">
-        <span class={`tier-badge ${entry.data.tier}`}>{entry.data.tier === 'founding' ? 'Founding Only' : 'Pro'}</span>
+        <span class={`tier-badge ${entry.data.tier}`}>{entry.data.tier === 'founding' ? 'Founding Only' : entry.data.featured_free ? 'Free this week' : 'Pro'}</span>
         <span class="category">{entry.data.category}</span>
         <span class="date">{entry.data.date}</span>
       </div>
@@ -82,29 +82,112 @@ const teaserParagraphs = extractTeaser(entry.body || '');
       <p class="description">{entry.data.description}</p>
     </header>
 
+    <!-- Decorative sketch divider -->
+    <div class="article-divider">
+      <svg viewBox="0 0 600 40" class="divider-svg">
+        <path d="M0,20 Q30,8 60,20 T120,20 T180,20 T240,20 T300,20 T360,20 T420,20 T480,20 T540,20 T600,20" fill="none" stroke="currentColor" stroke-width="1" opacity="0.12"/>
+      </svg>
+    </div>
+
     <main class="article-content">
       <Content />
     </main>
 
+    <!-- Bottom CTA -->
     <footer class="article-footer">
-      <p>Part of the <a href="/upgrade">Agentic Edge Pro</a> library.</p>
+      <div class="footer-sketch">
+        <svg viewBox="0 0 200 60" class="footer-sketch-svg">
+          <circle cx="60" cy="30" r="18" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.1"/>
+          <circle cx="100" cy="30" r="18" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.1"/>
+          <circle cx="140" cy="30" r="18" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.1"/>
+          <path d="M60,30 L140,30" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="2,3" opacity="0.08"/>
+        </svg>
+      </div>
+      <p class="footer-label">Want to see more articles like this?</p>
+      <div class="footer-actions">
+        <a href="/pro" class="footer-btn">Browse The Vault</a>
+        <a href="/upgrade" class="footer-btn footer-btn-primary">Upgrade to Pro</a>
+      </div>
+      <p class="footer-credit">Part of the <a href="/">Agentic Edge</a> library.</p>
     </footer>
   </div>
 
   <style>
-    .article-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--color-border); }
-    .back-link { display: inline-block; margin-bottom: 1rem; font-size: 0.9em; color: #888; }
-    .article-meta { display: flex; gap: 0.75rem; margin-bottom: 1rem; align-items: center; }
-    .tier-badge { padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75em; font-weight: 600; }
+    /* Article layout */
+    .article-wrapper { max-width: 680px; margin: 0 auto; }
+
+    .article-header { margin-bottom: 0; padding-bottom: 1.5rem; }
+    .back-link { display: inline-block; margin-bottom: 1rem; font-size: 0.88em; color: #999; text-decoration: none; }
+    .back-link:hover { color: var(--color-accent); }
+    .article-meta { display: flex; gap: 0.6rem; margin-bottom: 1rem; align-items: center; flex-wrap: wrap; }
+    .tier-badge { padding: 0.2rem 0.65rem; border-radius: 12px; font-size: 0.72em; font-weight: 600; }
     .tier-badge.pro { background: rgba(0,102,204,0.1); color: var(--color-accent); }
     .tier-badge.founding { background: rgba(245,158,11,0.1); color: #b45309; }
     .tier-badge.free { background: rgba(34,197,94,0.1); color: #16a34a; }
-    .category { padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75em; background: rgba(0,0,0,0.05); color: #666; }
-    .date { font-size: 0.85em; color: #888; }
-    h1 { font-size: 2em; line-height: 1.2; margin: 0 0 0.75rem; }
-    .description { font-size: 1.05em; color: #666; margin: 0; }
-    .article-content { margin-bottom: 3rem; }
-    .article-footer { padding-top: 1.5rem; border-top: 1px solid var(--color-border); text-align: center; color: #888; font-size: 0.9em; }
+    .category { padding: 0.2rem 0.65rem; border-radius: 12px; font-size: 0.72em; background: rgba(0,0,0,0.04); color: #888; }
+    .date { font-size: 0.82em; color: #aaa; }
+    h1 { font-size: 1.85em; line-height: 1.25; margin: 0 0 0.6rem; font-family: 'Merriweather', Georgia, serif; }
+    .description { font-size: 1em; color: #777; margin: 0; line-height: 1.5; }
+
+    /* Divider */
+    .article-divider { text-align: center; margin: 0.5rem 0 1.5rem; }
+    .divider-svg { width: 100%; max-width: 400px; height: 20px; color: var(--color-fg); }
+
+    /* Article body */
+    .article-content {
+      margin-bottom: 2.5rem;
+      font-family: 'Merriweather', Georgia, serif;
+      font-size: 0.95em;
+      line-height: 1.8;
+      color: var(--color-fg);
+    }
+    .article-content h2 {
+      font-size: 1.3em; margin: 2.5rem 0 0.75rem; font-weight: 700;
+      padding-bottom: 0.4rem; border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .article-content h3 { font-size: 1.1em; margin: 2rem 0 0.5rem; font-weight: 600; }
+    .article-content p { margin: 0 0 1.25rem; }
+    .article-content ul, .article-content ol { margin: 0 0 1.25rem; padding-left: 1.5rem; }
+    .article-content li { margin-bottom: 0.4rem; }
+    .article-content code {
+      background: rgba(0,0,0,0.04); padding: 0.15rem 0.4rem;
+      border-radius: 4px; font-size: 0.88em;
+    }
+    .article-content pre {
+      background: #f8f8f6; border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 8px; padding: 1.25rem; overflow-x: auto;
+      font-size: 0.85em; line-height: 1.6; margin: 1.25rem 0;
+    }
+    .article-content pre code { background: none; padding: 0; }
+    .article-content blockquote {
+      border-left: 3px solid var(--color-accent); margin: 1.5rem 0;
+      padding: 0.5rem 0 0.5rem 1.25rem; color: #555; font-style: italic;
+    }
+    .article-content table { width: 100%; border-collapse: collapse; margin: 1.25rem 0; font-size: 0.9em; }
+    .article-content th, .article-content td { padding: 0.6rem 0.75rem; border-bottom: 1px solid rgba(0,0,0,0.06); text-align: left; }
+    .article-content th { font-weight: 600; font-size: 0.85em; color: #666; text-transform: uppercase; letter-spacing: 0.04em; }
+    .article-content a { color: var(--color-accent); text-decoration: none; }
+    .article-content a:hover { text-decoration: underline; }
+    .article-content strong { font-weight: 600; }
+
+    /* Footer */
+    .article-footer {
+      text-align: center; padding: 2rem 0 1rem;
+      border-top: 1px solid var(--color-border);
+    }
+    .footer-sketch { margin-bottom: 1rem; }
+    .footer-sketch-svg { width: 120px; height: 40px; color: var(--color-fg); }
+    .footer-label { font-size: 1.05em; font-weight: 600; margin: 0 0 1rem; color: var(--color-fg); }
+    .footer-actions { display: flex; gap: 0.75rem; justify-content: center; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .footer-btn {
+      padding: 0.6rem 1.5rem; border-radius: 8px; font-size: 0.88em; font-weight: 600;
+      text-decoration: none; border: 1px solid var(--color-border); color: var(--color-fg);
+    }
+    .footer-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+    .footer-btn-primary { background: var(--color-accent); color: white; border-color: var(--color-accent); }
+    .footer-btn-primary:hover { opacity: 0.9; color: white; }
+    .footer-credit { font-size: 0.8em; color: #bbb; margin: 0; }
+    .footer-credit a { color: #bbb; }
     /* Teaser */
     .article-teaser { max-width: 760px; }
     .teaser-body { position: relative; overflow: hidden; max-height: 320px; margin-bottom: 0; }
