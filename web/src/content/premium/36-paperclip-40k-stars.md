@@ -2,7 +2,7 @@
 title: "Paperclip Hit 40,000 GitHub Stars. Agent Monitoring Is Now a Standard Practice."
 description: "1,400+ public repos use it. 80K npm downloads. Paperclip is the de facto standard for agent heartbeat monitoring, and the adoption curve says something important."
 date: "2026-04-06"
-tier: "pro"
+tier: "free"
 category: "news"
 ---
 

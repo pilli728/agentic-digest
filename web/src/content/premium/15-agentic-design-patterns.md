@@ -2,7 +2,7 @@
 title: "Agentic Design Patterns — The 424-Page Google Engineer Doc, Broken Down"
 description: "A senior Google engineer dropped a 424-page doc covering every agentic design pattern at the frontier. Every chapter is code-backed. Here's what matters and what you can use today."
 date: "2026-03-26"
-tier: "pro"
+tier: "free"
 category: "playbook"
 ---
 

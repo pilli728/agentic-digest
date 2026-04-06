@@ -2,7 +2,7 @@
 title: "The Boris Cherny Method: How Claude Code's Creator Runs 15 Sessions in Parallel"
 description: "The guy who built Claude Code shared his actual workflow. 10-15 parallel sessions, self-evolving CLAUDE.md, zero SQL in 6 months. Here's exactly what he does."
 date: "2026-03-30"
-tier: "pro"
+tier: "free"
 category: "playbook"
 ---
 

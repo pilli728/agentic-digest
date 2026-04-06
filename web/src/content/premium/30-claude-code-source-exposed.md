@@ -2,7 +2,7 @@
 title: "Claude Code's Source Code Is Now Public Knowledge. Here's What's Inside."
 description: "A misconfigured .map file exposed Anthropic's full Claude Code source. 60+ tools, 5 compaction strategies, subagent architecture. Most users are running at 10% capacity."
 date: "2026-04-06"
-tier: "pro"
+tier: "free"
 featured_free: true
 category: "analysis"
 ---

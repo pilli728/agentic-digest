@@ -2,7 +2,7 @@
 title: "Hermes Agent: The Open-Source Agent That Gets Smarter Every Session"
 description: "Nous Research launched Hermes Agent — an open-source agent with multi-level memory that persists across sessions. The community is calling it the replacement for OpenClaw."
 date: "2026-04-06"
-tier: "pro"
+tier: "free"
 category: "tools"
 ---
 
