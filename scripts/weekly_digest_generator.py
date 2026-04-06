@@ -155,68 +155,36 @@ def markdown_to_simple_html(md: str) -> str:
 # Twitter bookmarks
 # ---------------------------------------------------------------------------
 
-def _parse_bookmarks_json(raw: list, since_date: datetime) -> list[dict]:
-    """Parse raw bookmark JSON (from file or Playwright scraper) into normalized dicts."""
-    bookmarks = []
-    for item in raw:
-        tweeted_at_str = item.get("tweeted_at") or item.get("bookmark_date", "")
-        try:
-            tweeted_at = datetime.fromisoformat(tweeted_at_str.replace("Z", "+00:00"))
-        except Exception:
-            tweeted_at = since_date  # default: include it
-        if tweeted_at >= since_date:
-            bookmarks.append({
-                "tweet_url": item.get("tweet_url", ""),
-                "full_text": item.get("full_text", ""),
-                "screen_name": item.get("screen_name", ""),
-                "tweeted_at": tweeted_at.isoformat(),
-            })
-    return bookmarks
-
-
 def fetch_twitter_bookmarks(since_date: datetime) -> list[dict]:
     """
-    Fetch bookmarks via (in priority order):
-    1. BOOKMARKS_JSON_PATH env var — local JSON file
-    2. Playwright browser scraper (scripts/fetch_bookmarks.js) — uses Chrome login session
-    3. Twitter API v2 — requires TWITTER_ACCESS_TOKEN + TWITTER_USER_ID
-
+    Fetch bookmarks from Twitter API v2 since since_date.
+    Falls back to BOOKMARKS_JSON_PATH if set.
     Returns list of dicts with keys: tweet_url, full_text, screen_name, tweeted_at.
     """
-    # 1. Local JSON file
     local_path = os.environ.get("BOOKMARKS_JSON_PATH", "")
     if local_path and Path(local_path).exists():
         log(f"Loading bookmarks from local file: {local_path}")
         with open(local_path) as f:
             raw = json.load(f)
-        bookmarks = _parse_bookmarks_json(raw, since_date)
+        bookmarks = []
+        for item in raw:
+            tweeted_at_str = item.get("tweeted_at") or item.get("bookmark_date", "")
+            try:
+                tweeted_at = datetime.fromisoformat(tweeted_at_str.replace("Z", "+00:00"))
+            except Exception:
+                tweeted_at = since_date  # default: include it
+
+            if tweeted_at >= since_date:
+                bookmarks.append({
+                    "tweet_url": item.get("tweet_url", ""),
+                    "full_text": item.get("full_text", ""),
+                    "screen_name": item.get("screen_name", ""),
+                    "tweeted_at": tweeted_at.isoformat(),
+                })
         log(f"Loaded {len(bookmarks)} bookmarks since {since_date.date()} from local file")
         return bookmarks
 
-    # 2. Playwright browser scraper
-    scraper_path = SCRIPT_DIR / "fetch_bookmarks.js"
-    if scraper_path.exists():
-        log("Running Playwright bookmark scraper...")
-        try:
-            result = subprocess.run(
-                ["node", str(scraper_path), "--max", "200"],
-                capture_output=True, text=True, timeout=120,
-                cwd=str(REPO_ROOT)
-            )
-            if result.returncode == 0 and result.stdout.strip():
-                raw = json.loads(result.stdout)
-                bookmarks = _parse_bookmarks_json(raw, since_date)
-                log(f"Playwright scraped {len(bookmarks)} bookmarks since {since_date.date()}")
-                return bookmarks
-            else:
-                log(f"Playwright scraper failed (exit {result.returncode}): {result.stderr[:200]}")
-                log("Falling back to Twitter API...")
-        except subprocess.TimeoutExpired:
-            log("Playwright scraper timed out. Falling back to Twitter API...")
-        except json.JSONDecodeError as e:
-            log(f"Playwright scraper returned invalid JSON: {e}. Falling back to Twitter API...")
-
-    # 3. Twitter API v2
+    # Twitter API v2
     access_token = os.environ.get("TWITTER_ACCESS_TOKEN")
     user_id = os.environ.get("TWITTER_USER_ID")
     if not access_token or not user_id:
