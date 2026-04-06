@@ -10,6 +10,24 @@ jobs:
   deploy-and-send:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish drafts (remove draft: true from today's content)
+        run: |
+          python3 scripts/publish_drafts.py
+          if git diff --quiet; then
+            echo "No drafts to publish today."
+          else
+            git config user.email "bot@agenticedge.tech"
+            git config user.name "Agentic Edge Bot"
+            git add web/src/content/
+            git commit -m "Publish drafts for $(date +%Y-%m-%d)"
+            git push
+          fi
+
       - name: Trigger Vercel Deploy
         run: curl -s -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"
 

@@ -687,6 +687,7 @@ Return ONLY the article body (NO frontmatter). Start directly with the first par
     ]
     if is_featured_free:
         frontmatter_lines.append("featured_free: true")
+    frontmatter_lines.append("draft: true")
     frontmatter_lines.append("---")
 
     content = "\n".join(frontmatter_lines) + "\n\n" + body + "\n"
@@ -706,6 +707,7 @@ def build_digest_markdown(plan: dict, article_files: dict, date_str: str) -> str
         "---",
         f'title: "Agentic Edge Digest - {date_str}"',
         f'date: "{date_str}"',
+        "draft: true",
         "---",
         "",
     ]

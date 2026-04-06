@@ -6,7 +6,7 @@ export async function getStaticPaths() {
   const premium = await getCollection('premium');
   const now = new Date();
   const parseLocal = (s) => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
-  const published = premium.filter(p => parseLocal(p.data.date) <= now);
+  const published = premium.filter(p => parseLocal(p.data.date) <= now && (import.meta.env.DEV || !p.data.draft));
   return published.map(entry => ({
     params: { slug: entry.slug },
     props: { entry },

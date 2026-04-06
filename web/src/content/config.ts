@@ -6,6 +6,7 @@ const digests = defineCollection({
     title: z.string(),
     date: z.string(),
     layout: z.string().optional(),
+    draft: z.boolean().optional(),
   }),
 });
 
@@ -19,6 +20,7 @@ const premium = defineCollection({
     category: z.string(),
     layout: z.string().optional(),
     featured_free: z.boolean().optional(),
+    draft: z.boolean().optional(),
   }),
 });
 

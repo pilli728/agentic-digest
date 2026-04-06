@@ -5,7 +5,7 @@ import { getCollection } from 'astro:content';
 const allPremium = await getCollection('premium');
 const now = new Date();
 const parseLocal = (s) => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
-const premium = allPremium.filter(p => parseLocal(p.data.date) <= now);
+const premium = allPremium.filter(p => parseLocal(p.data.date) <= now && (import.meta.env.DEV || !p.data.draft));
 const sorted = premium.sort((a, b) => {
   // Featured free articles always first
   if (a.data.featured_free && !b.data.featured_free) return -1;
