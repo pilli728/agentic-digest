@@ -249,7 +249,34 @@ class APIHandler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path
 
-        if path == "/api/articles":
+        if path == "/api/debug":
+            import os
+            db_path = os.environ.get("DATABASE_PATH", "data/digest.db")
+            db_abs = os.path.abspath(db_path)
+            db_exists = os.path.exists(db_abs)
+            db_size = os.path.getsize(db_abs) if db_exists else 0
+            try:
+                db = DigestDatabase()
+                cursor = db.conn.cursor()
+                cursor.execute("SELECT tier, COUNT(*) FROM subscribers GROUP BY tier")
+                subs = dict(cursor.fetchall())
+                cursor.execute("SELECT COUNT(*) FROM subscribers")
+                total = cursor.fetchone()[0]
+                db.close()
+            except Exception as e:
+                subs = {}
+                total = f"error: {e}"
+            self.send_json({
+                "cwd": os.getcwd(),
+                "database_path_env": db_path,
+                "database_path_abs": db_abs,
+                "db_file_exists": db_exists,
+                "db_file_size_bytes": db_size,
+                "subscribers_total": total,
+                "subscribers_by_tier": subs,
+            })
+
+        elif path == "/api/articles":
             db = DigestDatabase()
             articles = db.get_all_articles()
             db.close()

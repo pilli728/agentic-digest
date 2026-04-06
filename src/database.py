@@ -1,5 +1,6 @@
 """SQLite database for the Agentic Digest pipeline."""
 
+import os
 import sqlite3
 import hashlib
 from pathlib import Path
@@ -15,10 +16,13 @@ if str(_src_path) not in sys.path:
 from core.models import Article, Digest
 
 
+_DEFAULT_DB_PATH = os.environ.get("DATABASE_PATH", "data/digest.db")
+
+
 class DigestDatabase:
     """SQLite database for storing articles, digests, and tracking state."""
 
-    def __init__(self, db_path: str = "data/digest.db"):
+    def __init__(self, db_path: str = _DEFAULT_DB_PATH):
         """Initialize database connection and create schema if needed."""
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
