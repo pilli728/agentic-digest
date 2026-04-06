@@ -1,145 +1,160 @@
 #!/usr/bin/env node
 /**
- * Scrapes Twitter bookmarks using your existing Chrome login session.
- * Outputs JSON to stdout (or --output path) in the same format as bookmarks_*.json
+ * Scrapes Twitter bookmarks using your real Chrome via AppleScript.
+ * Opens twitter.com/i/bookmarks, scrolls, extracts tweet data.
  *
  * Usage:
  *   node scripts/fetch_bookmarks.js
- *   node scripts/fetch_bookmarks.js --output bookmarks_$(date +%Y-%m-%d).json
+ *   node scripts/fetch_bookmarks.js --output bookmarks.json
  *   node scripts/fetch_bookmarks.js --max 200
  */
 
-const { chromium } = require('playwright');
+const { execSync } = require('child_process');
 const fs = require('fs');
-const path = require('path');
+const os = require('os');
 
 const args = process.argv.slice(2);
 const outputFlag = args.indexOf('--output');
 const maxFlag = args.indexOf('--max');
-
 const outputPath = outputFlag !== -1 ? args[outputFlag + 1] : null;
-const maxBookmarks = maxFlag !== -1 ? parseInt(args[maxFlag + 1]) : 100;
+const maxBookmarks = maxFlag !== -1 ? parseInt(args[maxFlag + 1]) : 150;
 
-// Dedicated automation profile — separate from your main Chrome profile.
-// Chrome won't allow CDP/remote-debug on the default profile dir.
-// This profile persists your Twitter login between runs.
-const AUTOMATION_PROFILE = path.join(
-  process.env.HOME,
-  'Library/Application Support/Google/Chrome/AgenticEdge'
-);
-
-async function scrapeBookmarks() {
-  let context;
-
-  process.stderr.write(`Using automation profile: ${AUTOMATION_PROFILE}\n`);
-
-  context = await chromium.launchPersistentContext(AUTOMATION_PROFILE, {
-    headless: false,
-    channel: 'chrome',
-    args: ['--disable-blink-features=AutomationControlled'],
-    timeout: 60000,
-  });
-
-  const page = await context.newPage();
-
+// Run AppleScript and return stdout
+function as(script) {
+  const tmp = `${os.tmpdir()}/bm_${Date.now()}_${Math.random().toString(36).slice(2)}.scpt`;
+  fs.writeFileSync(tmp, script);
   try {
-    process.stderr.write('Navigating to bookmarks...\n');
-    await page.goto('https://twitter.com/i/bookmarks', { waitUntil: 'networkidle', timeout: 30000 });
-
-    // Check if we're logged in
-    const url = page.url();
-    if (url.includes('/login') || url.includes('/flow')) {
-      process.stderr.write('ERROR: Not logged in to Twitter. Please log in first.\n');
-      process.exit(1);
-    }
-
-    const bookmarks = [];
-    const seen = new Set();
-
-    async function extractTweets() {
-      const tweets = await page.$$eval('article[data-testid="tweet"]', (articles) => {
-        return articles.map(article => {
-          // Get tweet text
-          const textEl = article.querySelector('[data-testid="tweetText"]');
-          const fullText = textEl ? textEl.innerText : '';
-
-          // Get author info
-          const userNameEl = article.querySelector('[data-testid="User-Name"]');
-          const links = userNameEl ? userNameEl.querySelectorAll('a') : [];
-          const screenName = links[1] ? links[1].href.split('/').pop() : '';
-          const name = links[0] ? links[0].innerText : '';
-
-          // Get tweet URL (timestamp link)
-          const timeEl = article.querySelector('time');
-          const tweetLinkEl = timeEl ? timeEl.closest('a') : null;
-          const tweetUrl = tweetLinkEl ? 'https://twitter.com' + tweetLinkEl.getAttribute('href') : '';
-
-          // Get timestamp
-          const tweeted_at = timeEl ? timeEl.getAttribute('datetime') : '';
-
-          // Get media
-          const mediaEls = article.querySelectorAll('img[src*="twimg.com/media"]');
-          const extended_media = Array.from(mediaEls).map(img => ({ media_url_https: img.src }));
-
-          // Profile image
-          const profileImg = article.querySelector('img[src*="profile_images"]');
-          const profile_image_url_https = profileImg ? profileImg.src : '';
-
-          return { profile_image_url_https, screen_name: screenName, name, full_text: fullText, tweeted_at, extended_media, tweet_url: tweetUrl };
-        });
-      });
-      return tweets;
-    }
-
-    let noNewCount = 0;
-
-    while (bookmarks.length < maxBookmarks && noNewCount < 5) {
-      const tweets = await extractTweets();
-      let newFound = 0;
-
-      for (const tweet of tweets) {
-        if (tweet.tweet_url && !seen.has(tweet.tweet_url)) {
-          seen.add(tweet.tweet_url);
-          bookmarks.push({
-            bookmark_date: new Date().toISOString(),
-            ...tweet,
-          });
-          newFound++;
-        }
-      }
-
-      process.stderr.write(`  Collected ${bookmarks.length} bookmarks...\r`);
-
-      if (newFound === 0) {
-        noNewCount++;
-      } else {
-        noNewCount = 0;
-      }
-
-      if (bookmarks.length >= maxBookmarks) break;
-
-      // Scroll down to load more
-      await page.evaluate(() => window.scrollBy(0, window.innerHeight * 3));
-      await page.waitForTimeout(1500);
-    }
-
-    process.stderr.write(`\nDone. Collected ${bookmarks.length} bookmarks.\n`);
-
-    const json = JSON.stringify(bookmarks, null, 2);
-
-    if (outputPath) {
-      fs.writeFileSync(outputPath, json);
-      process.stderr.write(`Saved to ${outputPath}\n`);
-    } else {
-      process.stdout.write(json);
-    }
-
+    return execSync(`osascript "${tmp}"`, { encoding: 'utf8', timeout: 30000 }).trim();
   } finally {
-    await context.close();
+    try { fs.unlinkSync(tmp); } catch (_) {}
   }
 }
 
-scrapeBookmarks().catch(err => {
-  process.stderr.write(`Error: ${err.message}\n`);
+// Execute JS in active Chrome tab — JS written to file to avoid escaping hell
+function js(code) {
+  const jsTmp = `${os.tmpdir()}/bm_${Date.now()}_${Math.random().toString(36).slice(2)}.js`;
+  fs.writeFileSync(jsTmp, code);
+  const result = as(`
+set jc to do shell script "cat " & quoted form of "${jsTmp}"
+tell application "Google Chrome"
+  tell active tab of window 1
+    return execute javascript jc
+  end tell
+end tell`);
+  try { fs.unlinkSync(jsTmp); } catch (_) {}
+  return result;
+}
+
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+async function main() {
+  // Open bookmarks in Chrome (new tab)
+  process.stderr.write('Opening Twitter bookmarks in Chrome...\n');
+  as(`
+tell application "Google Chrome"
+  activate
+  if (count of windows) is 0 then
+    make new window with properties {URL: "https://x.com/i/bookmarks"}
+  else
+    tell window 1
+      make new tab with properties {URL: "https://x.com/i/bookmarks"}
+    end tell
+  end if
+end tell`);
+
+  process.stderr.write('Waiting for page to load (5s)...\n');
+  await sleep(5000);
+
+  // Verify we're on bookmarks
+  const url = as(`tell application "Google Chrome" to return URL of active tab of window 1`);
+  if (!url.includes('bookmarks')) {
+    process.stderr.write(`ERROR: active tab is "${url}", not bookmarks. Focus the bookmarks tab and re-run.\n`);
+    process.exit(1);
+  }
+
+  // Initialize collector on the page
+  js(`window.__bm = { data: [], seen: {} };`);
+
+  const EXTRACT = `
+(function() {
+  if (!window.__bm) window.__bm = { data: [], seen: {} };
+  document.querySelectorAll('article[data-testid="tweet"]').forEach(function(article) {
+    var timeEl = article.querySelector('time');
+    var linkEl = timeEl && timeEl.closest('a');
+    if (!linkEl) return;
+    var href = linkEl.getAttribute('href') || '';
+    var tweetUrl = href.startsWith('http') ? href : 'https://x.com' + href;
+    if (window.__bm.seen[tweetUrl]) return;
+    window.__bm.seen[tweetUrl] = 1;
+    var textEl = article.querySelector('[data-testid="tweetText"]');
+    var uEl = article.querySelector('[data-testid="User-Name"]');
+    var uLinks = uEl ? uEl.querySelectorAll('a') : [];
+    var profileImg = article.querySelector('img[src*="profile_images"]');
+    var mediaImgs = article.querySelectorAll('img[src*="twimg.com/media"]');
+    window.__bm.data.push({
+      bookmark_date: new Date().toISOString(),
+      profile_image_url_https: profileImg ? profileImg.src : '',
+      screen_name: uLinks[1] ? uLinks[1].href.split('/').filter(Boolean).pop() : '',
+      name: uLinks[0] ? uLinks[0].innerText.split('\\n')[0] : '',
+      full_text: textEl ? textEl.innerText : '',
+      tweeted_at: timeEl ? timeEl.getAttribute('datetime') : '',
+      extended_media: Array.from(mediaImgs).map(function(img) { return { media_url_https: img.src }; }),
+      tweet_url: tweetUrl
+    });
+  });
+  return window.__bm.data.length;
+})()`;
+
+  let lastCount = 0;
+  let stuckRounds = 0;
+
+  process.stderr.write(`Scrolling and collecting (target: ${maxBookmarks})...\n`);
+
+  while (stuckRounds < 5) {
+    const countStr = js(EXTRACT);
+    const count = parseInt(countStr) || 0;
+    process.stderr.write(`  ${count} bookmarks...\r`);
+
+    if (count >= maxBookmarks) break;
+
+    if (count === lastCount) {
+      stuckRounds++;
+    } else {
+      stuckRounds = 0;
+      lastCount = count;
+    }
+
+    // Scroll down
+    js(`document.documentElement.scrollTop += window.innerHeight * 3;`);
+    await sleep(2000);
+  }
+
+  // Final extract pass
+  js(EXTRACT);
+
+  const jsonStr = js(`JSON.stringify(window.__bm ? window.__bm.data : [])`);
+  let bookmarks;
+  try {
+    bookmarks = JSON.parse(jsonStr);
+  } catch (e) {
+    process.stderr.write(`\nFailed to parse results: ${e.message}\n`);
+    process.exit(1);
+  }
+
+  process.stderr.write(`\nDone. Collected ${bookmarks.length} bookmarks.\n`);
+
+  const output = JSON.stringify(bookmarks, null, 2);
+  if (outputPath) {
+    fs.writeFileSync(outputPath, output);
+    process.stderr.write(`Saved to ${outputPath}\n`);
+  } else {
+    process.stdout.write(output + '\n');
+  }
+}
+
+main().catch(err => {
+  process.stderr.write(`\nError: ${err.message}\n`);
   process.exit(1);
 });
