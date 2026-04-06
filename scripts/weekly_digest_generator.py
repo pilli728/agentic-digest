@@ -480,6 +480,7 @@ def plan_digest_structure(top_bookmarks: list[dict]) -> dict:
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
     free_items = top_bookmarks[:8]
+    pro_items = top_bookmarks[8:]
     n = len(free_items)
 
     # Determine section count based on available articles
@@ -813,6 +814,7 @@ def send_test_email(digest_content: str, date_str: str):
         headers={
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         },
         method="POST",
     )
