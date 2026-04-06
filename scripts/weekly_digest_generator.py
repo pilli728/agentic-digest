@@ -472,7 +472,7 @@ def plan_digest_structure(top_bookmarks: list[dict]) -> dict:
     """
     Given the top-scored bookmarks, ask Claude to:
     - Split into free (top 8) and pro (remaining) tiers
-    - Group the top 8 into 3 sections with names and taglines
+    - Group the free items into 1-3 sections with names and taglines
     - Return structured JSON
     """
     import anthropic
@@ -480,7 +480,15 @@ def plan_digest_structure(top_bookmarks: list[dict]) -> dict:
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
     free_items = top_bookmarks[:8]
-    pro_items = top_bookmarks[8:]
+    n = len(free_items)
+
+    # Determine section count based on available articles
+    if n >= 6:
+        num_sections = 3
+    elif n >= 3:
+        num_sections = 2
+    else:
+        num_sections = 1
 
     items_json = json.dumps(
         [
@@ -498,10 +506,27 @@ def plan_digest_structure(top_bookmarks: list[dict]) -> dict:
         indent=2,
     )
 
+    section_example = ""
+    if num_sections == 3:
+        section_example = """  "sections": [
+    {"name": "Section One", "tagline": "Punchy tagline.", "article_indices": [0, 1, 2]},
+    {"name": "Section Two", "tagline": "Punchy tagline.", "article_indices": [3, 4]},
+    {"name": "Section Three", "tagline": "Punchy tagline.", "article_indices": [5, 6, 7]}
+  ]"""
+    elif num_sections == 2:
+        section_example = """  "sections": [
+    {"name": "Section One", "tagline": "Punchy tagline.", "article_indices": [0, 1]},
+    {"name": "Section Two", "tagline": "Punchy tagline.", "article_indices": [2, 3, 4]}
+  ]"""
+    else:
+        section_example = """  "sections": [
+    {"name": "This Week", "tagline": "Punchy tagline.", "article_indices": [0, 1]}
+  ]"""
+
     prompt = f"""You are the editor of Agentic Edge, a newsletter for senior AI engineers.
 
-You have 8 articles for this week's digest. Group them into exactly 3 sections.
-Each section should have 2-4 articles. Order sections by importance (biggest news first).
+You have {n} articles for this week's digest. Group them into exactly {num_sections} section(s).
+Order sections by importance (biggest news first).
 
 Good section names from past issues: "The Leak", "Cognition", "Builder Tools", "Agent Ops",
 "Working Smarter". Invent new names when the content calls for it.
@@ -510,28 +535,11 @@ Each section gets a short tagline in italics (one punchy sentence, max 10 words)
 Articles:
 {items_json}
 
-Return ONLY JSON in this exact structure:
+Return ONLY valid JSON. Every article index 0-{n-1} must appear exactly once.
+Example structure:
 {{
-  "sections": [
-    {{
-      "name": "Section Name",
-      "tagline": "Punchy tagline here.",
-      "article_indices": [0, 1, 2]
-    }},
-    {{
-      "name": "Section Two",
-      "tagline": "Tagline for section two.",
-      "article_indices": [3, 4]
-    }},
-    {{
-      "name": "Section Three",
-      "tagline": "Tagline for section three.",
-      "article_indices": [5, 6, 7]
-    }}
-  ]
+{section_example}
 }}
-
-Every article index 0-7 must appear exactly once. Total must equal 8.
 """
 
     for attempt in range(3):
@@ -855,15 +863,19 @@ def main():
         log("No new bookmarks after deduplication. Exiting cleanly.")
         return
 
-    # 3. Score and filter
+    # 3. Score and filter — lower threshold if not enough material
     scored = score_and_filter_bookmarks(new_bookmarks, min_score=7)
+    if len(scored) < 4:
+        log(f"Only {len(scored)} bookmarks at score >=7, trying >=6...")
+        scored = score_and_filter_bookmarks(new_bookmarks, min_score=6)
+    if len(scored) < 3:
+        log(f"Only {len(scored)} bookmarks at score >=6, trying >=5...")
+        scored = score_and_filter_bookmarks(new_bookmarks, min_score=5)
     if not scored:
-        log("No bookmarks scored >= 7. Exiting cleanly.")
+        log("No bookmarks scored >= 5. Exiting cleanly.")
         return
-
     if len(scored) < 8:
-        log(f"WARNING: Only {len(scored)} bookmarks scored >= 7. Need at least 8 for a full digest.")
-        log("Proceeding with what we have...")
+        log(f"INFO: {len(scored)} stories this week (below full digest of 8). Running lean digest.")
 
     # Cap at 18 total (8 free + up to 10 pro)
     scored = scored[:18]
