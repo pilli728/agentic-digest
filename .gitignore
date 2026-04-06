@@ -39,6 +39,12 @@ output/
 logs/
 *.log
 
+# Generated scripts (contain runtime paths, sourced from .env)
+scripts/run_weekly_digest.sh
+
+# Bookmark exports (personal data)
+bookmarks_*.json
+
 # IDE
 .vscode/
 .idea/
