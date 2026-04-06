@@ -155,40 +155,83 @@ def markdown_to_simple_html(md: str) -> str:
 # Twitter bookmarks
 # ---------------------------------------------------------------------------
 
+# Locations the Chrome extension typically exports to
+_BOOKMARK_SEARCH_DIRS = [
+    Path.home() / "Downloads",
+    REPO_ROOT,
+    Path.home() / "Desktop",
+]
+
+
+def _find_latest_bookmarks_file() -> Optional[Path]:
+    """
+    Scan common locations for the most recently modified bookmarks_*.json file.
+    Returns the newest one, or None if not found.
+    """
+    candidates = []
+    for d in _BOOKMARK_SEARCH_DIRS:
+        if d.exists():
+            candidates.extend(d.glob("bookmarks*.json"))
+    if not candidates:
+        return None
+    return max(candidates, key=lambda p: p.stat().st_mtime)
+
+
+def _parse_bookmarks_file(path: Path, since_date: datetime) -> list[dict]:
+    log(f"Loading bookmarks from: {path}")
+    with open(path) as f:
+        raw = json.load(f)
+    bookmarks = []
+    for item in raw:
+        tweeted_at_str = item.get("tweeted_at") or item.get("bookmark_date", "")
+        try:
+            tweeted_at = datetime.fromisoformat(tweeted_at_str.replace("Z", "+00:00"))
+        except Exception:
+            tweeted_at = since_date
+        if tweeted_at >= since_date:
+            bookmarks.append({
+                "tweet_url": item.get("tweet_url", ""),
+                "full_text": item.get("full_text", ""),
+                "screen_name": item.get("screen_name", ""),
+                "tweeted_at": tweeted_at.isoformat(),
+            })
+    return bookmarks
+
+
 def fetch_twitter_bookmarks(since_date: datetime) -> list[dict]:
     """
-    Fetch bookmarks from Twitter API v2 since since_date.
-    Falls back to BOOKMARKS_JSON_PATH if set.
-    Returns list of dicts with keys: tweet_url, full_text, screen_name, tweeted_at.
+    Fetch bookmarks via (in priority order):
+    1. BOOKMARKS_JSON_PATH env var — explicit path
+    2. Auto-detect latest bookmarks*.json in Downloads, repo root, Desktop
+    3. Twitter API v2 — requires TWITTER_ACCESS_TOKEN + TWITTER_USER_ID
+
+    The Chrome extension "Export Twitter Bookmarks" writes bookmarks*.json to Downloads.
+    Just export and run — the script picks it up automatically.
     """
+    # 1. Explicit path
     local_path = os.environ.get("BOOKMARKS_JSON_PATH", "")
     if local_path and Path(local_path).exists():
-        log(f"Loading bookmarks from local file: {local_path}")
-        with open(local_path) as f:
-            raw = json.load(f)
-        bookmarks = []
-        for item in raw:
-            tweeted_at_str = item.get("tweeted_at") or item.get("bookmark_date", "")
-            try:
-                tweeted_at = datetime.fromisoformat(tweeted_at_str.replace("Z", "+00:00"))
-            except Exception:
-                tweeted_at = since_date  # default: include it
-
-            if tweeted_at >= since_date:
-                bookmarks.append({
-                    "tweet_url": item.get("tweet_url", ""),
-                    "full_text": item.get("full_text", ""),
-                    "screen_name": item.get("screen_name", ""),
-                    "tweeted_at": tweeted_at.isoformat(),
-                })
-        log(f"Loaded {len(bookmarks)} bookmarks since {since_date.date()} from local file")
+        bookmarks = _parse_bookmarks_file(Path(local_path), since_date)
+        log(f"Loaded {len(bookmarks)} bookmarks since {since_date.date()}")
         return bookmarks
 
-    # Twitter API v2
+    # 2. Auto-detect latest export
+    latest = _find_latest_bookmarks_file()
+    if latest:
+        # Warn if the file is more than 3 days old
+        age_days = (datetime.now().timestamp() - latest.stat().st_mtime) / 86400
+        if age_days > 3:
+            log(f"WARNING: Found {latest.name} but it's {age_days:.0f} days old. Export fresh bookmarks for best results.")
+        bookmarks = _parse_bookmarks_file(latest, since_date)
+        log(f"Loaded {len(bookmarks)} bookmarks since {since_date.date()} (auto-detected {latest.name})")
+        return bookmarks
+
+    # 3. Twitter API v2
     access_token = os.environ.get("TWITTER_ACCESS_TOKEN")
     user_id = os.environ.get("TWITTER_USER_ID")
     if not access_token or not user_id:
-        log("ERROR: TWITTER_ACCESS_TOKEN and TWITTER_USER_ID required (or set BOOKMARKS_JSON_PATH)")
+        log("ERROR: No bookmarks file found and TWITTER_ACCESS_TOKEN/TWITTER_USER_ID not set.")
+        log("Export bookmarks with the Chrome extension → save to Downloads → re-run.")
         sys.exit(1)
 
     import urllib.request
