@@ -9,13 +9,13 @@ on:
 jobs:
   deploy-and-send:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish drafts (remove draft: true from today's content)
+      - name: Publish drafts (remove draft:true from today's content)
         run: |
           python3 scripts/publish_drafts.py
           if git diff --quiet; then
@@ -29,20 +29,39 @@ jobs:
           fi
 
       - name: Trigger Vercel Deploy
-        run: curl -s -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"
+        run: curl -s -X POST "$VERCEL_DEPLOY_HOOK"
+        env:
+          VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
 
       - name: Wait for deploy to finish
         run: sleep 60
 
       - name: Send digest email (if today has one)
+        env:
+          DIGEST_SEND_KEY: ${{ secrets.DIGEST_SEND_KEY }}
+          RAILWAY_API_URL: ${{ secrets.RAILWAY_API_URL }}
         run: |
           TODAY=$(date +%Y-%m-%d)
-          DIGEST_FILE="web/src/content/digests/${TODAY}-digest.md"
-          if [ ! -f "$DIGEST_FILE" ]; then
-            echo "No digest file for ${TODAY}, skipping email."
+          YESTERDAY=$(date -d "yesterday" +%Y-%m-%d 2>/dev/null || date -v-1d +%Y-%m-%d)
+
+          # Find digest file (today or yesterday to handle UTC offset)
+          DIGEST_FILE=""
+          for d in "$TODAY" "$YESTERDAY"; do
+            f="web/src/content/digests/${d}-digest.md"
+            if [ -f "$f" ]; then
+              DIGEST_FILE="$f"
+              break
+            fi
+          done
+
+          if [ -z "$DIGEST_FILE" ]; then
+            echo "No digest file for ${TODAY} or ${YESTERDAY}, skipping email."
             exit 0
           fi
-          # Find featured_free article slug and title
+
+          echo "Sending digest: $DIGEST_FILE"
+
+          # Find featured_free article
           FEATURED_SLUG=""
           FEATURED_TITLE=""
           for f in web/src/content/premium/*.md; do
@@ -52,10 +71,29 @@ jobs:
               break
             fi
           done
-          # Pass content directly so Railway doesn't need filesystem access
-          CONTENT=$(python3 -c "import sys, json; print(json.dumps(open('${DIGEST_FILE}').read()))")
-          PAYLOAD=$(python3 -c "import json; print(json.dumps({'api_key': '${{ secrets.DIGEST_SEND_KEY }}', 'content': open('${DIGEST_FILE}').read(), 'featured_title': '${FEATURED_TITLE}', 'featured_slug': '${FEATURED_SLUG}'}))")
-          response=$(curl -s -X POST "${{ secrets.RAILWAY_API_URL }}/api/digest/send-latest" \
-            -H "Content-Type: application/json" \
-            -d "$PAYLOAD")
-          echo "$response"
+
+          # Build JSON payload via Python (safe quoting)
+          python3 - <<PYEOF
+          import json, urllib.request, urllib.error, os, sys
+
+          content = open("$DIGEST_FILE").read()
+          payload = json.dumps({
+              "api_key": os.environ["DIGEST_SEND_KEY"],
+              "content": content,
+              "featured_title": "$FEATURED_TITLE",
+              "featured_slug": "$FEATURED_SLUG",
+          }).encode()
+
+          req = urllib.request.Request(
+              os.environ["RAILWAY_API_URL"] + "/api/digest/send-latest",
+              data=payload,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=60) as r:
+                  print(r.read().decode())
+          except urllib.error.HTTPError as e:
+              print("Error:", e.code, e.read().decode())
+              sys.exit(1)
+          PYEOF
