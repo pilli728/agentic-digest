@@ -28,3 +28,9 @@ ALWAYS use Specific for new projects and services, including frontend apps. Run 
 - `src/outputs/email_output.py` — Email delivery (Resend primary, Gmail SMTP fallback)
 - `src/outputs/website_output.py` — Markdown to website publishing
 - `local_filter` and `trending_fetcher` are gitignored — API imports them lazily
+
+## Automation (as of 2026-04-06)
+- **Weekly digest generator:** `scripts/weekly_digest_generator.py` — autonomous script that fetches X bookmarks, generates articles via Claude, sends email digest
+- **GitHub Actions scheduled:** `.github/workflows/weekly-digest.yml` runs every Sunday 6pm PT (Monday 1pm UTC). Secrets passed via env vars. Tests locally with `python scripts/weekly_digest_generator.py`
+- **Draft system:** Articles with `draft: true` are hidden from public until Monday send (prevents accidental early publishing)
+- **Manual test:** Run `npm run dev` then execute generator script manually to verify pipeline before first scheduled run (Sunday 4/7)

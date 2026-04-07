@@ -776,17 +776,28 @@ class APIHandler(BaseHTTPRequestHandler):
                                             md = f"**This week's free Pro article:** [{ft}]({fu}) — read the full piece, no login needed.\n\n---\n\n{md}"
                                         break
 
-                from outputs.email_output import send_to_all_subscribers
-                db = DigestDatabase()
-                email_results = send_to_all_subscribers(md, db)
-                db.close()
-
-                self.send_json({
-                    "success": True,
-                    "message": f"Sent {email_results.get('sent', 0)} emails for {today}",
-                    "emails_sent": email_results.get("sent", 0),
-                    "emails_failed": email_results.get("failed", 0),
-                })
+                test_mode = body.get("test_mode", False)
+                from outputs.email_output import send_to_all_subscribers, send_digest_email
+                if test_mode:
+                    test_email = os.environ.get("DIGEST_TEST_EMAIL", "pillicdj@gmail.com")
+                    success = send_digest_email(md, email_to=test_email)
+                    self.send_json({
+                        "success": True,
+                        "message": f"TEST MODE: sent to {test_email} only",
+                        "emails_sent": 1 if success else 0,
+                        "emails_failed": 0 if success else 1,
+                        "test_mode": True,
+                    })
+                else:
+                    db = DigestDatabase()
+                    email_results = send_to_all_subscribers(md, db)
+                    db.close()
+                    self.send_json({
+                        "success": True,
+                        "message": f"Sent {email_results.get('sent', 0)} emails for {today}",
+                        "emails_sent": email_results.get("sent", 0),
+                        "emails_failed": email_results.get("failed", 0),
+                    })
             except Exception as e:
                 self.send_json({"success": False, "message": f"Error: {str(e)[:300]}"})
 

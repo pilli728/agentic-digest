@@ -5,6 +5,11 @@ on:
     # Every Monday at 6am PT (1pm UTC / PDT)
     - cron: '0 13 * * 1'
   workflow_dispatch: # Allow manual trigger
+    inputs:
+      test_mode:
+        description: 'Send to test email only (pillicdj@gmail.com). Set to false for real send.'
+        required: false
+        default: 'true'
 
 jobs:
   deploy-and-send:
@@ -40,6 +45,7 @@ jobs:
         env:
           DIGEST_SEND_KEY: ${{ secrets.DIGEST_SEND_KEY }}
           RAILWAY_API_URL: ${{ secrets.RAILWAY_API_URL }}
+          IS_SCHEDULE: ${{ github.event_name == 'schedule' }}
         run: |
           TODAY=$(date +%Y-%m-%d)
           YESTERDAY=$(date -d "yesterday" +%Y-%m-%d 2>/dev/null || date -v-1d +%Y-%m-%d)
@@ -73,8 +79,16 @@ jobs:
           done
 
           # Build JSON payload via Python (safe quoting)
+          # test_mode=true when manually triggered (default), false on Monday schedule
           python3 - <<PYEOF
           import json, urllib.request, urllib.error, os, sys
+
+          is_schedule = os.environ.get("IS_SCHEDULE", "false").lower() == "true"
+          # Manual runs (workflow_dispatch) respect the test_mode input; schedule always sends to all
+          if is_schedule:
+              test_mode = False
+          else:
+              test_mode = "${{ github.event.inputs.test_mode || 'true' }}".lower() != "false"
 
           content = open("$DIGEST_FILE").read()
           payload = json.dumps({
@@ -82,6 +96,7 @@ jobs:
               "content": content,
               "featured_title": "$FEATURED_TITLE",
               "featured_slug": "$FEATURED_SLUG",
+              "test_mode": test_mode,
           }).encode()
 
           req = urllib.request.Request(
