@@ -137,13 +137,14 @@ def send_digest_email(
     email_from: str = None,
     email_to: str = None,
     password: str = None,
+    is_test: bool = False,
 ) -> bool:
     """Send the digest email. Uses Resend if available, falls back to Gmail SMTP."""
 
     resend_key = os.environ.get("RESEND_API_KEY")
 
     if resend_key and resend is not None:
-        return _send_via_resend(digest_content, resend_key, email_to)
+        return _send_via_resend(digest_content, resend_key, email_to, is_test=is_test)
     else:
         return _send_via_gmail(digest_content, email_from, email_to, password)
 
@@ -173,7 +174,7 @@ def send_to_all_subscribers(digest_content: str, db) -> dict:
     return results
 
 
-def _send_via_resend(digest_content: str, api_key: str, email_to: str = None) -> bool:
+def _send_via_resend(digest_content: str, api_key: str, email_to: str = None, is_test: bool = False) -> bool:
     """Send via Resend — proper deliverability."""
     try:
         resend.api_key = api_key
@@ -188,11 +189,12 @@ def _send_via_resend(digest_content: str, api_key: str, email_to: str = None) ->
         today = datetime.now().strftime("%B %d, %Y")
         unsub_url = f"{os.environ.get('SITE_URL', 'https://agenticedge.tech')}/unsubscribe?email={recipient}"
         html = _build_html(digest_content, unsubscribe_url=unsub_url)
+        subject = f"[TEST PREVIEW] Agentic Edge | {today}" if is_test else f"Agentic Edge | {today}"
 
         params = {
             "from": sender,
             "to": [recipient],
-            "subject": f"Agentic Edge | {today}",
+            "subject": subject,
             "html": html,
             "text": digest_content,
             "headers": {

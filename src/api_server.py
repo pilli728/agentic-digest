@@ -780,7 +780,7 @@ class APIHandler(BaseHTTPRequestHandler):
                 from outputs.email_output import send_to_all_subscribers, send_digest_email
                 if test_mode:
                     test_email = os.environ.get("DIGEST_TEST_EMAIL", "pillicdj@gmail.com")
-                    success = send_digest_email(md, email_to=test_email)
+                    success = send_digest_email(md, email_to=test_email, is_test=True)
                     self.send_json({
                         "success": True,
                         "message": f"TEST MODE: sent to {test_email} only",
