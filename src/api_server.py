@@ -711,55 +711,70 @@ class APIHandler(BaseHTTPRequestHandler):
                 from datetime import datetime as dt
                 today = dt.now().strftime("%Y-%m-%d")
 
-                # Try multiple possible paths for digest files
-                base = os.path.dirname(os.path.abspath(__file__))
-                possible_paths = [
-                    os.path.join(base, "..", "web", "src", "content", "digests"),
-                    os.path.join(base, "web", "src", "content", "digests"),
-                    "/app/web/src/content/digests",
-                ]
-
-                digest_file = None
-                for digest_path in possible_paths:
-                    if not os.path.isdir(digest_path):
-                        continue
-                    for f in os.listdir(digest_path):
-                        if f.startswith(today) and f.endswith(".md"):
-                            digest_file = os.path.join(digest_path, f)
+                # Accept digest content passed directly in request body (preferred)
+                # Falls back to reading from filesystem (legacy)
+                raw_content = body.get("content", "")
+                if raw_content:
+                    parts = raw_content.split("---", 2)
+                    md = parts[2].strip() if len(parts) >= 3 else raw_content
+                else:
+                    # Filesystem fallback — find most recent digest within last 2 days
+                    base = os.path.dirname(os.path.abspath(__file__))
+                    possible_paths = [
+                        os.path.join(base, "..", "web", "src", "content", "digests"),
+                        os.path.join(base, "web", "src", "content", "digests"),
+                        "/app/web/src/content/digests",
+                    ]
+                    from datetime import timedelta
+                    digest_file = None
+                    for check_date in [today, (dt.now() - timedelta(days=1)).strftime("%Y-%m-%d")]:
+                        for digest_path in possible_paths:
+                            if not os.path.isdir(digest_path):
+                                continue
+                            for f in os.listdir(digest_path):
+                                if f.startswith(check_date) and f.endswith(".md"):
+                                    digest_file = os.path.join(digest_path, f)
+                                    break
+                            if digest_file:
+                                break
+                        if digest_file:
                             break
-                    if digest_file:
-                        break
-
-                if not digest_file:
-                    tried = [p for p in possible_paths if os.path.isdir(p)]
-                    self.send_json({"success": False, "message": f"No digest for {today}. Paths: {tried}"})
-                    return
-
-                with open(digest_file, "r") as f:
-                    content = f.read()
-                    parts = content.split("---", 2)
-                    md = parts[2].strip() if len(parts) >= 3 else content
+                    if not digest_file:
+                        tried = [p for p in possible_paths if os.path.isdir(p)]
+                        self.send_json({"success": False, "message": f"No digest for {today} or yesterday. Paths: {tried}"})
+                        return
+                    with open(digest_file, "r") as f:
+                        content = f.read()
+                        parts = content.split("---", 2)
+                        md = parts[2].strip() if len(parts) >= 3 else content
 
                 # Find featured_free article and prepend to digest
                 site_url = os.environ.get("SITE_URL", "https://agenticedge.tech")
-                premium_path = os.path.join(base, "..", "web", "src", "content", "premium")
-                if not os.path.isdir(premium_path):
-                    premium_path = os.path.join(base, "web", "src", "content", "premium")
-                if os.path.isdir(premium_path):
-                    for pf in os.listdir(premium_path):
-                        if pf.endswith(".md"):
-                            with open(os.path.join(premium_path, pf), "r") as pfile:
-                                pcontent = pfile.read()
-                                if "featured_free: true" in pcontent:
-                                    # Extract title and slug
-                                    import re as _re
-                                    title_match = _re.search(r'title:\s*"([^"]+)"', pcontent)
-                                    slug = pf.replace(".md", "")
-                                    if title_match:
-                                        featured_title = title_match.group(1)
-                                        featured_url = f"{site_url}/pro/{slug}"
-                                        md = f"**This week's free Pro article:** [{featured_title}]({featured_url}) — read the full piece, no login needed.\n\n---\n\n{md}"
-                                    break
+                featured_title = body.get("featured_title", "")
+                featured_slug = body.get("featured_slug", "")
+                if featured_title and featured_slug:
+                    featured_url = f"{site_url}/pro/{featured_slug}"
+                    md = f"**This week's free Pro article:** [{featured_title}]({featured_url}) — read the full piece, no login needed.\n\n---\n\n{md}"
+                else:
+                    # Filesystem fallback for featured article
+                    base = os.path.dirname(os.path.abspath(__file__))
+                    premium_path = os.path.join(base, "..", "web", "src", "content", "premium")
+                    if not os.path.isdir(premium_path):
+                        premium_path = os.path.join(base, "web", "src", "content", "premium")
+                    if os.path.isdir(premium_path):
+                        for pf in os.listdir(premium_path):
+                            if pf.endswith(".md"):
+                                with open(os.path.join(premium_path, pf), "r") as pfile:
+                                    pcontent = pfile.read()
+                                    if "featured_free: true" in pcontent:
+                                        import re as _re
+                                        title_match = _re.search(r'title:\s*"([^"]+)"', pcontent)
+                                        slug = pf.replace(".md", "")
+                                        if title_match:
+                                            ft = title_match.group(1)
+                                            fu = f"{site_url}/pro/{slug}"
+                                            md = f"**This week's free Pro article:** [{ft}]({fu}) — read the full piece, no login needed.\n\n---\n\n{md}"
+                                        break
 
                 from outputs.email_output import send_to_all_subscribers
                 db = DigestDatabase()

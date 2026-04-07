@@ -36,7 +36,26 @@ jobs:
 
       - name: Send digest email (if today has one)
         run: |
+          TODAY=$(date +%Y-%m-%d)
+          DIGEST_FILE="web/src/content/digests/${TODAY}-digest.md"
+          if [ ! -f "$DIGEST_FILE" ]; then
+            echo "No digest file for ${TODAY}, skipping email."
+            exit 0
+          fi
+          # Find featured_free article slug and title
+          FEATURED_SLUG=""
+          FEATURED_TITLE=""
+          for f in web/src/content/premium/*.md; do
+            if grep -q "featured_free: true" "$f"; then
+              FEATURED_SLUG=$(basename "$f" .md)
+              FEATURED_TITLE=$(grep '^title:' "$f" | head -1 | sed 's/title: *"//;s/"$//')
+              break
+            fi
+          done
+          # Pass content directly so Railway doesn't need filesystem access
+          CONTENT=$(python3 -c "import sys, json; print(json.dumps(open('${DIGEST_FILE}').read()))")
+          PAYLOAD=$(python3 -c "import json; print(json.dumps({'api_key': '${{ secrets.DIGEST_SEND_KEY }}', 'content': open('${DIGEST_FILE}').read(), 'featured_title': '${FEATURED_TITLE}', 'featured_slug': '${FEATURED_SLUG}'}))")
           response=$(curl -s -X POST "${{ secrets.RAILWAY_API_URL }}/api/digest/send-latest" \
             -H "Content-Type: application/json" \
-            -d "{\"api_key\": \"${{ secrets.DIGEST_SEND_KEY }}\"}")
+            -d "$PAYLOAD")
           echo "$response"
