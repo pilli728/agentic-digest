@@ -2,8 +2,8 @@ name: Scheduled Deploy & Send
 
 on:
   schedule:
-    # Every day at 1pm PT (8pm UTC)
-    - cron: '0 20 * * *'
+    # Every Monday at 6am PT (1pm UTC / PDT)
+    - cron: '0 13 * * 1'
   workflow_dispatch: # Allow manual trigger
 
 jobs:
