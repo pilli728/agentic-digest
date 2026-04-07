@@ -35,6 +35,7 @@ SCRIPT_DIR = Path(__file__).parent.resolve()
 REPO_ROOT = Path(os.environ.get("REPO_PATH", str(SCRIPT_DIR.parent))).resolve()
 DIGESTS_DIR = REPO_ROOT / "web/src/content/digests"
 PREMIUM_DIR = REPO_ROOT / "web/src/content/premium"
+PROCESSED_URLS_FILE = SCRIPT_DIR / "processed_urls.txt"
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -328,31 +329,46 @@ def fetch_twitter_bookmarks(since_date: datetime) -> list[dict]:
 
 def get_already_published_urls() -> set[str]:
     """
-    Scan all digest and premium files.
-    Extract tweet URLs (x.com/...) and vault article URLs.
-    Returns a set of normalized URLs.
+    Returns all tweet URLs we've ever processed.
+    Primary source: scripts/processed_urls.txt (reliable, always up to date).
+    Fallback scan of content files catches anything written before this file existed.
     """
     urls: set[str] = set()
+
+    # Primary: processed_urls.txt — canonical record of every tweet we've used
+    if PROCESSED_URLS_FILE.exists():
+        for line in PROCESSED_URLS_FILE.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line:
+                urls.add(line)
+
+    # Fallback: scan premium article [Source:] links (catches pre-file articles)
     url_pattern = re.compile(r"https?://(?:x\.com|twitter\.com)/[^\s)\]\"']+")
-
-    # Scan digests
-    for f in DIGESTS_DIR.glob("*.md"):
-        text = f.read_text(encoding="utf-8")
-        for m in url_pattern.finditer(text):
-            urls.add(m.group(0).rstrip(".,)"))
-
-    # Scan premium articles — look for [Source: ...](url) lines
     source_pattern = re.compile(r"\[Source:[^\]]*\]\(([^)]+)\)")
     for f in PREMIUM_DIR.glob("*.md"):
         text = f.read_text(encoding="utf-8")
         for m in source_pattern.finditer(text):
-            urls.add(m.group(1).rstrip(".,)"))
-        # Also any x.com links anywhere in the file
+            u = m.group(1).rstrip(".,)")
+            if "x.com" in u or "twitter.com" in u:
+                urls.add(u)
         for m in url_pattern.finditer(text):
             urls.add(m.group(0).rstrip(".,)"))
 
-    log(f"Found {len(urls)} already-published URLs")
+    log(f"Found {len(urls)} already-processed URLs")
     return urls
+
+
+def record_processed_urls(tweet_urls: list[str]):
+    """Append newly processed tweet URLs to processed_urls.txt."""
+    existing = set()
+    if PROCESSED_URLS_FILE.exists():
+        existing = {l.strip() for l in PROCESSED_URLS_FILE.read_text().splitlines() if l.strip()}
+    new_urls = [u for u in tweet_urls if u not in existing]
+    if new_urls:
+        with open(PROCESSED_URLS_FILE, "a", encoding="utf-8") as f:
+            for u in sorted(new_urls):
+                f.write(u + "\n")
+        log(f"Recorded {len(new_urls)} new URLs to processed_urls.txt")
 
 
 # ---------------------------------------------------------------------------
@@ -771,7 +787,7 @@ def commit_and_push(date_str: str):
     run_git(["config", "user.name", "Agentic Edge Bot"])
 
     # Stage files
-    run_git(["add", "web/src/content/digests/", "web/src/content/premium/"])
+    run_git(["add", "web/src/content/digests/", "web/src/content/premium/", "scripts/processed_urls.txt"])
 
     # Check if there's anything to commit
     status = run_git(["status", "--porcelain"])
@@ -957,7 +973,12 @@ def main():
         print(line)
     log("--- End preview ---")
 
-    # 7. Commit and push
+    # 7. Record all processed tweet URLs so future runs skip them
+    all_processed = [b["tweet_url"] for b in scored if b.get("tweet_url")]
+    record_processed_urls(all_processed)
+    files_written.append(str(PROCESSED_URLS_FILE))
+
+    # 8. Commit and push
     try:
         commit_and_push(date_str)
     except subprocess.CalledProcessError as e:
