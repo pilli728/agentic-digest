@@ -5,7 +5,6 @@ date: "2026-04-07"
 tier: "free"
 category: "workflow"
 featured_free: true
-draft: true
 ---
 
 **Build the exact folder structure Karpathy uses to give Claude persistent memory across sessions.**
